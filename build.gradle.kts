@@ -12,8 +12,8 @@ repositories {
 
 dependencies {
     testImplementation(kotlin("test"))
-    implementation("org.entur.ror:netex-pipeline:0.0.24")
-    implementation("org.entur.ror:netex-tools-lib:0.0.24")
+    implementation("org.entur.ror:netex-pipeline:0.0.29")
+    implementation("org.entur.ror:netex-tools-lib:0.0.29")
 }
 
 tasks.test {
