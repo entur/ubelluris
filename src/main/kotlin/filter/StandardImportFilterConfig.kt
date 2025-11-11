@@ -3,6 +3,8 @@ package filter
 import org.entur.netex.tools.lib.config.FilterConfig
 import org.entur.netex.tools.lib.config.FilterConfigBuilder
 import org.entur.netex.tools.lib.config.TimePeriod
+import plugin.handlers.StopPlaceIdHandler
+import plugin.handlers.StopPlaceParentSiteRefHandler
 import java.time.LocalDate
 
 class StandardImportFilterConfig : FilterProfileConfiguration {
@@ -22,6 +24,12 @@ class StandardImportFilterConfig : FilterProfileConfiguration {
                     "/PublicationDelivery/dataObjects/SiteFrame/stopPlaces/StopPlace/TopographicPlaceRef",
                     "/PublicationDelivery/dataObjects/SiteFrame/stopPlaces/StopPlace/quays/Quay/Name",
                     "/PublicationDelivery/dataObjects/SiteFrame/stopPlaces/StopPlace/quays/Quay/ShortName"
+                )
+            )
+            .withCustomElementHandlers(
+                mapOf(
+                    "/PublicationDelivery/dataObjects/SiteFrame/stopPlaces/StopPlace" to StopPlaceIdHandler(),
+                    "/PublicationDelivery/dataObjects/SiteFrame/stopPlaces/StopPlace/ParentSiteRef" to StopPlaceParentSiteRefHandler()
                 )
             )
             .withRemovePrivateData(true)
