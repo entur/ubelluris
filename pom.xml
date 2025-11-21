@@ -13,6 +13,7 @@
         <maven.compiler.release>21</maven.compiler.release>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <junit.version>5.10.2</junit.version>
+        <netex-tools.version>0.0.24</netex-tools.version>
     </properties>
 
     <repositories>
@@ -52,13 +53,13 @@
         <dependency>
             <groupId>org.entur.ror</groupId>
             <artifactId>netex-pipeline</artifactId>
-            <version>0.0.30</version>
+            <version>${netex-tools.version}</version>
         </dependency>
 
         <dependency>
             <groupId>org.entur.ror</groupId>
             <artifactId>netex-tools-lib</artifactId>
-            <version>0.0.30</version>
+            <version>${netex-tools.version}</version>
         </dependency>
 
         <dependency>
