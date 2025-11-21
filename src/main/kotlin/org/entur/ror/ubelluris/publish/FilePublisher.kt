@@ -1,4 +1,4 @@
-package publish
+package org.entur.ror.ubelluris.publish
 
 import java.nio.file.Path
 

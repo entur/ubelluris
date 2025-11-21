@@ -1,4 +1,4 @@
-package model
+package org.entur.ror.ubelluris.model
 
 object NetexTypes {
     const val STOP_PLACE = "StopPlace"

@@ -1,4 +1,4 @@
-package filter
+package org.entur.ror.ubelluris.filter
 
 import java.nio.file.Path
 

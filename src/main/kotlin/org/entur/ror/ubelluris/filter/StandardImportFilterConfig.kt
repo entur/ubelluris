@@ -1,10 +1,10 @@
-package filter
+package org.entur.ror.ubelluris.filter
 
 import org.entur.netex.tools.lib.config.FilterConfig
 import org.entur.netex.tools.lib.config.FilterConfigBuilder
 import org.entur.netex.tools.lib.config.TimePeriod
-import plugin.handlers.StopPlaceIdHandler
-import plugin.handlers.StopPlaceParentSiteRefHandler
+import org.entur.ror.ubelluris.handlers.StopPlaceIdHandler
+import org.entur.ror.ubelluris.handlers.StopPlaceParentSiteRefHandler
 import java.time.LocalDate
 
 class StandardImportFilterConfig : FilterProfileConfiguration {

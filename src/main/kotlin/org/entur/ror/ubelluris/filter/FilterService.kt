@@ -1,4 +1,4 @@
-package filter
+package org.entur.ror.ubelluris.filter
 
 import org.entur.netex.tools.pipeline.app.FilterNetexApp
 import java.nio.file.Files

@@ -1,6 +1,8 @@
-import file.FileFetcher
-import filter.XmlProcessor
-import publish.FilePublisher
+package org.entur.ror.ubelluris
+
+import org.entur.ror.ubelluris.file.FileFetcher
+import org.entur.ror.ubelluris.filter.XmlProcessor
+import org.entur.ror.ubelluris.publish.FilePublisher
 import java.nio.file.Path
 
 class UbellurisService(

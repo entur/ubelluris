@@ -1,4 +1,4 @@
-package file
+package org.entur.ror.ubelluris.file
 
 import java.nio.file.Path
 

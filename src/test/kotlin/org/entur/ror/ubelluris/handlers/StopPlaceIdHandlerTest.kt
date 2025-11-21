@@ -1,7 +1,7 @@
-package plugin.handlers
+package org.entur.ror.ubelluris.handlers
 
-import model.NetexTypes
 import org.entur.netex.tools.lib.output.DelegatingXMLElementWriter
+import org.entur.ror.ubelluris.model.NetexTypes
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito.mock
 import org.mockito.kotlin.argumentCaptor

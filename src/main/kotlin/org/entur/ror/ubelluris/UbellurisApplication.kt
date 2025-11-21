@@ -1,6 +1,8 @@
-import file.HttpFileFetcher
-import filter.FilterService
-import publish.LocalFilePublisher
+package org.entur.ror.ubelluris
+
+import org.entur.ror.ubelluris.file.HttpFileFetcher
+import org.entur.ror.ubelluris.filter.FilterService
+import org.entur.ror.ubelluris.publish.LocalFilePublisher
 
 fun main() {
     val apiKey = "foo"
