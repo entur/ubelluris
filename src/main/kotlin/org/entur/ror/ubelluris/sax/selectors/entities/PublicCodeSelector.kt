@@ -8,7 +8,7 @@ import org.entur.ror.ubelluris.sax.plugins.PublicCodeRepository
 
 class PublicCodeSelector(val publicCodeRepository: PublicCodeRepository) : EntitySelector {
     override fun selectEntities(context: EntitySelectorContext): EntitySelection {
-        val model = context.entityModel;
+        val model = context.entityModel
         val idsToKeep = publicCodeRepository.types.filter { type -> type.value != "82" }.map { type -> type.key }
         val activeEntitiesMap = mutableMapOf<String, MutableMap<String, Entity>>()
         val entitiesByTypeAndId = model.getEntitesByTypeAndId()
