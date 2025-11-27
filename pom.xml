@@ -13,7 +13,8 @@
         <maven.compiler.release>21</maven.compiler.release>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <junit.version>5.10.2</junit.version>
-        <netex-tools.version>0.0.34</netex-tools.version>
+        <netex-tools.version>0.0.35</netex-tools.version>
+        <slf4j.version>2.0.17</slf4j.version>
     </properties>
 
     <repositories>
@@ -36,14 +37,12 @@
             <version>5.12.0</version>
             <scope>test</scope>
         </dependency>
-
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-inline</artifactId>
             <version>5.2.0</version>
             <scope>test</scope>
         </dependency>
-
         <dependency>
             <groupId>org.mockito.kotlin</groupId>
             <artifactId>mockito-kotlin</artifactId>
@@ -55,18 +54,31 @@
             <artifactId>netex-pipeline</artifactId>
             <version>${netex-tools.version}</version>
         </dependency>
-
         <dependency>
             <groupId>org.entur.ror</groupId>
             <artifactId>netex-tools-lib</artifactId>
             <version>${netex-tools.version}</version>
         </dependency>
-
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter</artifactId>
             <version>${junit.version}</version>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>${slf4j.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>net.logstash.logback</groupId>
+            <artifactId>logstash-logback-encoder</artifactId>
+            <version>8.1</version>
+        </dependency>
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>1.5.21</version>
         </dependency>
     </dependencies>
 

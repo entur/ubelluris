@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+
+    <!-- Console JSON logger -->
+    <appender name="console" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder class="net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder">
+            <providers>
+                <pattern>
+                    <pattern>
+                        {
+                        "serviceContext": {
+                        "service": "ubelluris"
+                        },
+                        "timestamp": "%d{yyyy-MM-dd'T'HH:mm:ss.SSSZ}",
+                        "severity": "%level",
+                        "thread": "%thread",
+                        "logger": "%logger",
+                        "message": "%d{HH:mm:ss.SSS} %-5level [%thread] %logger{36} - %msg%n%ex{full}"
+                        }
+                    </pattern>
+                </pattern>
+            </providers>
+        </encoder>
+    </appender>
+
+    <logger name="org.entur.ror.ubelluris" level="INFO"/>
+    <logger name="org.entur.netex" level="INFO"/>
+    <logger name="com" level="WARN"/>
+
+    <root level="INFO">
+        <appender-ref ref="console"/>
+    </root>
+
+</configuration>

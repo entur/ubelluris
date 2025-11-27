@@ -3,6 +3,7 @@ package org.entur.ror.ubelluris
 import org.entur.ror.ubelluris.file.FileFetcher
 import org.entur.ror.ubelluris.filter.XmlProcessor
 import org.entur.ror.ubelluris.publish.FilePublisher
+import org.slf4j.LoggerFactory
 import java.nio.file.Path
 
 class UbellurisService(
@@ -10,17 +11,19 @@ class UbellurisService(
     private val processor: XmlProcessor,
     private val publisher: FilePublisher
 ) {
+    private val logger = LoggerFactory.getLogger(javaClass)
+
     fun run(): Path {
-        println("Starting Ubelluris pipeline...")
+        logger.info("Staring Ubelluris pipeline...")
 
         val rawFile: Path = fetcher.fetch()
-        println("Fetched file: $rawFile")
+        logger.info("Fetched file: $rawFile")
 
         val processedFile: Path = processor.process(rawFile)
-        println("Processed file: $processedFile")
+        logger.info("Processed file: $processedFile")
 
         val publishedFile: Path = publisher.publish(processedFile)
-        println("Published file: $publishedFile")
+        logger.info("Published file: $publishedFile")
 
         return publishedFile
     }
