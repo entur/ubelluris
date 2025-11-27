@@ -1,10 +1,10 @@
 package org.entur.ror.ubelluris.sax.plugins
 
 class PublicCodeRepository(
-    val types: MutableMap<String, String> = mutableMapOf(),
+    val entityIds: MutableList<String> = mutableListOf()
 ) {
 
-    fun getType(dayTypeId: String, input: String): String =
-        types.getOrPut(dayTypeId) { input }
-
+    fun addEntityId(entityId: String) {
+        entityIds.add(entityId)
+    }
 }

@@ -18,6 +18,9 @@ class PublicCodeHandler(val publicCodeRepository: PublicCodeRepository) : Public
     }
 
     override fun endElement(context: PublicCodeParsingContext, currentEntity: Entity) {
-        publicCodeRepository.getType(currentEntity.id, stringBuilder.toString())
+        if (stringBuilder.isNotEmpty() && stringBuilder.toString() in listOf("81", "82", "83")) {
+            publicCodeRepository.addEntityId(currentEntity.id)
+        }
+        stringBuilder.clear()
     }
 }

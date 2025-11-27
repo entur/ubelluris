@@ -11,17 +11,15 @@ class PublicCodePlugin(
 
     private val parsingContext: PublicCodeParsingContext = PublicCodeParsingContext()
 
-    // Map of element handlers - delegating to existing collector implementations
     private val elementHandlers: Map<String, PublicCodeDataCollector> by lazy {
         mapOf(
             "PublicCode" to PublicCodeHandler(publicCodeRepository)
         )
     }
 
-    override fun getName(): String = "PublicCodePlugin"
+    override fun getName(): String = TODO("Not yet implemented")
 
-    override fun getDescription(): String =
-        "Collects date-related data from NeTEx elements to enable date-based filtering of service journeys and related entities"
+    override fun getDescription(): String = TODO("Not yet implemented")
 
     override fun getSupportedElementTypes(): Set<String> = elementHandlers.keys.toSet()
 

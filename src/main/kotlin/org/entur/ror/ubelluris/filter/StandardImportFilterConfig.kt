@@ -4,6 +4,7 @@ import org.entur.netex.tools.lib.config.FilterConfig
 import org.entur.netex.tools.lib.config.FilterConfigBuilder
 import org.entur.ror.ubelluris.sax.handlers.StopPlaceIdHandler
 import org.entur.ror.ubelluris.sax.handlers.StopPlaceParentSiteRefHandler
+import org.entur.ror.ubelluris.sax.handlers.StopPlaceQuayHandler
 import org.entur.ror.ubelluris.sax.plugins.PublicCodePlugin
 import org.entur.ror.ubelluris.sax.plugins.PublicCodeRepository
 import org.entur.ror.ubelluris.sax.selectors.entities.PublicCodeSelector
@@ -26,12 +27,13 @@ class StandardImportFilterConfig : FilterProfileConfiguration {
             .withCustomElementHandlers(
                 mapOf(
                     "/PublicationDelivery/dataObjects/SiteFrame/stopPlaces/StopPlace" to StopPlaceIdHandler(),
-                    "/PublicationDelivery/dataObjects/SiteFrame/stopPlaces/StopPlace/ParentSiteRef" to StopPlaceParentSiteRefHandler()
+                    "/PublicationDelivery/dataObjects/SiteFrame/stopPlaces/StopPlace/ParentSiteRef" to StopPlaceParentSiteRefHandler(),
+                    "/PublicationDelivery/dataObjects/SiteFrame/stopPlaces/StopPlace/quays/Quay/" to StopPlaceQuayHandler()
                 )
             )
             .withPlugins(listOf(PublicCodePlugin(publicCodeRepository)))
             .withEntitySelectors(listOf(PublicCodeSelector(publicCodeRepository)))
-            .withRefSelectors(listOf(PublicCodeRefSelector(publicCodeRepository)))
+            .withRefSelectors(listOf(PublicCodeRefSelector()))
             .withRemovePrivateData(true)
             .withPreserveComments(false)
             .withUseSelfClosingTagsWhereApplicable(true)

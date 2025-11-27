@@ -1,8 +1,8 @@
-package org.entur.ror.ubelluris.handlers
+package org.entur.ror.ubelluris.sax.handlers
 
+import org.assertj.core.api.Assertions.assertThat
 import org.entur.netex.tools.lib.output.DelegatingXMLElementWriter
 import org.entur.ror.ubelluris.model.NetexTypes
-import org.entur.ror.ubelluris.sax.handlers.StopPlaceParentSiteRefHandler
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito.mock
 import org.mockito.kotlin.argumentCaptor
@@ -11,7 +11,6 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.xml.sax.Attributes
 import org.xml.sax.helpers.AttributesImpl
-import kotlin.test.assertEquals
 
 class StopPlaceParentSiteRefHandlerTest {
     private val handler = StopPlaceParentSiteRefHandler()
@@ -34,7 +33,7 @@ class StopPlaceParentSiteRefHandlerTest {
 
             val rewrittenId = firstValue.getValue("ref")
 
-            assertEquals("SAM:StopPlace:1", rewrittenId)
+            assertThat(rewrittenId).isEqualTo("SAM:StopPlace:1")
         }
     }
 }
