@@ -9,11 +9,11 @@ import org.entur.ror.ubelluris.sax.plugins.PublicCodeRepository
 import org.junit.jupiter.api.Test
 
 class PublicCodeHandlerTest {
-    val context = PublicCodeParsingContext()
+    private val context = PublicCodeParsingContext()
 
-    val publicCodeRepository = PublicCodeRepository()
+    private val publicCodeRepository = PublicCodeRepository()
 
-    val publicCodeHandler = PublicCodeHandler(publicCodeRepository)
+    private val publicCodeHandler = PublicCodeHandler(publicCodeRepository)
 
     @Test
     fun shouldAddEntityIdIfBlacklistedPublicCode() {

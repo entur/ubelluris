@@ -17,7 +17,6 @@ class PublicCodeSelector(val publicCodeRepository: PublicCodeRepository) : Entit
                 if (entitiesToKeep.isNotEmpty()) {
                     activeEntitiesMap.put(type, entitiesToKeep.toMutableMap())
                 }
-
             } else {
                 activeEntitiesMap.put(type, entities.toMutableMap())
             }

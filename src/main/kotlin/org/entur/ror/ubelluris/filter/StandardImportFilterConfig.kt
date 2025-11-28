@@ -28,7 +28,7 @@ class StandardImportFilterConfig : FilterProfileConfiguration {
                 mapOf(
                     "/PublicationDelivery/dataObjects/SiteFrame/stopPlaces/StopPlace" to StopPlaceIdHandler(),
                     "/PublicationDelivery/dataObjects/SiteFrame/stopPlaces/StopPlace/ParentSiteRef" to StopPlaceParentSiteRefHandler(),
-                    "/PublicationDelivery/dataObjects/SiteFrame/stopPlaces/StopPlace/quays/Quay/" to StopPlaceQuayHandler()
+                    "/PublicationDelivery/dataObjects/SiteFrame/stopPlaces/StopPlace/quays/Quay" to StopPlaceQuayHandler()
                 )
             )
             .withPlugins(listOf(PublicCodePlugin(publicCodeRepository)))
