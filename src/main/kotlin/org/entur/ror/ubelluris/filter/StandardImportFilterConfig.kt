@@ -17,11 +17,13 @@ class StandardImportFilterConfig : FilterProfileConfiguration {
             .withSkipElements(
                 listOf(
                     "/PublicationDelivery/dataObjects/SiteFrame/topographicPlaces",
+                    "/PublicationDelivery/dataObjects/SiteFrame/tariffZones",
                     "/PublicationDelivery/dataObjects/SiteFrame/stopPlaces/StopPlace/ShortName",
                     "/PublicationDelivery/dataObjects/SiteFrame/stopPlaces/StopPlace/alternativeNames",
                     "/PublicationDelivery/dataObjects/SiteFrame/stopPlaces/StopPlace/TopographicPlaceRef",
                     "/PublicationDelivery/dataObjects/SiteFrame/stopPlaces/StopPlace/quays/Quay/Name",
-                    "/PublicationDelivery/dataObjects/SiteFrame/stopPlaces/StopPlace/quays/Quay/ShortName"
+                    "/PublicationDelivery/dataObjects/SiteFrame/stopPlaces/StopPlace/quays/Quay/ShortName",
+                    "/PublicationDelivery/dataObjects/SiteFrame/stopPlaces/StopPlace/tariffZones",
                 )
             )
             .withCustomElementHandlers(
