@@ -30,6 +30,7 @@ class StandardImportFilterConfig : FilterProfileConfiguration {
                     "/PublicationDelivery/dataObjects/SiteFrame" to SiteFrameHandler(),
                     "/PublicationDelivery/dataObjects/SiteFrame/codespaces/Codespace" to CodespaceIdHandler(),
                     "/PublicationDelivery/dataObjects/SiteFrame/codespaces/Codespace/Xmlns" to XmlnsHandler(),
+                    "/PublicationDelivery/dataObjects/SiteFrame/codespaces/Codespace/XmlnsUrl" to XmlnsUrlHandler(),
                     "/PublicationDelivery/dataObjects/SiteFrame/stopPlaces/StopPlace" to StopPlaceIdHandler(),
                     "/PublicationDelivery/dataObjects/SiteFrame/stopPlaces/StopPlace/ParentSiteRef" to StopPlaceParentSiteRefHandler(),
                     "/PublicationDelivery/dataObjects/SiteFrame/stopPlaces/StopPlace/quays/Quay" to StopPlaceQuayHandler()
