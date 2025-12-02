@@ -2,10 +2,7 @@ package org.entur.ror.ubelluris.filter
 
 import org.entur.netex.tools.lib.config.FilterConfig
 import org.entur.netex.tools.lib.config.FilterConfigBuilder
-import org.entur.ror.ubelluris.sax.handlers.CodespaceIdHandler
-import org.entur.ror.ubelluris.sax.handlers.StopPlaceIdHandler
-import org.entur.ror.ubelluris.sax.handlers.StopPlaceParentSiteRefHandler
-import org.entur.ror.ubelluris.sax.handlers.StopPlaceQuayHandler
+import org.entur.ror.ubelluris.sax.handlers.*
 import org.entur.ror.ubelluris.sax.plugins.PublicCodePlugin
 import org.entur.ror.ubelluris.sax.plugins.PublicCodeRepository
 import org.entur.ror.ubelluris.sax.selectors.entities.PublicCodeSelector
@@ -30,7 +27,9 @@ class StandardImportFilterConfig : FilterProfileConfiguration {
             )
             .withCustomElementHandlers(
                 mapOf(
+                    "/PublicationDelivery/dataObjects/SiteFrame" to SiteFrameHandler(),
                     "/PublicationDelivery/dataObjects/SiteFrame/codespaces/Codespace" to CodespaceIdHandler(),
+                    "/PublicationDelivery/dataObjects/SiteFrame/codespaces/Codespace/Xmlns" to XmlnsHandler(),
                     "/PublicationDelivery/dataObjects/SiteFrame/stopPlaces/StopPlace" to StopPlaceIdHandler(),
                     "/PublicationDelivery/dataObjects/SiteFrame/stopPlaces/StopPlace/ParentSiteRef" to StopPlaceParentSiteRefHandler(),
                     "/PublicationDelivery/dataObjects/SiteFrame/stopPlaces/StopPlace/quays/Quay" to StopPlaceQuayHandler()

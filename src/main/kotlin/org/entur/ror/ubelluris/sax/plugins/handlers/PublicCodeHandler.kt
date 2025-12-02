@@ -22,8 +22,6 @@ class PublicCodeHandler(val publicCodeRepository: PublicCodeRepository) : Public
         if (stringBuilder.isNotEmpty() && stringBuilder.toString() in listOf("81", "82", "83")) {
             publicCodeRepository.addEntityId(currentEntity.id)
         }
-        stringBuilder.clear()
-
         if (stringBuilder.isNotEmpty()) {
             val parentEntityId = currentEntity.parent?.id
             if (parentEntityId != null) {
@@ -33,5 +31,6 @@ class PublicCodeHandler(val publicCodeRepository: PublicCodeRepository) : Public
                 )
             }
         }
+        stringBuilder.clear()
     }
 }
