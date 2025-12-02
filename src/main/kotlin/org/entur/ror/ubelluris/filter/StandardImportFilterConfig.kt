@@ -2,6 +2,7 @@ package org.entur.ror.ubelluris.filter
 
 import org.entur.netex.tools.lib.config.FilterConfig
 import org.entur.netex.tools.lib.config.FilterConfigBuilder
+import org.entur.ror.ubelluris.sax.handlers.CodespaceIdHandler
 import org.entur.ror.ubelluris.sax.handlers.StopPlaceIdHandler
 import org.entur.ror.ubelluris.sax.handlers.StopPlaceParentSiteRefHandler
 import org.entur.ror.ubelluris.sax.handlers.StopPlaceQuayHandler
@@ -19,6 +20,7 @@ class StandardImportFilterConfig : FilterProfileConfiguration {
                     "/PublicationDelivery/dataObjects/SiteFrame/topographicPlaces",
                     "/PublicationDelivery/dataObjects/SiteFrame/tariffZones",
                     "/PublicationDelivery/dataObjects/SiteFrame/stopPlaces/StopPlace/ShortName",
+                    "/PublicationDelivery/dataObjects/SiteFrame/stopPlaces/StopPlace/ValidBetween",
                     "/PublicationDelivery/dataObjects/SiteFrame/stopPlaces/StopPlace/alternativeNames",
                     "/PublicationDelivery/dataObjects/SiteFrame/stopPlaces/StopPlace/TopographicPlaceRef",
                     "/PublicationDelivery/dataObjects/SiteFrame/stopPlaces/StopPlace/quays/Quay/Name",
@@ -28,6 +30,7 @@ class StandardImportFilterConfig : FilterProfileConfiguration {
             )
             .withCustomElementHandlers(
                 mapOf(
+                    "/PublicationDelivery/dataObjects/SiteFrame/codespaces/Codespace" to CodespaceIdHandler(),
                     "/PublicationDelivery/dataObjects/SiteFrame/stopPlaces/StopPlace" to StopPlaceIdHandler(),
                     "/PublicationDelivery/dataObjects/SiteFrame/stopPlaces/StopPlace/ParentSiteRef" to StopPlaceParentSiteRefHandler(),
                     "/PublicationDelivery/dataObjects/SiteFrame/stopPlaces/StopPlace/quays/Quay" to StopPlaceQuayHandler()

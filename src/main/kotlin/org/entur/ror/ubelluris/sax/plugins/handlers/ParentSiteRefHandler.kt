@@ -4,14 +4,17 @@ import org.entur.netex.tools.lib.model.Entity
 import org.entur.ror.ubelluris.sax.plugins.PublicCodeDataCollector
 import org.entur.ror.ubelluris.sax.plugins.PublicCodeParsingContext
 import org.entur.ror.ubelluris.sax.plugins.PublicCodeRepository
-import org.entur.ror.ubelluris.sax.plugins.data.QuayData
 import org.xml.sax.Attributes
 
-class PublicCodeHandler(val publicCodeRepository: PublicCodeRepository) : PublicCodeDataCollector() {
+class ParentSiteRefHandler(val publicCodeRepository: PublicCodeRepository) : PublicCodeDataCollector() {
     private val stringBuilder = StringBuilder()
 
     override fun startElement(context: PublicCodeParsingContext, attributes: Attributes?, currentEntity: Entity) {
         stringBuilder.clear()
+        val refValue = attributes?.getValue("ref")
+        if (refValue != null) {
+            stringBuilder.append(refValue)
+        }
     }
 
     override fun characters(context: PublicCodeParsingContext, ch: CharArray?, start: Int, length: Int) {
@@ -19,19 +22,9 @@ class PublicCodeHandler(val publicCodeRepository: PublicCodeRepository) : Public
     }
 
     override fun endElement(context: PublicCodeParsingContext, currentEntity: Entity) {
-        if (stringBuilder.isNotEmpty() && stringBuilder.toString() in listOf("81", "82", "83")) {
-            publicCodeRepository.addEntityId(currentEntity.id)
+        if (stringBuilder.isNotEmpty()) {
+            publicCodeRepository.addChildStopToParent(stringBuilder.toString(), currentEntity.id)
         }
         stringBuilder.clear()
-
-        if (stringBuilder.isNotEmpty()) {
-            val parentEntityId = currentEntity.parent?.id
-            if (parentEntityId != null) {
-                publicCodeRepository.addQuayToStopPlace(
-                    parentEntityId,
-                    QuayData(currentEntity.id, stringBuilder.toString())
-                )
-            }
-        }
     }
 }

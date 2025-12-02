@@ -4,6 +4,7 @@ import org.entur.ror.ubelluris.model.NetexTypes
 import org.entur.netex.tools.lib.extensions.addNewAttribute
 import org.entur.netex.tools.lib.output.DelegatingXMLElementWriter
 import org.entur.netex.tools.lib.output.XMLElementHandler
+import org.entur.ror.ubelluris.sax.handlers.util.AttributeReplacer
 import org.xml.sax.Attributes
 import org.xml.sax.helpers.AttributesImpl
 
@@ -16,7 +17,7 @@ class StopPlaceParentSiteRefHandler(
         attributes: Attributes?,
         writer: DelegatingXMLElementWriter
     ) {
-        val idValue = attributes?.getValue("ref")?.replace("SE:050", "SAM") ?: ""
+        val idValue = AttributeReplacer.replaceAttribute(attributes, "ref")
         val newAttributes = AttributesImpl()
         newAttributes.addNewAttribute("ref", idValue)
         newAttributes.addNewAttribute("version", "1")

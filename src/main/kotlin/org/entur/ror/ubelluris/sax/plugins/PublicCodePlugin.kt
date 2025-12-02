@@ -4,6 +4,7 @@ import org.entur.netex.tools.lib.model.Entity
 import org.entur.netex.tools.lib.plugin.AbstractNetexPlugin
 import org.entur.ror.ubelluris.model.NetexTypes
 import org.entur.ror.ubelluris.sax.plugins.handlers.BlacklistQuayHandler
+import org.entur.ror.ubelluris.sax.plugins.handlers.ParentSiteRefHandler
 import org.entur.ror.ubelluris.sax.plugins.handlers.PublicCodeHandler
 import org.xml.sax.Attributes
 
@@ -16,7 +17,8 @@ class PublicCodePlugin(
     private val elementHandlers: Map<String, PublicCodeDataCollector> by lazy {
         mapOf(
             NetexTypes.PUBLIC_CODE to PublicCodeHandler(publicCodeRepository),
-            NetexTypes.QUAY to BlacklistQuayHandler(publicCodeRepository)
+            NetexTypes.QUAY to BlacklistQuayHandler(publicCodeRepository),
+            NetexTypes.PARENT_SITE_REF to ParentSiteRefHandler(publicCodeRepository)
         )
     }
 
