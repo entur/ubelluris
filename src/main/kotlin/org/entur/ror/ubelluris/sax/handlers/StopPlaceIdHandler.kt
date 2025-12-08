@@ -9,6 +9,7 @@ import org.xml.sax.Attributes
 import org.xml.sax.helpers.AttributesImpl
 
 class StopPlaceIdHandler(
+    private val parentStopPlaceAttributeSkipHandler: ParentStopPlaceAttributeSkipHandler? = null
 ) : XMLElementHandler {
     override fun startElement(
         uri: String?,
@@ -17,11 +18,16 @@ class StopPlaceIdHandler(
         attributes: Attributes?,
         writer: DelegatingXMLElementWriter
     ) {
+        val originalId = attributes?.getValue("id")
         val idValue = AttributeReplacer.replaceAttribute(attributes, "id")
         val newAttributes = AttributesImpl()
         newAttributes.addNewAttribute("id", idValue)
         newAttributes.addNewAttribute("version", "1")
         writer.startElement(uri, NetexTypes.STOP_PLACE, NetexTypes.STOP_PLACE, newAttributes)
+
+        if (originalId != null) {
+            parentStopPlaceAttributeSkipHandler?.notifyStopPlaceStart(originalId)
+        }
     }
 
     override fun characters(
@@ -39,6 +45,7 @@ class StopPlaceIdHandler(
         qName: String?,
         writer: DelegatingXMLElementWriter
     ) {
+        parentStopPlaceAttributeSkipHandler?.notifyStopPlaceEnd()
         writer.endElement(uri, NetexTypes.STOP_PLACE, NetexTypes.STOP_PLACE)
     }
 }
