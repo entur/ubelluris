@@ -9,4 +9,7 @@ object NetexTypes {
     const val PARENT_SITE_REF = "ParentSiteRef"
     const val QUAY = "Quay"
     const val PUBLIC_CODE = "PublicCode"
+    const val KEY_VALUE = "KeyValue"
+    const val KEY = "Key"
+    const val VALUE = "Value"
 }

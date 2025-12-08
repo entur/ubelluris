@@ -8,17 +8,17 @@ import org.entur.ror.ubelluris.sax.plugins.handlers.ParentSiteRefHandler
 import org.entur.ror.ubelluris.sax.plugins.handlers.PublicCodeHandler
 import org.xml.sax.Attributes
 
-class PublicCodePlugin(
-    val publicCodeRepository: PublicCodeRepository
+class StopPlacePurgingPlugin(
+    val stopPlacePurgingRepository: StopPlacePurgingRepository
 ) : AbstractNetexPlugin() {
 
-    private val parsingContext: PublicCodeParsingContext = PublicCodeParsingContext()
+    private val parsingContext: StopPlacePurgingParsingContext = StopPlacePurgingParsingContext()
 
-    private val elementHandlers: Map<String, PublicCodeDataCollector> by lazy {
+    private val elementHandlers: Map<String, StopPlacePurgingDataCollector> by lazy {
         mapOf(
-            NetexTypes.PUBLIC_CODE to PublicCodeHandler(publicCodeRepository),
-            NetexTypes.QUAY to BlacklistQuayHandler(publicCodeRepository),
-            NetexTypes.PARENT_SITE_REF to ParentSiteRefHandler(publicCodeRepository)
+            NetexTypes.PUBLIC_CODE to PublicCodeHandler(stopPlacePurgingRepository),
+            NetexTypes.QUAY to BlacklistQuayHandler(stopPlacePurgingRepository),
+            NetexTypes.PARENT_SITE_REF to ParentSiteRefHandler(stopPlacePurgingRepository)
         )
     }
 
@@ -44,7 +44,7 @@ class PublicCodePlugin(
         }
     }
 
-    override fun getCollectedData(): PublicCodeRepository {
-        return publicCodeRepository
+    override fun getCollectedData(): StopPlacePurgingRepository {
+        return stopPlacePurgingRepository
     }
 }

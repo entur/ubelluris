@@ -1,16 +1,16 @@
 package org.entur.ror.ubelluris.sax.plugins.handlers
 
 import org.entur.netex.tools.lib.model.Entity
-import org.entur.ror.ubelluris.sax.plugins.PublicCodeDataCollector
-import org.entur.ror.ubelluris.sax.plugins.PublicCodeParsingContext
-import org.entur.ror.ubelluris.sax.plugins.PublicCodeRepository
+import org.entur.ror.ubelluris.sax.plugins.StopPlacePurgingDataCollector
+import org.entur.ror.ubelluris.sax.plugins.StopPlacePurgingParsingContext
+import org.entur.ror.ubelluris.sax.plugins.StopPlacePurgingRepository
 import org.xml.sax.Attributes
 import java.io.File
 
 class BlacklistQuayHandler(
-    val publicCodeRepository: PublicCodeRepository,
+    val stopPlacePurgingRepository: StopPlacePurgingRepository,
     private val blacklistFile: File = File("processing/blacklist-quays.txt")
-) : PublicCodeDataCollector() {
+) : StopPlacePurgingDataCollector() {
 
     private val blacklistedQuayIds: Set<String> by lazy {
         loadBlacklistFile()
@@ -27,10 +27,10 @@ class BlacklistQuayHandler(
         }
     }
 
-    override fun startElement(context: PublicCodeParsingContext, attributes: Attributes?, currentEntity: Entity) {
+    override fun startElement(context: StopPlacePurgingParsingContext, attributes: Attributes?, currentEntity: Entity) {
         val idValue = attributes?.getValue("id")
         if (idValue != null && idValue in blacklistedQuayIds) {
-            publicCodeRepository.addEntityId(currentEntity.id)
+            stopPlacePurgingRepository.addEntityId(currentEntity.id)
         }
     }
 }

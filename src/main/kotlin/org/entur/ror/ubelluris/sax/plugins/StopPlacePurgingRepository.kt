@@ -2,10 +2,11 @@ package org.entur.ror.ubelluris.sax.plugins
 
 import org.entur.ror.ubelluris.sax.plugins.data.QuayData
 
-class PublicCodeRepository(
+class StopPlacePurgingRepository(
     val entityIds: MutableList<String> = mutableListOf(),
     val quaysPerStopPlace: MutableMap<String, MutableSet<QuayData>> = mutableMapOf(),
     val parentSiteRefsPerStopPlace: MutableMap<String, MutableSet<String>> = mutableMapOf(),
+    val childStopPlaces: MutableSet<String> = mutableSetOf(),
 ) {
 
     fun addEntityId(entityId: String) {
@@ -18,5 +19,10 @@ class PublicCodeRepository(
 
     fun addChildStopToParent(parentSiteRef: String, childId: String) {
         parentSiteRefsPerStopPlace.getOrPut(parentSiteRef) { mutableSetOf() }.add(childId)
+        childStopPlaces.add(childId)
+    }
+
+    fun isChildStopPlace(stopPlaceId: String): Boolean {
+        return stopPlaceId in childStopPlaces
     }
 }

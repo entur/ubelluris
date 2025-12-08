@@ -2,14 +2,21 @@ package org.entur.ror.ubelluris.filter
 
 import org.entur.netex.tools.lib.config.FilterConfig
 import org.entur.netex.tools.lib.config.FilterConfigBuilder
-import org.entur.ror.ubelluris.sax.handlers.*
-import org.entur.ror.ubelluris.sax.plugins.PublicCodePlugin
-import org.entur.ror.ubelluris.sax.plugins.PublicCodeRepository
-import org.entur.ror.ubelluris.sax.selectors.entities.PublicCodeSelector
-import org.entur.ror.ubelluris.sax.selectors.refs.PublicCodeRefSelector
+import org.entur.ror.ubelluris.sax.handlers.CodespaceIdHandler
+import org.entur.ror.ubelluris.sax.handlers.SiteFrameHandler
+import org.entur.ror.ubelluris.sax.handlers.StopPlaceIdHandler
+import org.entur.ror.ubelluris.sax.handlers.StopPlaceParentSiteRefHandler
+import org.entur.ror.ubelluris.sax.handlers.StopPlaceQuayHandler
+import org.entur.ror.ubelluris.sax.handlers.XmlnsHandler
+import org.entur.ror.ubelluris.sax.handlers.XmlnsUrlHandler
+import org.entur.ror.ubelluris.sax.plugins.StopPlacePurgingPlugin
+import org.entur.ror.ubelluris.sax.plugins.StopPlacePurgingRepository
+import org.entur.ror.ubelluris.sax.selectors.entities.StopPlacePurgingEntitySelector
+import org.entur.ror.ubelluris.sax.selectors.refs.StopPlacePurgingRefSelector
 
 class StandardImportFilterConfig : FilterProfileConfiguration {
-    val publicCodeRepository = PublicCodeRepository()
+    val stopPlacePurgingRepository = StopPlacePurgingRepository()
+
     override fun build(): FilterConfig =
         FilterConfigBuilder()
             .withSkipElements(
@@ -36,9 +43,17 @@ class StandardImportFilterConfig : FilterProfileConfiguration {
                     "/PublicationDelivery/dataObjects/SiteFrame/stopPlaces/StopPlace/quays/Quay" to StopPlaceQuayHandler()
                 )
             )
-            .withPlugins(listOf(PublicCodePlugin(publicCodeRepository)))
-            .withEntitySelectors(listOf(PublicCodeSelector(publicCodeRepository)))
-            .withRefSelectors(listOf(PublicCodeRefSelector()))
+            .withPlugins(
+                listOf(
+                    StopPlacePurgingPlugin(stopPlacePurgingRepository)
+                )
+            )
+            .withEntitySelectors(
+                listOf(
+                    StopPlacePurgingEntitySelector(stopPlacePurgingRepository)
+                )
+            )
+            .withRefSelectors(listOf(StopPlacePurgingRefSelector()))
             .withRemovePrivateData(true)
             .withPreserveComments(false)
             .withUseSelfClosingTagsWhereApplicable(true)

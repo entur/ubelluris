@@ -5,9 +5,9 @@ import org.entur.netex.tools.lib.selections.EntitySelection
 import org.entur.netex.tools.lib.selectors.entities.EntitySelector
 import org.entur.netex.tools.lib.selectors.entities.EntitySelectorContext
 import org.entur.ror.ubelluris.model.NetexTypes
-import org.entur.ror.ubelluris.sax.plugins.PublicCodeRepository
+import org.entur.ror.ubelluris.sax.plugins.StopPlacePurgingRepository
 
-class PublicCodeSelector(val publicCodeRepository: PublicCodeRepository) : EntitySelector {
+class StopPlacePurgingEntitySelector(val stopPlacePurgingRepository: StopPlacePurgingRepository) : EntitySelector {
 
     override fun selectEntities(context: EntitySelectorContext): EntitySelection {
         val model = context.entityModel
@@ -18,14 +18,30 @@ class PublicCodeSelector(val publicCodeRepository: PublicCodeRepository) : Entit
 
                 NetexTypes.QUAY -> {
                     entities.filter { entity ->
-                        entity.key !in publicCodeRepository.entityIds
+                        entity.key !in stopPlacePurgingRepository.entityIds
                     }
                 }
 
                 NetexTypes.STOP_PLACE -> {
                     entities.filter { entity ->
-                        val quays = publicCodeRepository.quaysPerStopPlace[entity.key].orEmpty()
-                        quays.size != 1 || quays.first().publicCode != "*"
+                        val quays = stopPlacePurgingRepository.quaysPerStopPlace[entity.key].orEmpty()
+
+                        val remainingQuays = quays.filter { quay ->
+                            quay.quayId !in stopPlacePurgingRepository.entityIds
+                        }
+
+                        if (remainingQuays.size == 1) {
+                            val publicCode = remainingQuays.first().publicCode
+                            if (publicCode == "*" || publicCode == "-") {
+                                return@filter false
+                            }
+                        }
+
+                        if (stopPlacePurgingRepository.isChildStopPlace(entity.key) && remainingQuays.isEmpty()) {
+                            return@filter false
+                        }
+
+                        true
                     }
                 }
 

@@ -1,5 +1,6 @@
 package org.entur.ror.ubelluris.file
 
+import org.slf4j.LoggerFactory
 import java.net.URI
 import java.net.http.HttpClient
 import java.net.http.HttpRequest
@@ -14,12 +15,20 @@ class HttpFileFetcher(
     private val url: String,
     private val downloadDir: Path = Path.of("downloads")
 ) : FileFetcher {
+    private val logger = LoggerFactory.getLogger(javaClass)
 
     override fun fetch(): Path {
         val today = LocalDate.now()
         val outputPath = downloadDir.resolve("${today}_stop_places.xml")
 
         Files.createDirectories(downloadDir)
+
+        if (Files.exists(outputPath)) {
+            logger.info("Found existing download for $today: $outputPath")
+            return outputPath
+        }
+
+        logger.info("No existing download for $today found. Downloading from $url...")
 
         val client = HttpClient.newHttpClient()
         val request = HttpRequest.newBuilder()
@@ -46,6 +55,7 @@ class HttpFileFetcher(
                         StandardOpenOption.CREATE,
                         StandardOpenOption.TRUNCATE_EXISTING
                     )
+                    logger.info("Downloaded and saved to: $outputPath")
                     return outputPath
                 }
                 entry = zip.nextEntry

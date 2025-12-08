@@ -4,8 +4,8 @@ import org.assertj.core.api.Assertions.assertThat
 import org.entur.netex.tools.lib.model.Entity
 import org.entur.netex.tools.lib.model.PublicationEnumeration
 import org.entur.ror.ubelluris.model.NetexTypes
-import org.entur.ror.ubelluris.sax.plugins.PublicCodeParsingContext
-import org.entur.ror.ubelluris.sax.plugins.PublicCodeRepository
+import org.entur.ror.ubelluris.sax.plugins.StopPlacePurgingParsingContext
+import org.entur.ror.ubelluris.sax.plugins.StopPlacePurgingRepository
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.io.TempDir
 import org.mockito.Mockito.mock
@@ -15,9 +15,9 @@ import java.io.File
 import java.nio.file.Path
 
 class BlacklistQuayHandlerTest {
-    private val context = PublicCodeParsingContext()
+    private val context = StopPlacePurgingParsingContext()
 
-    private val publicCodeRepository = PublicCodeRepository()
+    private val stopPlacePurgingRepository = StopPlacePurgingRepository()
 
     @TempDir
     lateinit var tempDir: Path
@@ -34,7 +34,7 @@ class BlacklistQuayHandlerTest {
             """.trimIndent()
         )
 
-        val handler = BlacklistQuayHandler(publicCodeRepository, blacklistFile)
+        val handler = BlacklistQuayHandler(stopPlacePurgingRepository, blacklistFile)
         val quayEntity = defaultEntity(id = "entityId", type = NetexTypes.QUAY)
 
         val attrs: Attributes = mock()
@@ -42,7 +42,7 @@ class BlacklistQuayHandlerTest {
 
         handler.startElement(context, attrs, quayEntity)
 
-        assertThat(publicCodeRepository.entityIds).containsOnly("entityId")
+        assertThat(stopPlacePurgingRepository.entityIds).containsOnly("entityId")
     }
 
     @Test
@@ -55,7 +55,7 @@ class BlacklistQuayHandlerTest {
             """.trimIndent()
         )
 
-        val handler = BlacklistQuayHandler(publicCodeRepository, blacklistFile)
+        val handler = BlacklistQuayHandler(stopPlacePurgingRepository, blacklistFile)
         val quayEntity = defaultEntity(id = "entityId", type = NetexTypes.QUAY)
 
         val attrs: Attributes = mock()
@@ -63,7 +63,7 @@ class BlacklistQuayHandlerTest {
 
         handler.startElement(context, attrs, quayEntity)
 
-        assertThat(publicCodeRepository.entityIds).isEmpty()
+        assertThat(stopPlacePurgingRepository.entityIds).isEmpty()
     }
 
     @Test
@@ -71,12 +71,12 @@ class BlacklistQuayHandlerTest {
         val blacklistFile = tempDir.resolve("blacklist.txt").toFile()
         blacklistFile.writeText("SE:050:Quay:47296")
 
-        val handler = BlacklistQuayHandler(publicCodeRepository, blacklistFile)
+        val handler = BlacklistQuayHandler(stopPlacePurgingRepository, blacklistFile)
         val quayEntity = defaultEntity(id = "entityId", type = NetexTypes.QUAY)
 
         handler.startElement(context, null, quayEntity)
 
-        assertThat(publicCodeRepository.entityIds).isEmpty()
+        assertThat(stopPlacePurgingRepository.entityIds).isEmpty()
     }
 
     @Test
@@ -84,7 +84,7 @@ class BlacklistQuayHandlerTest {
         val blacklistFile = tempDir.resolve("blacklist.txt").toFile()
         blacklistFile.writeText("SE:050:Quay:47296")
 
-        val handler = BlacklistQuayHandler(publicCodeRepository, blacklistFile)
+        val handler = BlacklistQuayHandler(stopPlacePurgingRepository, blacklistFile)
         val quayEntity = defaultEntity(id = "entityId", type = NetexTypes.QUAY)
 
         val attrs: Attributes = mock()
@@ -92,7 +92,7 @@ class BlacklistQuayHandlerTest {
 
         handler.startElement(context, attrs, quayEntity)
 
-        assertThat(publicCodeRepository.entityIds).isEmpty()
+        assertThat(stopPlacePurgingRepository.entityIds).isEmpty()
     }
 
     @Test
@@ -100,7 +100,7 @@ class BlacklistQuayHandlerTest {
         val blacklistFile = tempDir.resolve("blacklist.txt").toFile()
         blacklistFile.writeText("")
 
-        val handler = BlacklistQuayHandler(publicCodeRepository, blacklistFile)
+        val handler = BlacklistQuayHandler(stopPlacePurgingRepository, blacklistFile)
         val quayEntity = defaultEntity(id = "entityId", type = NetexTypes.QUAY)
 
         val attrs: Attributes = mock()
@@ -108,14 +108,14 @@ class BlacklistQuayHandlerTest {
 
         handler.startElement(context, attrs, quayEntity)
 
-        assertThat(publicCodeRepository.entityIds).isEmpty()
+        assertThat(stopPlacePurgingRepository.entityIds).isEmpty()
     }
 
     @Test
     fun shouldHandleNonExistentBlacklistFile() {
         val blacklistFile = File(tempDir.resolve("nonexistent.txt").toString())
 
-        val handler = BlacklistQuayHandler(publicCodeRepository, blacklistFile)
+        val handler = BlacklistQuayHandler(stopPlacePurgingRepository, blacklistFile)
         val quayEntity = defaultEntity(id = "entityId", type = NetexTypes.QUAY)
 
         val attrs: Attributes = mock()
@@ -123,7 +123,7 @@ class BlacklistQuayHandlerTest {
 
         handler.startElement(context, attrs, quayEntity)
 
-        assertThat(publicCodeRepository.entityIds).isEmpty()
+        assertThat(stopPlacePurgingRepository.entityIds).isEmpty()
     }
 
     @Test
@@ -139,7 +139,7 @@ class BlacklistQuayHandlerTest {
             """.trimIndent()
         )
 
-        val handler = BlacklistQuayHandler(publicCodeRepository, blacklistFile)
+        val handler = BlacklistQuayHandler(stopPlacePurgingRepository, blacklistFile)
         val quayEntity1 = defaultEntity(id = "entityId1", type = NetexTypes.QUAY)
         val quayEntity2 = defaultEntity(id = "entityId2", type = NetexTypes.QUAY)
 
@@ -152,7 +152,7 @@ class BlacklistQuayHandlerTest {
         handler.startElement(context, attrs1, quayEntity1)
         handler.startElement(context, attrs2, quayEntity2)
 
-        assertThat(publicCodeRepository.entityIds).containsOnly("entityId1", "entityId2")
+        assertThat(stopPlacePurgingRepository.entityIds).containsOnly("entityId1", "entityId2")
     }
 
     private fun defaultEntity(

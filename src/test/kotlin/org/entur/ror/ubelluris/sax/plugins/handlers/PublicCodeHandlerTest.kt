@@ -4,16 +4,16 @@ import org.assertj.core.api.Assertions.assertThat
 import org.entur.netex.tools.lib.model.Entity
 import org.entur.netex.tools.lib.model.PublicationEnumeration
 import org.entur.ror.ubelluris.model.NetexTypes
-import org.entur.ror.ubelluris.sax.plugins.PublicCodeParsingContext
-import org.entur.ror.ubelluris.sax.plugins.PublicCodeRepository
+import org.entur.ror.ubelluris.sax.plugins.StopPlacePurgingParsingContext
+import org.entur.ror.ubelluris.sax.plugins.StopPlacePurgingRepository
 import org.junit.jupiter.api.Test
 
 class PublicCodeHandlerTest {
-    private val context = PublicCodeParsingContext()
+    private val context = StopPlacePurgingParsingContext()
 
-    private val publicCodeRepository = PublicCodeRepository()
+    private val stopPlacePurgingRepository = StopPlacePurgingRepository()
 
-    private val publicCodeHandler = PublicCodeHandler(publicCodeRepository)
+    private val publicCodeHandler = PublicCodeHandler(stopPlacePurgingRepository)
 
     @Test
     fun shouldAddEntityIdIfBlacklistedPublicCode() {
@@ -23,7 +23,7 @@ class PublicCodeHandlerTest {
         publicCodeHandler.characters(context, "81".toCharArray(), 0, 2)
         publicCodeHandler.endElement(context, quayEntity)
 
-        assertThat(publicCodeRepository.entityIds).containsOnly("entityId")
+        assertThat(stopPlacePurgingRepository.entityIds).containsOnly("entityId")
     }
 
     @Test
@@ -34,7 +34,7 @@ class PublicCodeHandlerTest {
         publicCodeHandler.characters(context, "A".toCharArray(), 0, 1)
         publicCodeHandler.endElement(context, quayEntity)
 
-        assertThat(publicCodeRepository.entityIds).isEmpty()
+        assertThat(stopPlacePurgingRepository.entityIds).isEmpty()
     }
 
     fun defaultEntity(

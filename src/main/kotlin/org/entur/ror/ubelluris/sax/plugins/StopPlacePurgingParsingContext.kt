@@ -1,5 +1,5 @@
 package org.entur.ror.ubelluris.sax.plugins
 
-data class PublicCodeParsingContext(
+data class StopPlacePurgingParsingContext(
     var publicCode: String? = null
 )

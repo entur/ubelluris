@@ -4,7 +4,7 @@ import org.entur.netex.tools.lib.model.EntityModel
 import org.entur.netex.tools.lib.selections.RefSelection
 import org.entur.netex.tools.lib.selectors.refs.RefSelector
 
-class PublicCodeRefSelector() : RefSelector {
+class StopPlacePurgingRefSelector() : RefSelector {
 
     override fun selectRefs(model: EntityModel): RefSelection {
         val selectedRefs = model.listAllRefs().toMutableSet()
