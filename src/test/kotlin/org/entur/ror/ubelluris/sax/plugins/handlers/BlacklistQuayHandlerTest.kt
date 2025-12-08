@@ -1,8 +1,7 @@
 package org.entur.ror.ubelluris.sax.plugins.handlers
 
 import org.assertj.core.api.Assertions.assertThat
-import org.entur.netex.tools.lib.model.Entity
-import org.entur.netex.tools.lib.model.PublicationEnumeration
+import org.entur.ror.ubelluris.data.TestDataFactory.defaultEntity
 import org.entur.ror.ubelluris.model.NetexTypes
 import org.entur.ror.ubelluris.sax.plugins.StopPlacePurgingParsingContext
 import org.entur.ror.ubelluris.sax.plugins.StopPlacePurgingRepository
@@ -155,15 +154,4 @@ class BlacklistQuayHandlerTest {
         assertThat(stopPlacePurgingRepository.entityIds).containsOnly("entityId1", "entityId2")
     }
 
-    private fun defaultEntity(
-        id: String,
-        type: String = "testType",
-        publication: String = PublicationEnumeration.PUBLIC.toString().lowercase(),
-        parent: Entity? = null
-    ): Entity = Entity(
-        id = id,
-        type = type,
-        publication = publication,
-        parent = parent
-    )
 }
