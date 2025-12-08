@@ -1,13 +1,14 @@
-package org.entur.ror.ubelluris.handlers
+package org.entur.ror.ubelluris.sax.handlers
 
-import org.entur.ror.ubelluris.model.NetexTypes
 import org.entur.netex.tools.lib.extensions.addNewAttribute
 import org.entur.netex.tools.lib.output.DelegatingXMLElementWriter
 import org.entur.netex.tools.lib.output.XMLElementHandler
+import org.entur.ror.ubelluris.model.NetexTypes
+import org.entur.ror.ubelluris.sax.handlers.util.AttributeReplacer
 import org.xml.sax.Attributes
 import org.xml.sax.helpers.AttributesImpl
 
-class StopPlaceParentSiteRefHandler(
+class CodespaceIdHandler(
 ) : XMLElementHandler {
     override fun startElement(
         uri: String?,
@@ -16,11 +17,10 @@ class StopPlaceParentSiteRefHandler(
         attributes: Attributes?,
         writer: DelegatingXMLElementWriter
     ) {
-        val idValue = attributes?.getValue("ref")?.replace("SE:050", "SAM") ?: ""
+        val idValue = AttributeReplacer.replaceAttribute(attributes, "id")
         val newAttributes = AttributesImpl()
-        newAttributes.addNewAttribute("ref", idValue)
-        newAttributes.addNewAttribute("version", "1")
-        writer.startElement(uri, NetexTypes.PARENT_SITE_REF, NetexTypes.PARENT_SITE_REF, newAttributes)
+        newAttributes.addNewAttribute("id", idValue)
+        writer.startElement(uri, NetexTypes.CODESPACE, NetexTypes.CODESPACE, newAttributes)
     }
 
     override fun characters(
@@ -38,6 +38,6 @@ class StopPlaceParentSiteRefHandler(
         qName: String?,
         writer: DelegatingXMLElementWriter
     ) {
-        writer.endElement(uri, NetexTypes.PARENT_SITE_REF, NetexTypes.PARENT_SITE_REF)
+        writer.endElement(uri, NetexTypes.CODESPACE, NetexTypes.CODESPACE)
     }
 }

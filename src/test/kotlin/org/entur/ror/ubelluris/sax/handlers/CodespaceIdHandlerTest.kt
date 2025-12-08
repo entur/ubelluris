@@ -1,5 +1,6 @@
-package org.entur.ror.ubelluris.handlers
+package org.entur.ror.ubelluris.sax.handlers
 
+import org.assertj.core.api.Assertions.assertThat
 import org.entur.netex.tools.lib.output.DelegatingXMLElementWriter
 import org.entur.ror.ubelluris.model.NetexTypes
 import org.junit.jupiter.api.Test
@@ -10,30 +11,30 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.xml.sax.Attributes
 import org.xml.sax.helpers.AttributesImpl
-import kotlin.test.assertEquals
 
-class StopPlaceParentSiteRefHandlerTest {
-    private val handler = StopPlaceParentSiteRefHandler()
+class CodespaceIdHandlerTest {
+    private val handler = CodespaceIdHandler()
+
     private val writer = mock<DelegatingXMLElementWriter>()
 
     @Test
-    fun testStopPlaceParentSiteRefHandler() {
+    fun testCodespaceIdHandler() {
         val attrs: Attributes = mock()
-        whenever(attrs.getValue("ref")).thenReturn("SE:050:StopPlace:1")
+        whenever(attrs.getValue("id")).thenReturn("SE:050")
 
-        handler.startElement(null, "ref", "ref", attrs, writer)
+        handler.startElement(null, "Codespace", "Codespace", attrs, writer)
 
         argumentCaptor<AttributesImpl>().apply {
             verify(writer).startElement(
                 eq(null),
-                eq(NetexTypes.PARENT_SITE_REF),
-                eq(NetexTypes.PARENT_SITE_REF),
+                eq(NetexTypes.CODESPACE),
+                eq(NetexTypes.CODESPACE),
                 capture()
             )
 
-            val rewrittenId = firstValue.getValue("ref")
-
-            assertEquals("SAM:StopPlace:1", rewrittenId)
+            val rewrittenId = firstValue.getValue("id")
+            assertThat(rewrittenId).isEqualTo("SAM")
         }
+
     }
 }

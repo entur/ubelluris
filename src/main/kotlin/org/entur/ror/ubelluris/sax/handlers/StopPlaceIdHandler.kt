@@ -1,9 +1,10 @@
-package org.entur.ror.ubelluris.handlers
+package org.entur.ror.ubelluris.sax.handlers
 
-import org.entur.ror.ubelluris.model.NetexTypes
 import org.entur.netex.tools.lib.extensions.addNewAttribute
 import org.entur.netex.tools.lib.output.DelegatingXMLElementWriter
 import org.entur.netex.tools.lib.output.XMLElementHandler
+import org.entur.ror.ubelluris.model.NetexTypes
+import org.entur.ror.ubelluris.sax.handlers.util.AttributeReplacer
 import org.xml.sax.Attributes
 import org.xml.sax.helpers.AttributesImpl
 
@@ -16,7 +17,7 @@ class StopPlaceIdHandler(
         attributes: Attributes?,
         writer: DelegatingXMLElementWriter
     ) {
-        val idValue = attributes?.getValue("id")?.replace("SE:050", "SAM") ?: ""
+        val idValue = AttributeReplacer.replaceAttribute(attributes, "id")
         val newAttributes = AttributesImpl()
         newAttributes.addNewAttribute("id", idValue)
         newAttributes.addNewAttribute("version", "1")
