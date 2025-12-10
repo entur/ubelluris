@@ -9,7 +9,6 @@ import java.time.format.DateTimeFormatter
 
 /**
  * Handler that replaces the ValidBetween/FromDate content with the current datetime.
- * This ensures SiteFrame validity starts from when the file was processed.
  */
 class ValidBetweenFromDateHandler(
     private val clock: Clock = Clock.systemDefaultZone()
