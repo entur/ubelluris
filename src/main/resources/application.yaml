@@ -1,0 +1,9 @@
+stops:
+  url: "https://opendata.samtrafiken.se/stopsregister-netex-sweden/sweden.zip"
+  apiKey: "4e818653b83e4a13be78cd9638926c9c"
+
+timetable:
+  apiUrl: "https://opendata.samtrafiken.se/netex/"
+  apiKey: "4b8b5c69e34541b0adf05453e0892713"
+  providers: ["vt", "halland", "skane"]
+  modes: ["TRAM", "WATER"]

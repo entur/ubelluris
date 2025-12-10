@@ -2,6 +2,7 @@ package org.entur.ror.ubelluris.filter
 
 import org.entur.netex.tools.pipeline.app.FilterNetexApp
 import org.entur.ror.ubelluris.processor.KeyValueMigrationProcessor
+import org.entur.ror.ubelluris.timetable.TimetableBridgeProcessor
 import org.slf4j.LoggerFactory
 import java.nio.file.Files
 import java.nio.file.Path
@@ -9,7 +10,8 @@ import java.nio.file.StandardCopyOption
 
 class FilterService(
     private val filterConfig: StandardImportFilterConfig = StandardImportFilterConfig(),
-    private val resultsDir: Path = Path.of("results")
+    private val resultsDir: Path = Path.of("results"),
+    private val timetableBridgeProcessor: TimetableBridgeProcessor? = null
 ) : XmlProcessor {
     private val logger = LoggerFactory.getLogger(javaClass)
 
@@ -28,6 +30,18 @@ class FilterService(
 
         val tempInputFile = tempDir.resolve(inputFile.fileName)
         Files.copy(inputFile, tempInputFile, StandardCopyOption.REPLACE_EXISTING)
+
+        if (timetableBridgeProcessor != null) {
+            logger.info("Running TimetableBridge processing")
+            try {
+                timetableBridgeProcessor.process(tempInputFile)
+                logger.info("TimetableBridge processing completed successfully")
+            } catch (e: Exception) {
+                logger.error("TimetableBridge processing failed, continuing with pipeline", e)
+            }
+        } else {
+            logger.debug("TimetableBridge processing disabled (no processor configured)")
+        }
 
         Files.list(tempDir)
             .filter { it.toString().endsWith(".xml") }
