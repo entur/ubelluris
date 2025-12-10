@@ -1,6 +1,7 @@
 package org.entur.ror.ubelluris.filter
 
 import org.entur.netex.tools.pipeline.app.FilterNetexApp
+import org.entur.ror.ubelluris.postprocessor.KeyValueRemovalPostProcessor
 import org.slf4j.LoggerFactory
 import java.nio.file.Files
 import java.nio.file.Path
@@ -11,6 +12,7 @@ class FilterService(
     private val resultsDir: Path = Path.of("results")
 ) : XmlProcessor {
     private val logger = LoggerFactory.getLogger(javaClass)
+    private val keyValueRemovalPostProcessor = KeyValueRemovalPostProcessor()
 
     override fun process(inputFile: Path): Path {
         val outputFile = resultsDir.resolve(
@@ -38,6 +40,8 @@ class FilterService(
             .filter { it.fileName.toString().endsWith(".xml") }
             .max(Comparator.comparing { Files.getLastModifiedTime(it).toMillis() })
             .orElseThrow { IllegalStateException("No filtered file produced.") }
+
+        keyValueRemovalPostProcessor.process(filteredTempFile.toFile())
 
         Files.copy(filteredTempFile, outputFile, StandardCopyOption.REPLACE_EXISTING)
         tempDir.toFile().deleteRecursively()
