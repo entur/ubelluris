@@ -14,7 +14,7 @@ import java.nio.file.Path
  */
 class QuayModeMatcher {
 
-    private val logger = LoggerFactory.getLogger(QuayModeMatcher::class.java)
+    private val logger = LoggerFactory.getLogger(javaClass)
     private val saxBuilder = SAXBuilder()
 
     fun match(stopsXmlPath: Path, scheduledStopPointRefs: List<ScheduledStopPointRef>): QuayModeMapping {

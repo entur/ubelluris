@@ -23,7 +23,7 @@ class HttpTimetableFetcher(
     private val config: TimetableConfig
 ) : TimetableFetcher {
 
-    private val logger = LoggerFactory.getLogger(HttpTimetableFetcher::class.java)
+    private val logger = LoggerFactory.getLogger(javaClass)
     private val httpClient: HttpClient = HttpClient.newBuilder()
         .followRedirects(HttpClient.Redirect.NORMAL)
         .build()

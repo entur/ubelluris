@@ -22,7 +22,7 @@ class TransportModeInserter(
     private val stopPlaceSplitter: StopPlaceSplitter
 ) {
 
-    private val logger = LoggerFactory.getLogger(TransportModeInserter::class.java)
+    private val logger = LoggerFactory.getLogger(javaClass)
     private val saxBuilder = SAXBuilder()
 
     fun insert(stopsXmlPath: Path, analyses: List<StopPlaceAnalysis>): Pair<Path, List<ModeInsertionLog>> {

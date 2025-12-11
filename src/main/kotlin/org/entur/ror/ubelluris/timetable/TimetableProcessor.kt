@@ -31,9 +31,9 @@ class TimetableProcessor(
         try {
             val timetableDataMap = timetableFetcher.fetch(config.providers)
 
-            val quayModeMapping = performDiscovery(stopsXmlPath, timetableDataMap)
+            val quayModeMapping = mapQuaysToTransportModes(stopsXmlPath, timetableDataMap)
 
-            val (processedPath, insertionLogs) = performInsertion(stopsXmlPath, quayModeMapping)
+            val (processedPath, insertionLogs) = modifyStopPlaces(stopsXmlPath, quayModeMapping)
 
             logger.info("Timetable processing complete")
             return processedPath
@@ -44,7 +44,7 @@ class TimetableProcessor(
         }
     }
 
-    private fun performDiscovery(
+    private fun mapQuaysToTransportModes(
         stopsXmlPath: Path,
         timetableDataMap: Map<String, org.entur.ror.ubelluris.timetable.model.TimetableData>
     ): QuayModeMapping {
@@ -59,7 +59,7 @@ class TimetableProcessor(
         return quayModeMapping
     }
 
-    private fun performInsertion(
+    private fun modifyStopPlaces(
         stopsXmlPath: Path,
         quayModeMapping: QuayModeMapping
     ): Pair<Path, List<ModeInsertionLog>> {

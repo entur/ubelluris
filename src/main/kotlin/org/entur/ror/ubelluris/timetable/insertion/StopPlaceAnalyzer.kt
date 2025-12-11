@@ -17,7 +17,7 @@ import java.nio.file.Path
  */
 class StopPlaceAnalyzer {
 
-    private val logger = LoggerFactory.getLogger(StopPlaceAnalyzer::class.java)
+    private val logger = LoggerFactory.getLogger(javaClass)
     private val saxBuilder = SAXBuilder()
 
     fun analyze(stopsXmlPath: Path, quayModeMapping: QuayModeMapping): List<StopPlaceAnalysis> {

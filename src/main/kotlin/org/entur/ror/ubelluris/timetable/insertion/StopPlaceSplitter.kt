@@ -16,7 +16,7 @@ import org.slf4j.LoggerFactory
  */
 class StopPlaceSplitter {
 
-    private val logger = LoggerFactory.getLogger(StopPlaceSplitter::class.java)
+    private val logger = LoggerFactory.getLogger(javaClass)
 
     fun split(document: Document, mixedModeAnalyses: List<StopPlaceAnalysis>): List<ModeInsertionLog> {
         logger.info("Splitting ${mixedModeAnalyses.size} MIXED_MODE StopPlaces")
@@ -78,7 +78,6 @@ class StopPlaceSplitter {
                 childId = childId,
                 mode = mode,
                 quayIds = quayIds,
-                quaysContainer = quaysContainer,
                 namespace = namespace,
                 parentRef = parentId!!
             )
@@ -113,7 +112,6 @@ class StopPlaceSplitter {
         childId: String,
         mode: TransportMode,
         quayIds: List<String>,
-        quaysContainer: Element,
         namespace: Namespace,
         parentRef: String
     ): Element {
