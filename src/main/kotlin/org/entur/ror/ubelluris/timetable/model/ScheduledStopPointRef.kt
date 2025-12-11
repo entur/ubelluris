@@ -10,15 +10,11 @@ data class ScheduledStopPointRef(
     val originalRef: String,
     val transportMode: TransportMode
 ) {
-    /**
-     * Converts the original ref (e.g., "SE:014:ScheduledStopPoint:123456")
-     * to codespace format (e.g., "014:123456")
-     */
     fun toCodespaceFormat(): String? {
         val parts = originalRef.split(":")
         if (parts.size >= 4) {
-            val codespace = parts[1]  // "014"
-            val id = parts[3]         // "123456"
+            val codespace = parts[1].trimStart('0').ifEmpty { "0" }
+            val id = parts[3]
             return "$codespace:$id"
         }
         return null

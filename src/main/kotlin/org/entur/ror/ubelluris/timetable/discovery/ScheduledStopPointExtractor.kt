@@ -3,6 +3,9 @@ package org.entur.ror.ubelluris.timetable.discovery
 import org.entur.ror.ubelluris.model.TransportMode
 import org.entur.ror.ubelluris.timetable.model.ScheduledStopPointRef
 import org.entur.ror.ubelluris.timetable.model.TimetableData
+import org.jdom2.Element
+import org.jdom2.Namespace
+import org.jdom2.filter.Filters
 import org.jdom2.input.SAXBuilder
 import org.slf4j.LoggerFactory
 import java.nio.file.Path
@@ -13,15 +16,9 @@ import java.nio.file.Path
  */
 class ScheduledStopPointExtractor {
 
-    private val logger = LoggerFactory.getLogger(ScheduledStopPointExtractor::class.java)
+    private val logger = LoggerFactory.getLogger(javaClass)
     private val saxBuilder = SAXBuilder()
 
-    /**
-     * Extracts all ScheduledStopPointRefs from timetable data
-     *
-     * @param timetableDataMap Map of provider to TimetableData
-     * @return List of ScheduledStopPointRefs with associated TransportModes
-     */
     fun extract(timetableDataMap: Map<String, TimetableData>): List<ScheduledStopPointRef> {
         logger.info("Extracting ScheduledStopPointRefs from timetable data")
 
@@ -51,52 +48,56 @@ class ScheduledStopPointExtractor {
 
         val refs = mutableListOf<ScheduledStopPointRef>()
 
-        // Find all Line elements
-        val lines = root.getDescendants(org.jdom2.filter.Filters.element("Line", namespace))
+        val transportMode = extractTransportModeFromLine(root, namespace)
 
-        while (lines.hasNext()) {
-            val lineElement = lines.next()
+        if (transportMode == null) {
+            logger.warn("No valid TransportMode found in file: ${file.fileName}")
+            return emptyList()
+        }
 
-            // Get TransportMode for this Line
-            val transportModeElement = lineElement.getChild("TransportMode", namespace)
-            val transportModeText = transportModeElement?.text
+        val journeyPatterns = root.getDescendants(
+            Filters.element("JourneyPattern", namespace)
+        )
 
-            if (transportModeText != null) {
-                val transportMode = TransportMode.fromNetexValue(transportModeText)
+        while (journeyPatterns.hasNext()) {
+            val journeyPattern = journeyPatterns.next()
 
-                if (transportMode != null) {
-                    // Find all JourneyPatterns within this Line's routes
-                    val journeyPatterns = lineElement.getDescendants(
-                        org.jdom2.filter.Filters.element("JourneyPattern", namespace)
-                    )
+            val stopPointRefs = journeyPattern.getDescendants(
+                Filters.element("ScheduledStopPointRef", namespace)
+            )
 
-                    while (journeyPatterns.hasNext()) {
-                        val journeyPattern = journeyPatterns.next()
-
-                        // Find all ScheduledStopPointRef within pointsInSequence
-                        val stopPointRefs = journeyPattern.getDescendants(
-                            org.jdom2.filter.Filters.element("ScheduledStopPointRef", namespace)
+            while (stopPointRefs.hasNext()) {
+                val stopPointRef = stopPointRefs.next()
+                val refValue = stopPointRef.getAttributeValue("ref")
+                if (refValue != null) {
+                    refs.add(
+                        ScheduledStopPointRef(
+                            provider = provider,
+                            originalRef = refValue,
+                            transportMode = transportMode
                         )
-
-                        while (stopPointRefs.hasNext()) {
-                            val stopPointRef = stopPointRefs.next()
-                            val refValue = stopPointRef.getAttributeValue("ref")
-                            if (refValue != null) {
-                                refs.add(
-                                    ScheduledStopPointRef(
-                                        provider = provider,
-                                        originalRef = refValue,
-                                        transportMode = transportMode
-                                    )
-                                )
-                            }
-                        }
-                    }
+                    )
                 }
             }
         }
 
-        logger.debug("Extracted ${refs.size} refs from file: ${file.fileName}")
+        logger.info("Extracted ${refs.size} refs from file: ${file.fileName}")
         return refs
+    }
+
+    private fun extractTransportModeFromLine(root: Element, namespace: Namespace): TransportMode? {
+        val lines = root.getDescendants(Filters.element("Line", namespace))
+
+        if (lines.hasNext()) {
+            val lineElement = lines.next()
+            val transportModeElement = lineElement.getChild("TransportMode", namespace)
+            val transportModeText = transportModeElement?.text
+
+            if (transportModeText != null) {
+                return TransportMode.fromNetexValue(transportModeText)
+            }
+        }
+
+        return null
     }
 }

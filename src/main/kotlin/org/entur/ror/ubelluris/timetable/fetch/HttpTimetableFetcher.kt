@@ -2,9 +2,9 @@ package org.entur.ror.ubelluris.timetable.fetch
 
 import org.entur.ror.ubelluris.timetable.config.TimetableConfig
 import org.entur.ror.ubelluris.timetable.model.TimetableData
+import org.jdom2.filter.Filters
 import org.jdom2.input.SAXBuilder
 import org.slf4j.LoggerFactory
-import java.io.InputStream
 import java.net.URI
 import java.net.http.HttpClient
 import java.net.http.HttpRequest
@@ -17,7 +17,6 @@ import java.time.format.DateTimeFormatter
 import java.util.zip.ZipInputStream
 
 /**
- * HTTP-based implementation of TimetableFetcher
  * Downloads timetable ZIPs from API, caches them, and filters for relevant transport modes
  */
 class HttpTimetableFetcher(
@@ -32,7 +31,6 @@ class HttpTimetableFetcher(
     override fun fetch(providers: List<String>): Map<String, TimetableData> {
         logger.info("Fetching timetables for providers: $providers")
 
-        // Ensure directories exist
         Files.createDirectories(config.cacheDir)
         Files.createDirectories(config.helperDir)
 
@@ -47,23 +45,22 @@ class HttpTimetableFetcher(
         val today = LocalDate.now().format(DateTimeFormatter.ISO_DATE)
         val cachedZip = config.cacheDir.resolve("${today}_${provider}.zip")
 
-        // Download if not cached
         if (!Files.exists(cachedZip)) {
             downloadTimetable(provider, cachedZip)
         } else {
             logger.info("Using cached timetable: $cachedZip")
         }
 
-        // Extract and filter files
         return extractAndFilter(provider, cachedZip)
     }
 
     private fun downloadTimetable(provider: String, destination: Path) {
-        val url = "${config.apiUrl}/$provider.zip?key=${config.apiKey}"
+        val url = "${config.apiUrl}/$provider/$provider.zip?key=${config.apiKey}"
         logger.info("Downloading timetable from: ${url.replace(config.apiKey, "***")}")
 
         val request = HttpRequest.newBuilder()
             .uri(URI.create(url))
+            .header("Accept-Encoding", "gzip")
             .GET()
             .build()
 
@@ -91,9 +88,8 @@ class HttpTimetableFetcher(
             var entry = zipStream.nextEntry
             while (entry != null) {
                 if (!entry.isDirectory && entry.name.endsWith(".xml", ignoreCase = true)) {
-                    // Check blacklist
                     if (isBlacklisted(entry.name, blacklistPatterns)) {
-                        logger.debug("Skipping blacklisted file: ${entry.name}")
+                        logger.info("Skipping blacklisted file: ${entry.name}")
                         entry = zipStream.nextEntry
                         continue
                     }
@@ -101,15 +97,13 @@ class HttpTimetableFetcher(
                     val fileName = Path.of(entry.name).fileName.toString()
                     val extractedFile = providerHelperDir.resolve(fileName)
 
-                    // Copy the content before checking (needed for parsing)
                     val tempContent = zipStream.readBytes()
                     Files.write(extractedFile, tempContent)
                     allFiles.add(extractedFile)
 
-                    // Check if file contains relevant transport modes
                     if (containsRelevantModes(tempContent)) {
                         modeHelperFiles.add(extractedFile)
-                        logger.debug("File contains relevant modes: $fileName")
+                        logger.info("File contains relevant modes: $fileName")
                     }
                 }
                 entry = zipStream.nextEntry
@@ -139,10 +133,8 @@ class HttpTimetableFetcher(
             val root = document.rootElement
             val namespace = root.namespace
 
-            // Find all Line elements
-            val lines = root.getDescendants(org.jdom2.filter.Filters.element("Line", namespace))
+            val lines = root.getDescendants(Filters.element("Line", namespace))
 
-            // Check if any Line has a TransportMode we're interested in
             lines.forEach { lineElement ->
                 val transportModeElement = lineElement.getChild("TransportMode", namespace)
                 if (transportModeElement != null) {

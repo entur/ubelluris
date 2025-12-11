@@ -32,15 +32,15 @@ class FilterService(
         Files.copy(inputFile, tempInputFile, StandardCopyOption.REPLACE_EXISTING)
 
         if (timetableBridgeProcessor != null) {
-            logger.info("Running TimetableBridge processing")
+            logger.info("Running timetable processing")
             try {
                 timetableBridgeProcessor.process(tempInputFile)
-                logger.info("TimetableBridge processing completed successfully")
+                logger.info("Done running timetable processing")
             } catch (e: Exception) {
-                logger.error("TimetableBridge processing failed, continuing with pipeline", e)
+                logger.error("Timetable processing failed", e)
             }
         } else {
-            logger.debug("TimetableBridge processing disabled (no processor configured)")
+            logger.info("No timetable processor configured")
         }
 
         Files.list(tempDir)
