@@ -4,7 +4,7 @@ import org.entur.ror.ubelluris.file.HttpFileFetcher
 import org.entur.ror.ubelluris.filter.FilterService
 import org.entur.ror.ubelluris.model.TransportMode
 import org.entur.ror.ubelluris.publish.LocalFilePublisher
-import org.entur.ror.ubelluris.timetable.TimetableBridgeProcessor
+import org.entur.ror.ubelluris.timetable.TimetableProcessor
 import org.entur.ror.ubelluris.timetable.config.TimetableConfig
 import org.entur.ror.ubelluris.timetable.fetch.HttpTimetableFetcher
 
@@ -24,11 +24,11 @@ fun main() {
     )
 
     val timetableFetcher = HttpTimetableFetcher(timetableConfig)
-    val timetableBridgeProcessor = TimetableBridgeProcessor(timetableFetcher, timetableConfig)
+    val timetableProcessor = TimetableProcessor(timetableFetcher, timetableConfig)
 
     UbellurisService(
         fetcher = HttpFileFetcher(stopsUrl),
-        processor = FilterService(timetableBridgeProcessor = timetableBridgeProcessor),
+        processor = FilterService(timetableProcessor = timetableProcessor),
         publisher = LocalFilePublisher()
     ).run()
 }

@@ -38,7 +38,7 @@ class TransportModeInserter(
         val uniformMode = analyses.filter { it.scenario == Scenario.UNIFORM_MODE }
         val mixedMode = analyses.filter { it.scenario == Scenario.MIXED_MODE }
 
-        logger.info("Scenarios: SINGLE_QUAY=${singleQuay.size}, UNIFORM_MODE=${uniformMode.size}, MIXED_MODE=${mixedMode.size}")
+        logger.info("SINGLE_QUAY=${singleQuay.size}, UNIFORM_MODE=${uniformMode.size}, MIXED_MODE=${mixedMode.size}")
 
         val stopPlacesIterator = root.getDescendants(Filters.element(NetexTypes.STOP_PLACE, namespace))
         val stopPlaces = mutableListOf<Element>()

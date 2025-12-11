@@ -12,7 +12,7 @@ import org.entur.ror.ubelluris.timetable.model.QuayModeMapping
 import org.slf4j.LoggerFactory
 import java.nio.file.Path
 
-class TimetableBridgeProcessor(
+class TimetableProcessor(
     private val timetableFetcher: TimetableFetcher,
     private val config: TimetableConfig
 ) {
@@ -26,7 +26,7 @@ class TimetableBridgeProcessor(
     private val transportModeInserter = TransportModeInserter(stopPlaceSplitter)
 
     fun process(stopsXmlPath: Path): Path {
-        logger.info("Starting TimetableBridge processing for: $stopsXmlPath")
+        logger.info("Starting timetable processing for: $stopsXmlPath")
 
         try {
             val timetableDataMap = timetableFetcher.fetch(config.providers)
@@ -35,11 +35,11 @@ class TimetableBridgeProcessor(
 
             val (processedPath, insertionLogs) = performInsertion(stopsXmlPath, quayModeMapping)
 
-            logger.info("TimetableBridge processing complete")
+            logger.info("Timetable processing complete")
             return processedPath
 
         } catch (e: Exception) {
-            logger.error("TimetableBridge processing failed", e)
+            logger.error("Timetable processing failed", e)
             throw e
         }
     }

@@ -2,7 +2,7 @@ package org.entur.ror.ubelluris.filter
 
 import org.entur.netex.tools.pipeline.app.FilterNetexApp
 import org.entur.ror.ubelluris.processor.KeyValueMigrationProcessor
-import org.entur.ror.ubelluris.timetable.TimetableBridgeProcessor
+import org.entur.ror.ubelluris.timetable.TimetableProcessor
 import org.slf4j.LoggerFactory
 import java.nio.file.Files
 import java.nio.file.Path
@@ -11,7 +11,7 @@ import java.nio.file.StandardCopyOption
 class FilterService(
     private val filterConfig: StandardImportFilterConfig = StandardImportFilterConfig(),
     private val resultsDir: Path = Path.of("results"),
-    private val timetableBridgeProcessor: TimetableBridgeProcessor? = null
+    private val timetableProcessor: TimetableProcessor? = null
 ) : XmlProcessor {
     private val logger = LoggerFactory.getLogger(javaClass)
 
@@ -31,10 +31,10 @@ class FilterService(
         val tempInputFile = tempDir.resolve(inputFile.fileName)
         Files.copy(inputFile, tempInputFile, StandardCopyOption.REPLACE_EXISTING)
 
-        if (timetableBridgeProcessor != null) {
+        if (timetableProcessor != null) {
             logger.info("Running timetable processing")
             try {
-                timetableBridgeProcessor.process(tempInputFile)
+                timetableProcessor.process(tempInputFile)
                 logger.info("Done running timetable processing")
             } catch (e: Exception) {
                 logger.error("Timetable processing failed", e)
