@@ -94,6 +94,149 @@ class HttpTimetableFetcherTest {
             .containsExactlyInAnyOrder("line_p2_001.xml", "line_p2_002.xml")
     }
 
+    @Test
+    fun shouldHandleBlacklistedFiles() {
+        val cacheDir = tempDir.resolve("cache")
+        val helperDir = tempDir.resolve("helper")
+
+        val config = TimetableConfig(
+            apiUrl = "http://unused",
+            apiKey = "unused",
+            providers = listOf("provider1"),
+            modeFilter = setOf(TransportMode.TRAM),
+            blacklist = mapOf(
+                "provider1" to listOf("blacklisted_*.xml")
+            ),
+            cacheDir = cacheDir,
+            helperDir = helperDir
+        )
+
+        Files.createDirectories(cacheDir)
+
+        val today = LocalDate.now().format(DateTimeFormatter.ISO_DATE)
+
+        createZip(
+            cacheDir.resolve("${today}_provider1.zip"),
+            mapOf(
+                "line_ok.xml" to """
+                <PublicationDelivery xmlns="http://www.netex.org.uk/netex">
+                    <Line>
+                        <TransportMode>tram</TransportMode>
+                    </Line>
+                </PublicationDelivery>
+            """.trimIndent(),
+                "blacklisted_001.xml" to """
+                <PublicationDelivery xmlns="http://www.netex.org.uk/netex">
+                    <Line>
+                        <TransportMode>tram</TransportMode>
+                    </Line>
+                </PublicationDelivery>
+            """.trimIndent()
+            )
+        )
+
+        val fetcher = HttpTimetableFetcher(config)
+
+        val result = fetcher.fetch(listOf("provider1"))
+        val data = result["provider1"]!!
+
+        assertThat(data.allFiles)
+            .extracting { it.fileName.toString() }
+            .containsExactly("line_ok.xml")
+
+        assertThat(data.modeHelperFiles)
+            .extracting { it.fileName.toString() }
+            .containsExactly("line_ok.xml")
+    }
+
+    @Test
+    fun shouldHandleNoLines() {
+        val cacheDir = tempDir.resolve("cache")
+        val helperDir = tempDir.resolve("helper")
+
+        val config = TimetableConfig(
+            apiUrl = "http://unused",
+            apiKey = "unused",
+            providers = listOf("provider1"),
+            modeFilter = setOf(TransportMode.TRAM),
+            blacklist = emptyMap(),
+            cacheDir = cacheDir,
+            helperDir = helperDir
+        )
+
+        Files.createDirectories(cacheDir)
+
+        val today = LocalDate.now().format(DateTimeFormatter.ISO_DATE)
+
+        createZip(
+            cacheDir.resolve("${today}_provider1.zip"),
+            mapOf(
+                "no_lines.xml" to """
+                <PublicationDelivery xmlns="http://www.netex.org.uk/netex">
+                    <JourneyPattern>
+                        <SomethingElse/>
+                    </JourneyPattern>
+                </PublicationDelivery>
+            """.trimIndent()
+            )
+        )
+
+        val fetcher = HttpTimetableFetcher(config)
+
+        val result = fetcher.fetch(listOf("provider1"))
+        val data = result["provider1"]!!
+
+        assertThat(data.allFiles)
+            .extracting { it.fileName.toString() }
+            .containsExactly("no_lines.xml")
+
+        assertThat(data.modeHelperFiles).isEmpty()
+    }
+
+    @Test
+    fun shouldHandleInvalidXml() {
+        val cacheDir = tempDir.resolve("cache")
+        val helperDir = tempDir.resolve("helper")
+
+        val config = TimetableConfig(
+            apiUrl = "http://unused",
+            apiKey = "unused",
+            providers = listOf("provider1"),
+            modeFilter = setOf(TransportMode.TRAM),
+            blacklist = emptyMap(),
+            cacheDir = cacheDir,
+            helperDir = helperDir
+        )
+
+        Files.createDirectories(cacheDir)
+
+        val today = LocalDate.now().format(DateTimeFormatter.ISO_DATE)
+
+        createZip(
+            cacheDir.resolve("${today}_provider1.zip"),
+            mapOf(
+                "invalid.xml" to """
+                <PublicationDelivery xmlns="http://www.netex.org.uk/netex">
+                    <Line>
+                        <TransportMode>tram</TransportMode>
+                    <!-- INVALID tags -->
+            """.trimIndent()
+            )
+        )
+
+        val fetcher = HttpTimetableFetcher(config)
+
+        val result = fetcher.fetch(listOf("provider1"))
+        val data = result["provider1"]!!
+
+        assertThat(data.allFiles)
+            .extracting { it.fileName.toString() }
+            .containsExactly("invalid.xml")
+
+        assertThat(data.modeHelperFiles).isEmpty()
+    }
+
+
     private fun createZip(
         zipPath: Path,
         files: Map<String, String>
