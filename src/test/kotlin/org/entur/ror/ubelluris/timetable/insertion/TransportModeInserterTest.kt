@@ -246,7 +246,6 @@ class TransportModeInserterTest {
         // existing parent reused (no generated parent)
         assert(!updatedXml.contains("_4000_parent"))
 
-        // children reference the existing parent
         assert(updatedXml.contains("""ParentSiteRef ref="SAM:StopPlace:PARENT""""))
     }
 
