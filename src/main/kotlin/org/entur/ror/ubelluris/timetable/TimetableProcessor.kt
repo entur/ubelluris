@@ -7,7 +7,6 @@ import org.entur.ror.ubelluris.timetable.fetch.TimetableFetcher
 import org.entur.ror.ubelluris.timetable.insertion.StopPlaceAnalyzer
 import org.entur.ror.ubelluris.timetable.insertion.StopPlaceSplitter
 import org.entur.ror.ubelluris.timetable.insertion.TransportModeInserter
-import org.entur.ror.ubelluris.timetable.model.ModeInsertionLog
 import org.entur.ror.ubelluris.timetable.model.QuayModeMapping
 import org.slf4j.LoggerFactory
 import java.nio.file.Path
@@ -33,7 +32,7 @@ class TimetableProcessor(
 
             val quayModeMapping = mapQuaysToTransportModes(stopsXmlPath, timetableDataMap)
 
-            val (processedPath, insertionLogs) = modifyStopPlaces(stopsXmlPath, quayModeMapping)
+            val processedPath = modifyStopPlaces(stopsXmlPath, quayModeMapping)
 
             logger.info("Timetable processing complete")
             return processedPath
@@ -62,15 +61,15 @@ class TimetableProcessor(
     private fun modifyStopPlaces(
         stopsXmlPath: Path,
         quayModeMapping: QuayModeMapping
-    ): Pair<Path, List<ModeInsertionLog>> {
+    ): Path {
         logger.info("Analysing stop places and insert transport modes")
 
         val analyses = stopPlaceAnalyzer.analyze(stopsXmlPath, quayModeMapping)
 
-        val (processedPath, insertionLogs) = transportModeInserter.insert(stopsXmlPath, analyses)
+        val processedPath = transportModeInserter.insert(stopsXmlPath, analyses)
 
-        logger.info("Done analysing stop places, ${insertionLogs.size} modifications")
+        logger.info("Done analysing stop places")
 
-        return Pair(processedPath, insertionLogs)
+        return processedPath
     }
 }

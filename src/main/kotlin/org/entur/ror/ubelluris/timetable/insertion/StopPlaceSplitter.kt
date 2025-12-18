@@ -2,8 +2,6 @@ package org.entur.ror.ubelluris.timetable.insertion
 
 import org.entur.ror.ubelluris.model.NetexTypes
 import org.entur.ror.ubelluris.model.TransportMode
-import org.entur.ror.ubelluris.timetable.model.Action
-import org.entur.ror.ubelluris.timetable.model.ModeInsertionLog
 import org.entur.ror.ubelluris.timetable.model.StopPlaceAnalysis
 import org.jdom2.Document
 import org.jdom2.Element
@@ -18,17 +16,16 @@ class StopPlaceSplitter {
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
-    fun split(document: Document, mixedModeAnalyses: List<StopPlaceAnalysis>): List<ModeInsertionLog> {
+    fun split(document: Document, mixedModeAnalyses: List<StopPlaceAnalysis>) {
         logger.info("Splitting ${mixedModeAnalyses.size} MIXED_MODE StopPlaces")
 
         val root = document.rootElement
         val namespace = root.namespace
-        val logs = mutableListOf<ModeInsertionLog>()
 
         val stopPlacesContainer = root.getDescendants(Filters.element("stopPlaces", namespace))
             .firstOrNull() ?: run {
             logger.error("Could not find stopPlaces container")
-            return emptyList()
+            return
         }
 
         mixedModeAnalyses.forEach { analysis ->
@@ -39,20 +36,10 @@ class StopPlaceSplitter {
             }
 
             val childStopPlaces = performSplit(stopPlaceElement, namespace, analysis)
-            logs.add(
-                ModeInsertionLog(
-                    stopPlaceId = analysis.stopPlaceId,
-                    action = Action.SPLIT_MIXED_MODE,
-                    oldMode = analysis.existingMode,
-                    newMode = null,
-                    childStopPlaces = childStopPlaces
-                )
-            )
             logger.info("Split StopPlace ${analysis.stopPlaceId} into ${childStopPlaces.size} children")
         }
 
-        logger.info("Split complete, generated ${logs.size} log entries")
-        return logs
+        logger.info("Split complete for ${mixedModeAnalyses.size} StopPlaces")
     }
 
     private fun performSplit(

@@ -1,8 +1,6 @@
 package org.entur.ror.ubelluris.timetable.insertion
 
 import org.entur.ror.ubelluris.model.NetexTypes
-import org.entur.ror.ubelluris.timetable.model.Action
-import org.entur.ror.ubelluris.timetable.model.ModeInsertionLog
 import org.entur.ror.ubelluris.timetable.model.Scenario
 import org.entur.ror.ubelluris.timetable.model.StopPlaceAnalysis
 import org.jdom2.Element
@@ -25,14 +23,12 @@ class TransportModeInserter(
     private val logger = LoggerFactory.getLogger(javaClass)
     private val saxBuilder = SAXBuilder()
 
-    fun insert(stopsXmlPath: Path, analyses: List<StopPlaceAnalysis>): Pair<Path, List<ModeInsertionLog>> {
+    fun insert(stopsXmlPath: Path, analyses: List<StopPlaceAnalysis>): Path {
         logger.info("Inserting transport modes for ${analyses.size} StopPlaces")
 
         val document = saxBuilder.build(stopsXmlPath.toFile())
         val root = document.rootElement
         val namespace = root.namespace
-
-        val logs = mutableListOf<ModeInsertionLog>()
 
         val singleQuay = analyses.filter { it.scenario == Scenario.SINGLE_QUAY }
         val uniformMode = analyses.filter { it.scenario == Scenario.UNIFORM_MODE }
@@ -53,14 +49,6 @@ class TransportModeInserter(
                 val newMode = analysis.quayModes.values.first()
                 updateStopPlaceMode(stopPlaceElement, namespace, newMode)
                 cleanQuayPublicCode(stopPlaceElement, namespace, analysis.quayModes.keys.first())
-                logs.add(
-                    ModeInsertionLog(
-                        stopPlaceId = stopPlaceId,
-                        action = Action.UPDATED_SINGLE_QUAY,
-                        oldMode = analysis.existingMode,
-                        newMode = newMode
-                    )
-                )
                 logger.info("Updated SINGLE_QUAY: $stopPlaceId to $newMode")
             }
 
@@ -70,22 +58,13 @@ class TransportModeInserter(
                 analysis.quayModes.keys.forEach { quayId ->
                     cleanQuayPublicCode(stopPlaceElement, namespace, quayId)
                 }
-                logs.add(
-                    ModeInsertionLog(
-                        stopPlaceId = stopPlaceId,
-                        action = Action.UPDATED_UNIFORM_MODE,
-                        oldMode = analysis.existingMode,
-                        newMode = newMode
-                    )
-                )
                 logger.info("Updated UNIFORM_MODE: $stopPlaceId to $newMode")
             }
         }
 
         if (mixedMode.isNotEmpty()) {
             logger.info("Processing ${mixedMode.size} MIXED_MODE StopPlaces")
-            val splitLogs = stopPlaceSplitter.split(document, mixedMode)
-            logs.addAll(splitLogs)
+            stopPlaceSplitter.split(document, mixedMode)
         }
 
         val outputter = XMLOutputter(Format.getPrettyFormat())
@@ -93,8 +72,8 @@ class TransportModeInserter(
             outputter.output(document, writer)
         }
 
-        logger.info("Inserted TransportMode values, generated ${logs.size} log entries")
-        return Pair(stopsXmlPath, logs)
+        logger.info("Inserted TransportMode values for ${analyses.size} StopPlaces")
+        return stopsXmlPath
     }
 
     private fun updateStopPlaceMode(

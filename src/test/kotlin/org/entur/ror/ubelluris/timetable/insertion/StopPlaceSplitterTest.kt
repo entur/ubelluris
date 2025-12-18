@@ -219,9 +219,7 @@ class StopPlaceSplitterTest {
             parentRef = null
         )
 
-        val logs = stopPlaceSplitter.split(document, listOf(analysis))
-
-        assertThat(logs).isEmpty()
+        stopPlaceSplitter.split(document, listOf(analysis))
 
         val root = document.rootElement
         assertThat(root.getDescendants(Filters.element("StopPlace", root.namespace)).toList())
@@ -256,9 +254,7 @@ class StopPlaceSplitterTest {
             parentRef = null
         )
 
-        val logs = stopPlaceSplitter.split(document, listOf(analysis))
-
-        assertThat(logs).isEmpty()
+        stopPlaceSplitter.split(document, listOf(analysis))
 
         val root = document.rootElement
         val ns = root.namespace
