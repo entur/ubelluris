@@ -3,6 +3,7 @@
 Ubelluris performs a transformation and filtering job on NeTEx PublicationDelivery datasets.
 
 > Ubelluris is still a work in progress!
+> It is currently tailored to filter and transform data from Trafiklab only!
 
 ## How it works
 Ubelluris downloads stop place and timetable data from Trafiklab, and subsequently processes it to produce a filtered .xml file.
