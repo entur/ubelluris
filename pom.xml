@@ -15,6 +15,7 @@
         <junit.version>5.10.2</junit.version>
         <netex-tools.version>0.0.35</netex-tools.version>
         <slf4j.version>2.0.17</slf4j.version>
+        <kotlinx.serialization.version>1.8.1</kotlinx.serialization.version>
     </properties>
 
     <repositories>
@@ -30,6 +31,11 @@
             <artifactId>kotlin-test</artifactId>
             <version>${kotlin.version}</version>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.jetbrains.kotlinx</groupId>
+            <artifactId>kotlinx-serialization-json</artifactId>
+            <version>${kotlinx.serialization.version}</version>
         </dependency>
         <dependency>
             <groupId>org.mockito</groupId>
@@ -125,7 +131,17 @@
                 </executions>
                 <configuration>
                     <jvmTarget>21</jvmTarget>
+                    <compilerPlugins>
+                        <plugin>kotlinx-serialization</plugin>
+                    </compilerPlugins>
                 </configuration>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.jetbrains.kotlin</groupId>
+                        <artifactId>kotlin-maven-serialization</artifactId>
+                        <version>${kotlin.version}</version>
+                    </dependency>
+                </dependencies>
             </plugin>
 
             <plugin>
