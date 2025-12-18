@@ -13,7 +13,7 @@ A minimal local setup requires Trafiklab API keys for "**Stops data**" and "**Ne
 The main function takes one argument:
 * A CLI config file
 
-Running the main method in UbellurisApplication.kt with the necessary API keys will download stops data and produce a result filtered file.
+Running the main method in UbellurisApplication.kt with the necessary API keys will download stops data and produce a filtered result file.
 
 ### cli-config file
 
