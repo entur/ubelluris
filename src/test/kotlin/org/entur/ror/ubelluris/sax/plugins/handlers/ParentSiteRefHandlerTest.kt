@@ -33,7 +33,7 @@ class ParentSiteRefHandlerTest {
         assertThat(stopPlacePurgingRepository.childStopPlaces)
             .containsOnly("SE:050:StopPlace:123")
         assertThat(stopPlacePurgingRepository.isChildStopPlace("SE:050:StopPlace:123"))
-            .isTrue()
+            .isEqualTo(true)
     }
 
     @Test
