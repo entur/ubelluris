@@ -2,7 +2,8 @@ package org.entur.ror.ubelluris.timetable.discovery
 
 import org.entur.ror.ubelluris.model.NetexTypes
 import org.entur.ror.ubelluris.model.TransportMode
-import org.entur.ror.ubelluris.timetable.model.*
+import org.entur.ror.ubelluris.timetable.model.QuayModeMapping
+import org.entur.ror.ubelluris.timetable.model.ScheduledStopPointRef
 import org.jdom2.filter.Filters
 import org.jdom2.input.SAXBuilder
 import org.slf4j.LoggerFactory

@@ -1,5 +1,6 @@
 package org.entur.ror.ubelluris.timetable.discovery
 
+import org.entur.ror.ubelluris.model.NetexTypes
 import org.entur.ror.ubelluris.model.TransportMode
 import org.entur.ror.ubelluris.timetable.model.ScheduledStopPointRef
 import org.entur.ror.ubelluris.timetable.model.TimetableData
@@ -86,11 +87,11 @@ class ScheduledStopPointExtractor {
     }
 
     private fun extractTransportModeFromLine(root: Element, namespace: Namespace): TransportMode? {
-        val lines = root.getDescendants(Filters.element("Line", namespace))
+        val lines = root.getDescendants(Filters.element(NetexTypes.LINE, namespace))
 
         if (lines.hasNext()) {
             val lineElement = lines.next()
-            val transportModeElement = lineElement.getChild("TransportMode", namespace)
+            val transportModeElement = lineElement.getChild(NetexTypes.TRANSPORT_MODE, namespace)
             val transportModeText = transportModeElement?.text
 
             if (transportModeText != null) {
