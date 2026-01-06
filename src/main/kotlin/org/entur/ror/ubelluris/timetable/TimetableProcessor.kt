@@ -1,12 +1,12 @@
 package org.entur.ror.ubelluris.timetable
 
 import org.entur.ror.ubelluris.timetable.config.TimetableConfig
-import org.entur.ror.ubelluris.timetable.discovery.QuayModeMatcher
-import org.entur.ror.ubelluris.timetable.discovery.ScheduledStopPointExtractor
+import org.entur.ror.ubelluris.timetable.extraction.QuayModeMatcher
+import org.entur.ror.ubelluris.timetable.extraction.ScheduledStopPointExtractor
 import org.entur.ror.ubelluris.timetable.fetch.TimetableFetcher
-import org.entur.ror.ubelluris.timetable.insertion.StopPlaceAnalyzer
-import org.entur.ror.ubelluris.timetable.insertion.StopPlaceSplitter
-import org.entur.ror.ubelluris.timetable.insertion.TransportModeInserter
+import org.entur.ror.ubelluris.timetable.enrichment.StopPlaceAnalyzer
+import org.entur.ror.ubelluris.timetable.enrichment.StopPlaceSplitter
+import org.entur.ror.ubelluris.timetable.enrichment.TransportModeInserter
 import org.entur.ror.ubelluris.timetable.model.QuayModeMapping
 import org.slf4j.LoggerFactory
 import java.nio.file.Path
