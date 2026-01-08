@@ -36,10 +36,15 @@ bin/
 /nbbuild/
 /dist/
 /nbdist/
-/.nb-gradle/
 
 ### VS Code ###
 .vscode/
 
 ### Mac OS ###
 .DS_Store
+
+### Project Specific ###
+/downloads
+/transport-mode-helpers
+/processing
+/results

@@ -9,7 +9,8 @@ import org.entur.ror.ubelluris.sax.plugins.handlers.PublicCodeHandler
 import org.xml.sax.Attributes
 
 class StopPlacePurgingPlugin(
-    val stopPlacePurgingRepository: StopPlacePurgingRepository
+    val stopPlacePurgingRepository: StopPlacePurgingRepository,
+    private val blacklistFilePath: String
 ) : AbstractNetexPlugin() {
 
     private val parsingContext: StopPlacePurgingParsingContext = StopPlacePurgingParsingContext()
@@ -17,7 +18,7 @@ class StopPlacePurgingPlugin(
     private val elementHandlers: Map<String, StopPlacePurgingDataCollector> by lazy {
         mapOf(
             NetexTypes.PUBLIC_CODE to PublicCodeHandler(stopPlacePurgingRepository),
-            NetexTypes.QUAY to BlacklistQuayHandler(stopPlacePurgingRepository),
+            NetexTypes.QUAY to BlacklistQuayHandler(stopPlacePurgingRepository, java.io.File(blacklistFilePath)),
             NetexTypes.PARENT_SITE_REF to ParentSiteRefHandler(stopPlacePurgingRepository)
         )
     }

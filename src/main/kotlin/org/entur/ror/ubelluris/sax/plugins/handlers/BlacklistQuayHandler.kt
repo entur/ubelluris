@@ -9,7 +9,7 @@ import java.io.File
 
 class BlacklistQuayHandler(
     val stopPlacePurgingRepository: StopPlacePurgingRepository,
-    private val blacklistFile: File = File("processing/blacklist-quays.txt")
+    private val blacklistFile: File
 ) : StopPlacePurgingDataCollector() {
 
     private val blacklistedQuayIds: Set<String> by lazy {

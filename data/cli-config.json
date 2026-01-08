@@ -7,5 +7,6 @@
     "vt",
     "halland",
     "skane"
-  ]
+  ],
+  "illegalPublicCodes": ["*", "-"]
 }

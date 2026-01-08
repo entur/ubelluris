@@ -12,7 +12,7 @@ import java.io.File
 
 fun main(args: Array<String>) {
 
-    if (args.size != 1) {
+    if (args.size != 2) {
         printHelp()
         return
     }
@@ -22,6 +22,8 @@ fun main(args: Array<String>) {
         .use { inputStream ->
             JsonConfig.loadCliConfig(inputStream)
         }
+
+    val blacklistFilePath = args[1]
 
     val timetableConfig = TimetableConfig(
         apiUrl = cliConfig.timetableDataUrl,
@@ -39,7 +41,11 @@ fun main(args: Array<String>) {
 
     UbellurisService(
         fetcher = HttpFileFetcher("${cliConfig.stopsDataUrl}${cliConfig.stopsDataApiKey}"),
-        processor = FilterService(timetableProcessor = timetableProcessor),
+        processor = FilterService(
+            cliConfig = cliConfig,
+            timetableProcessor = timetableProcessor,
+            blacklistFilePath = blacklistFilePath
+        ),
         publisher = LocalFilePublisher()
     ).run()
 }
@@ -47,8 +53,9 @@ fun main(args: Array<String>) {
 fun printHelp() {
     println(
         """
-        The app takes 1 argument: 
+        The app takes 2 arguments:
        - <cli-config-file-name>      : The name of the configuration file for CLI, relative to the local directory.
+       - <blacklist-quays-file-path> : Path to the blacklist quays file (e.g., processing/blacklist-quays.txt)
     """.trimIndent()
     )
 }
