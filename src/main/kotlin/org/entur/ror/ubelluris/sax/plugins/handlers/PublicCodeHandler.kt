@@ -19,18 +19,20 @@ class PublicCodeHandler(val stopPlacePurgingRepository: StopPlacePurgingReposito
     }
 
     override fun endElement(context: StopPlacePurgingParsingContext, currentEntity: Entity) {
-        if (stringBuilder.isNotEmpty() && stringBuilder.toString() in listOf("81", "82", "83")) {
+        val publicCode = stringBuilder.toString()
+
+        if (publicCode in listOf("81", "82", "83")) {
             stopPlacePurgingRepository.addEntityId(currentEntity.id)
         }
-        if (stringBuilder.isNotEmpty()) {
-            val parentEntityId = currentEntity.parent?.id
-            if (parentEntityId != null) {
-                stopPlacePurgingRepository.addQuayToStopPlace(
-                    parentEntityId,
-                    QuayData(currentEntity.id, stringBuilder.toString())
-                )
-            }
+
+        val parentEntityId = currentEntity.parent?.id
+        if (parentEntityId != null) {
+            stopPlacePurgingRepository.addQuayToStopPlace(
+                parentEntityId,
+                QuayData(currentEntity.id, publicCode)
+            )
         }
+
         stringBuilder.clear()
     }
 }

@@ -6,10 +6,13 @@ object NetexTypes {
     const val XML_NS = "Xmlns"
     const val XML_NS_URL = "XmlnsUrl"
     const val STOP_PLACE = "StopPlace"
+    const val STOP_PLACE_TYPE = "StopPlaceType"
     const val PARENT_SITE_REF = "ParentSiteRef"
     const val QUAY = "Quay"
     const val PUBLIC_CODE = "PublicCode"
     const val KEY_VALUE = "KeyValue"
     const val KEY = "Key"
     const val VALUE = "Value"
+    const val LINE = "Line"
+    const val TRANSPORT_MODE = "TransportMode"
 }

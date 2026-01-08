@@ -11,8 +11,9 @@ Ubelluris downloads stop place and timetable data from Trafiklab, and subsequent
 ## Running Ubelluris locally
 A minimal local setup requires Trafiklab API keys for "**Stops data**" and "**NeTEx Regional Static data**".
 
-The main function takes one argument:
+The main function takes two arguments:
 * A CLI config file
+* A txt file specifying any blacklisted quays
 
 Running the main method in UbellurisApplication.kt with the necessary API keys will download stops data and produce a filtered result file.
 
@@ -28,6 +29,17 @@ Running the main method in UbellurisApplication.kt with the necessary API keys w
     "provider1",
     "provider2",
     "provider3"
+  ],
+  "illegalPublicCodes": [
+    "*",
+    "-"
   ]
 }
+```
+
+### blacklisted-quays.txt
+
+```plain text
+SE:050:Quay:0000
+SE:050:Quay:0001
 ```

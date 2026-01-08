@@ -1,4 +1,4 @@
-package org.entur.ror.ubelluris.timetable.insertion
+package org.entur.ror.ubelluris.timetable.enrichment
 
 import org.entur.ror.ubelluris.model.NetexTypes
 import org.entur.ror.ubelluris.model.TransportMode
@@ -60,7 +60,7 @@ class StopPlaceSplitter {
             val childId = generateChildId(originalId, mode)
             childStopPlaceIds.add(childId)
 
-            val childStopPlace = createChildStopPlace(
+            val childStopPlace = StopPlaceChildCreator().createChildStopPlace(
                 originalStopPlace = originalStopPlace,
                 childId = childId,
                 mode = mode,
@@ -75,7 +75,7 @@ class StopPlaceSplitter {
         }
 
         if (!analysis.hasParent) {
-            val parent = createParentStopPlace(originalStopPlace, namespace, parentId!!)
+            val parent = StopPlaceParentCreator().createParentStopPlace(originalStopPlace, namespace, parentId!!)
             val parentContainer = originalStopPlace.parentElement
             val index = parentContainer.indexOf(originalStopPlace)
             parentContainer.addContent(index, parent)
@@ -94,88 +94,6 @@ class StopPlaceSplitter {
         return childStopPlaceIds
     }
 
-    private fun createChildStopPlace(
-        originalStopPlace: Element,
-        childId: String,
-        mode: TransportMode,
-        quayIds: List<String>,
-        namespace: Namespace,
-        parentRef: String
-    ): Element {
-        val childStopPlace = originalStopPlace.clone()
-        childStopPlace.setAttribute("id", childId)
-        childStopPlace.setAttribute("version", "1")
-
-        val transportModeElement = childStopPlace.getChild("TransportMode", namespace)
-            ?: Element("TransportMode", namespace).also { childStopPlace.addContent(0, it) }
-        transportModeElement.text = mode.netexValue
-
-        val parentSiteRef = childStopPlace.getChild(NetexTypes.PARENT_SITE_REF, namespace)
-            ?: Element(NetexTypes.PARENT_SITE_REF, namespace).also {
-                val modeIndex = childStopPlace.indexOf(transportModeElement)
-                childStopPlace.addContent(modeIndex + 1, it)
-            }
-        parentSiteRef.setAttribute("ref", parentRef)
-        parentSiteRef.setAttribute("version", "1")
-
-        val childQuaysContainer = childStopPlace.getChild("quays", namespace)
-        if (childQuaysContainer != null) {
-            val allQuays = childQuaysContainer.getChildren(NetexTypes.QUAY, namespace).toList()
-            allQuays.forEach { quayElement ->
-                val quayId = quayElement.getAttributeValue("id")
-                if (quayId !in quayIds) {
-                    childQuaysContainer.removeContent(quayElement)
-                } else {
-                    val publicCodeElement = quayElement.getChild(NetexTypes.PUBLIC_CODE, namespace)
-                    if (publicCodeElement?.text == "*") {
-                        publicCodeElement.text = ""
-                    }
-                }
-            }
-        }
-
-        return childStopPlace
-    }
-
-    private fun createParentStopPlace(
-        originalStopPlace: Element,
-        namespace: Namespace,
-        parentId: String
-    ): Element {
-        val parent = Element(NetexTypes.STOP_PLACE, namespace)
-        parent.setAttribute("id", parentId)
-        parent.setAttribute("version", "1")
-
-        val keyList = Element("keyList", namespace)
-        parent.addContent(keyList)
-
-        val ownerKv = originalStopPlace.getChild("keyList", namespace)
-            ?.getChildren(NetexTypes.KEY_VALUE, namespace)
-            ?.find { it.getChildText(NetexTypes.KEY, namespace) == "owner" }
-        val dataFromKv = originalStopPlace.getChild("keyList", namespace)
-            ?.getChildren(NetexTypes.KEY_VALUE, namespace)
-            ?.find { it.getChildText(NetexTypes.KEY, namespace) == "data-from" }
-
-        if (ownerKv != null) {
-            keyList.addContent(ownerKv.clone())
-        }
-        if (dataFromKv != null) {
-            keyList.addContent(dataFromKv.clone())
-        }
-
-        val nameElement = originalStopPlace.getChild("Name", namespace)
-        if (nameElement != null) {
-            parent.addContent(nameElement.clone())
-        }
-
-        val centroid = originalStopPlace.getChild("Centroid", namespace)
-        if (centroid != null) {
-            parent.addContent(centroid.clone())
-        }
-
-        logger.info("Created parent StopPlace $parentId")
-        return parent
-    }
 
     private fun addParentSiteRefToStopPlace(
         stopPlace: Element,

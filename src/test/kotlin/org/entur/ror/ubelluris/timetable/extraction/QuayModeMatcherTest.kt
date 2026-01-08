@@ -1,4 +1,4 @@
-package org.entur.ror.ubelluris.timetable.discovery
+package org.entur.ror.ubelluris.timetable.extraction
 
 import org.assertj.core.api.Assertions.assertThat
 import org.entur.ror.ubelluris.model.TransportMode

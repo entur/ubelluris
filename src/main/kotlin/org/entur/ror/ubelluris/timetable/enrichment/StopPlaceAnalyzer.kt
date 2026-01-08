@@ -1,4 +1,4 @@
-package org.entur.ror.ubelluris.timetable.insertion
+package org.entur.ror.ubelluris.timetable.enrichment
 
 import org.entur.ror.ubelluris.model.NetexTypes
 import org.entur.ror.ubelluris.model.TransportMode
@@ -50,9 +50,9 @@ class StopPlaceAnalyzer {
 
             val scenario = determineScenario(totalQuays, quayModes)
 
-            val existingMode = stopPlaceElement.getChildText("TransportMode", namespace)
+            val existingMode = stopPlaceElement.getChildText(NetexTypes.TRANSPORT_MODE, namespace)
                 ?.let { TransportMode.fromNetexValue(it) }
-            val existingType = stopPlaceElement.getChildText("StopPlaceType", namespace)
+            val existingType = stopPlaceElement.getChildText(NetexTypes.STOP_PLACE_TYPE, namespace)
 
             val parentSiteRef = stopPlaceElement.getChild(NetexTypes.PARENT_SITE_REF, namespace)
             val parentRef = parentSiteRef?.getAttributeValue("ref")
