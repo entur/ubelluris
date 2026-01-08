@@ -48,7 +48,7 @@ class StopPlacePurgingEntitySelector(val stopPlacePurgingRepository: StopPlacePu
 
         val stopPlaceEntities = activeEntitiesMap[NetexTypes.STOP_PLACE]
         if (stopPlaceEntities != null) {
-            val finalStopPlaces = stopPlaceEntities.filter { (stopPlaceId, entity) ->
+            val finalStopPlaces = stopPlaceEntities.filter { (stopPlaceId) ->
                 val children = stopPlacePurgingRepository.parentSiteRefsPerStopPlace[stopPlaceId]
                 if (children != null) {
                     val remainingChildren = children.filter { childId ->

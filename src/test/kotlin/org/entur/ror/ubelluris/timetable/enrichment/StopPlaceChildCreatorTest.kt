@@ -415,6 +415,7 @@ class StopPlaceChildCreatorTest {
             parentRef = "SAM:StopPlace:1000_parent"
         )
 
+        // Verify original StopPlace is not modified
         assertThat(originalStopPlace.getAttributeValue("id")).isEqualTo("SAM:StopPlace:1000")
         assertThat(originalStopPlace.getChild("TransportMode", namespace)).isNull()
         assertThat(originalStopPlace.getChild("ParentSiteRef", namespace)).isNull()
@@ -422,5 +423,19 @@ class StopPlaceChildCreatorTest {
         val originalQuays = originalStopPlace.getChild("quays", namespace)!!
             .getChildren("Quay", namespace)
         assertThat(originalQuays).hasSize(originalQuayCount)
+
+        // Verify child StopPlace modified
+        assertThat(child.getAttributeValue("id")).isEqualTo("SAM:StopPlace:1000_tram")
+        assertThat(child.getChildText("TransportMode", namespace)).isEqualTo("tram")
+
+        val childParentSiteRef = child.getChild("ParentSiteRef", namespace)
+        assertThat(childParentSiteRef).isNotNull
+        assertThat(childParentSiteRef!!.getAttributeValue("ref")).isEqualTo("SAM:StopPlace:1000_parent")
+
+        val childQuays = child.getChild("quays", namespace)!!.getChildren("Quay", namespace)
+        assertThat(childQuays)
+            .hasSize(1)
+            .extracting { it.getAttributeValue("id") }
+            .containsExactly("SAM:Quay:50001")
     }
 }
