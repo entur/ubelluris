@@ -78,9 +78,9 @@ class TextTrimmingHandlerTest {
         handler.endElement(null, "Name", "Name", writer)
 
         argumentCaptor<CharArray>().apply {
-            verify(writer).characters(capture(), eq(0), eq(12))
+            verify(writer).characters(capture(), eq(0), eq(11))
 
-            val transformedContent = String(firstValue, 0, 12)
+            val transformedContent = String(firstValue, 0, 11)
 
             assertThat(transformedContent).isEqualTo("Test  Value")
         }
