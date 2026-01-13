@@ -9,12 +9,13 @@ import org.entur.ror.ubelluris.timetable.TimetableProcessor
 import org.entur.ror.ubelluris.timetable.config.TimetableConfig
 import org.entur.ror.ubelluris.timetable.fetch.HttpTimetableFetcher
 import java.io.File
+import kotlin.system.exitProcess
 
 fun main(args: Array<String>) {
 
     if (args.size != 2) {
         printHelp()
-        return
+        exitProcess(1)
     }
 
     val cliConfig = File(args[0])
