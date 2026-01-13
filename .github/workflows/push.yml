@@ -31,3 +31,26 @@ jobs:
             ${{ runner.os }}-
       - name: Run maven build
         run: mvn verify
+      - uses: actions/upload-artifact@v4.6.2
+        with:
+          path: target
+  docker-lint:
+    needs: [maven-verify]
+    uses: entur/gha-docker/.github/workflows/lint.yml@v1
+    with:
+      ignore: DL3018
+  docker-build:
+    if: github.repository_owner == 'entur' && github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: [maven-verify]
+    uses: entur/gha-docker/.github/workflows/build.yml@v1
+    with:
+      build_artifact_name: artifact
+      build_artifact_path: target
+  docker-push:
+    needs: [docker-build]
+    uses: entur/gha-docker/.github/workflows/push.yml@v1
+  docker-scan:
+    needs: [ docker-build ]
+    uses: entur/gha-security/.github/workflows/docker-scan.yml@v2
+    with:
+      image_artifact: ${{ needs.docker-build.outputs.image_artifact }}
