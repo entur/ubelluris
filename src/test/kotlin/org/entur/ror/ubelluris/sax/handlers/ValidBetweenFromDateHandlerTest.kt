@@ -11,10 +11,11 @@ import org.xml.sax.Attributes
 import java.time.Clock
 import java.time.LocalDateTime
 import java.time.ZoneId
+import java.time.ZoneOffset
 
 class ValidBetweenFromDateHandlerTest {
 
-    private val zoneId = ZoneId.systemDefault()
+    private val zoneId = ZoneId.of(ZoneOffset.UTC.id)
     private val fixedTime = LocalDateTime.of(2020, 1, 1, 12, 0, 0)
     private val clock = Clock.fixed(
         fixedTime.atZone(zoneId).toInstant(),
@@ -33,12 +34,13 @@ class ValidBetweenFromDateHandlerTest {
         handler.characters(oldContent, 0, oldContent.size, writer)
         handler.endElement(null, "FromDate", "FromDate", writer)
 
-        argumentCaptor<CharArray>().apply {
-            verify(writer).characters(capture(), eq(0), eq(25))
+        val expected = "2020-01-01T12:00:00${offsetString()}"
 
-            val transformed = String(firstValue, 0, 25)
-            assertThat(transformed)
-                .isEqualTo("2020-01-01T12:00:00${offsetString()}")
+        argumentCaptor<CharArray>().apply {
+            verify(writer).characters(capture(), eq(0), eq(expected.length))
+
+            val transformed = String(firstValue, 0, expected.length)
+            assertThat(transformed).isEqualTo(expected)
         }
     }
 
