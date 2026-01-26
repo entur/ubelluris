@@ -1,5 +1,6 @@
 package org.entur.ror.ubelluris
 
+import org.entur.ror.ubelluris.config.ApiKeys
 import org.entur.ror.ubelluris.config.JsonConfig
 import org.entur.ror.ubelluris.file.HttpFileFetcher
 import org.entur.ror.ubelluris.filter.FilterService
@@ -24,11 +25,13 @@ fun main(args: Array<String>) {
             JsonConfig.loadCliConfig(inputStream)
         }
 
+    val apiKeys = ApiKeys.fromEnvironment()
+
     val blacklistFilePath = args[1]
 
     val timetableConfig = TimetableConfig(
         apiUrl = cliConfig.timetableDataUrl,
-        apiKey = cliConfig.timetableDataApiKey,
+        apiKey = apiKeys.timetableDataApiKey,
         providers = cliConfig.timetableProviders,
         modeFilter = setOf(
             TransportMode.TRAM,
@@ -41,7 +44,7 @@ fun main(args: Array<String>) {
     val timetableProcessor = TimetableProcessor(timetableFetcher, timetableConfig)
 
     UbellurisService(
-        fetcher = HttpFileFetcher("${cliConfig.stopsDataUrl}${cliConfig.stopsDataApiKey}"),
+        fetcher = HttpFileFetcher("${cliConfig.stopsDataUrl}${apiKeys.stopsDataApiKey}"),
         processor = FilterService(
             cliConfig = cliConfig,
             timetableProcessor = timetableProcessor,

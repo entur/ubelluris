@@ -391,6 +391,52 @@ class StopPlaceChildCreatorTest {
     }
 
     @Test
+    fun shouldSetStopPlaceTypeBasedOnTransportMode() {
+        val xml = """
+            <StopPlace xmlns="http://www.netex.org.uk/netex" id="SAM:StopPlace:1000" version="1">
+              <TransportMode>bus</TransportMode>
+              <StopPlaceType>onstreetBus</StopPlaceType>
+              <quays>
+                <Quay id="SAM:Quay:50001"/>
+              </quays>
+            </StopPlace>
+        """.trimIndent()
+
+        val originalStopPlace = SAXBuilder().build(StringReader(xml)).rootElement
+
+        val tramChild = stopPlaceChildCreator.createChildStopPlace(
+            originalStopPlace = originalStopPlace,
+            childId = "SAM:StopPlace:1000_tram",
+            mode = TransportMode.TRAM,
+            quayIds = listOf("SAM:Quay:50001"),
+            namespace = namespace,
+            parentRef = "SAM:StopPlace:1000_parent"
+        )
+
+        val waterChild = stopPlaceChildCreator.createChildStopPlace(
+            originalStopPlace = originalStopPlace,
+            childId = "SAM:StopPlace:1000_water",
+            mode = TransportMode.WATER,
+            quayIds = listOf("SAM:Quay:50001"),
+            namespace = namespace,
+            parentRef = "SAM:StopPlace:1000_parent"
+        )
+
+        val busChild = stopPlaceChildCreator.createChildStopPlace(
+            originalStopPlace = originalStopPlace,
+            childId = "SAM:StopPlace:1000_bus",
+            mode = TransportMode.BUS,
+            quayIds = listOf("SAM:Quay:50001"),
+            namespace = namespace,
+            parentRef = "SAM:StopPlace:1000_parent"
+        )
+
+        assertThat(tramChild.getChildText("StopPlaceType", namespace)).isEqualTo("onstreetTram")
+        assertThat(waterChild.getChildText("StopPlaceType", namespace)).isEqualTo("ferryStop")
+        assertThat(busChild.getChildText("StopPlaceType", namespace)).isEqualTo("onstreetBus")
+    }
+
+    @Test
     fun shouldNotModifyOriginalStopPlace() {
         val xml = """
             <StopPlace xmlns="http://www.netex.org.uk/netex" id="SAM:StopPlace:1000" version="1">
@@ -415,7 +461,6 @@ class StopPlaceChildCreatorTest {
             parentRef = "SAM:StopPlace:1000_parent"
         )
 
-        // Verify original StopPlace is not modified
         assertThat(originalStopPlace.getAttributeValue("id")).isEqualTo("SAM:StopPlace:1000")
         assertThat(originalStopPlace.getChild("TransportMode", namespace)).isNull()
         assertThat(originalStopPlace.getChild("ParentSiteRef", namespace)).isNull()
@@ -424,7 +469,6 @@ class StopPlaceChildCreatorTest {
             .getChildren("Quay", namespace)
         assertThat(originalQuays).hasSize(originalQuayCount)
 
-        // Verify child StopPlace modified
         assertThat(child.getAttributeValue("id")).isEqualTo("SAM:StopPlace:1000_tram")
         assertThat(child.getChildText("TransportMode", namespace)).isEqualTo("tram")
 

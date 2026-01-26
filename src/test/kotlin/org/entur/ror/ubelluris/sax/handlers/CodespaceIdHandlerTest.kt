@@ -18,7 +18,7 @@ class CodespaceIdHandlerTest {
     private val writer = mock<DelegatingXMLElementWriter>()
 
     @Test
-    fun testCodespaceIdHandler() {
+    fun shouldReplaceCodespaceId() {
         val attrs: Attributes = mock()
         whenever(attrs.getValue("id")).thenReturn("SE:050")
 

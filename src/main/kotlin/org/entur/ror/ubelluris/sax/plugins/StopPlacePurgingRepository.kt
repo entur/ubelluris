@@ -7,6 +7,7 @@ class StopPlacePurgingRepository(
     val quaysPerStopPlace: MutableMap<String, MutableSet<QuayData>> = mutableMapOf(),
     val parentSiteRefsPerStopPlace: MutableMap<String, MutableSet<String>> = mutableMapOf(),
     val childStopPlaces: MutableSet<String> = mutableSetOf(),
+    val illegalPublicCodes: List<String> = listOf("*", "-")
 ) {
 
     fun addEntityId(entityId: String) {

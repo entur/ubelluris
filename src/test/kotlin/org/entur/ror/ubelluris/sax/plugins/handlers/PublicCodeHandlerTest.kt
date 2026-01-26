@@ -5,6 +5,7 @@ import org.entur.ror.ubelluris.data.TestDataFactory.defaultEntity
 import org.entur.ror.ubelluris.model.NetexTypes
 import org.entur.ror.ubelluris.sax.plugins.StopPlacePurgingParsingContext
 import org.entur.ror.ubelluris.sax.plugins.StopPlacePurgingRepository
+import org.entur.ror.ubelluris.sax.plugins.data.QuayData
 import org.junit.jupiter.api.Test
 
 class PublicCodeHandlerTest {
@@ -34,6 +35,45 @@ class PublicCodeHandlerTest {
         publicCodeHandler.endElement(context, quayEntity)
 
         assertThat(stopPlacePurgingRepository.entityIds).isEmpty()
+    }
+
+    @Test
+    fun shouldAddQuayToStopPlaceWhenParentExists() {
+        val parentEntity = defaultEntity(id = "stopPlaceId", type = NetexTypes.STOP_PLACE)
+        val quayEntity = defaultEntity(id = "quayId", type = NetexTypes.QUAY, parent = parentEntity)
+
+        publicCodeHandler.startElement(context, null, quayEntity)
+        publicCodeHandler.characters(context, "A".toCharArray(), 0, 1)
+        publicCodeHandler.endElement(context, quayEntity)
+
+        assertThat(stopPlacePurgingRepository.quaysPerStopPlace)
+            .containsKey("stopPlaceId")
+        assertThat(stopPlacePurgingRepository.quaysPerStopPlace["stopPlaceId"])
+            .containsExactly(QuayData("quayId", "A"))
+    }
+
+    @Test
+    fun shouldSetQuayHasPublicCodeWhenParentExists() {
+        val parentEntity = defaultEntity(id = "stopPlaceId", type = NetexTypes.STOP_PLACE)
+        val quayEntity = defaultEntity(id = "quayId", type = NetexTypes.QUAY, parent = parentEntity)
+
+        publicCodeHandler.startElement(context, null, quayEntity)
+        publicCodeHandler.characters(context, "B".toCharArray(), 0, 1)
+        publicCodeHandler.endElement(context, quayEntity)
+
+        assertThat(context.quayHasPublicCode).isEqualTo(true)
+    }
+
+    @Test
+    fun shouldNotAddQuayToStopPlaceWhenNoParent() {
+        val quayEntity = defaultEntity(id = "quayId", type = NetexTypes.QUAY)
+
+        publicCodeHandler.startElement(context, null, quayEntity)
+        publicCodeHandler.characters(context, "A".toCharArray(), 0, 1)
+        publicCodeHandler.endElement(context, quayEntity)
+
+        assertThat(stopPlacePurgingRepository.quaysPerStopPlace).isEmpty()
+        assertThat(context.quayHasPublicCode).isEqualTo(false)
     }
 
 }

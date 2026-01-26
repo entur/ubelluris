@@ -61,11 +61,9 @@ class StopPlaceSplitterTest {
         assertThat(tramChild).isNotNull
         assertThat(busChild).isNotNull
 
-        // children have correct TransportMode
         assertThat(tramChild!!.getChildText("TransportMode", ns)).isEqualTo("tram")
         assertThat(busChild!!.getChildText("TransportMode", ns)).isEqualTo("bus")
 
-        // children reference parent
         assertThat(tramChild.getChild("ParentSiteRef", ns)?.getAttributeValue("ref"))
             .isEqualTo(parent!!.getAttributeValue("id"))
 
@@ -130,14 +128,12 @@ class StopPlaceSplitterTest {
         val stopPlaces = root.getChild("stopPlaces", ns)!!
             .getChildren("StopPlace", ns)
 
-        // children created
         val tramChild = stopPlaces.find { it.getAttributeValue("id")!!.endsWith("_tram") }
         val busChild = stopPlaces.find { it.getAttributeValue("id")!!.endsWith("_bus") }
 
         assertThat(tramChild).isNotNull
         assertThat(busChild).isNotNull
 
-        // no generated parent created
         assertThat(stopPlaces.any { it.getAttributeValue("id")!!.endsWith("_parent") })
             .isFalse
 

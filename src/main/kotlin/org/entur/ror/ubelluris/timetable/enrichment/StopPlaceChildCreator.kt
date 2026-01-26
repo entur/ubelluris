@@ -23,6 +23,15 @@ class StopPlaceChildCreator {
             ?: Element(NetexTypes.TRANSPORT_MODE, namespace).also { childStopPlace.addContent(0, it) }
         transportModeElement.text = mode.netexValue
 
+        val stopPlaceTypeElement = childStopPlace.getChild(NetexTypes.STOP_PLACE_TYPE, namespace)
+        if (stopPlaceTypeElement != null) {
+            stopPlaceTypeElement.text = when (mode) {
+                TransportMode.TRAM -> "onstreetTram"
+                TransportMode.WATER -> "ferryStop"
+                TransportMode.BUS -> stopPlaceTypeElement.text
+            }
+        }
+
         val parentSiteRef = childStopPlace.getChild(NetexTypes.PARENT_SITE_REF, namespace)
             ?: Element(NetexTypes.PARENT_SITE_REF, namespace).also {
                 val modeIndex = childStopPlace.indexOf(transportModeElement)
