@@ -24,7 +24,9 @@ class StandardImportFilterConfig(
     private val cliConfig: CliConfig,
     private val blacklistFilePath: String
 ) : FilterProfileConfiguration {
-    val stopPlacePurgingRepository = StopPlacePurgingRepository()
+    val stopPlacePurgingRepository = StopPlacePurgingRepository(
+        illegalPublicCodes = cliConfig.illegalPublicCodes
+    )
 
     override fun build(): FilterConfig {
         val parentStopPlaceAttributeSkipHandler = ParentStopPlaceAttributeSkipHandler(stopPlacePurgingRepository)

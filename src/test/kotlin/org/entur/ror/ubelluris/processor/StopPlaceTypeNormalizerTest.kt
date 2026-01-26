@@ -252,4 +252,114 @@ class StopPlaceTypeNormalizerTest {
         val result = xmlFile.readText()
         assertThat(result).contains("<StopPlaceType>onstreetBus</StopPlaceType>")
     }
+
+    @Test
+    fun shouldNormalizeStopPlaceTypeFromOtherToFerryStopForWaterMode(@TempDir tempDir: Path) {
+        val inputXml = """
+            <?xml version="1.0" encoding="UTF-8"?>
+            <PublicationDelivery xmlns="http://www.netex.org.uk/netex">
+                <dataObjects>
+                    <SiteFrame>
+                        <stopPlaces>
+                            <StopPlace id="SAM:StopPlace:1">
+                                <TransportMode>water</TransportMode>
+                                <StopPlaceType>other</StopPlaceType>
+                            </StopPlace>
+                        </stopPlaces>
+                    </SiteFrame>
+                </dataObjects>
+            </PublicationDelivery>
+        """.trimIndent()
+
+        val xmlFile = tempDir.resolve("test.xml").toFile()
+        xmlFile.writeText(inputXml)
+
+        processor.process(xmlFile)
+
+        val result = xmlFile.readText()
+        assertThat(result).contains("<TransportMode>water</TransportMode>")
+        assertThat(result).contains("<StopPlaceType>ferryStop</StopPlaceType>")
+    }
+
+    @Test
+    fun shouldNormalizeStopPlaceTypeFromOtherToOnstreetTramForTramMode(@TempDir tempDir: Path) {
+        val inputXml = """
+            <?xml version="1.0" encoding="UTF-8"?>
+            <PublicationDelivery xmlns="http://www.netex.org.uk/netex">
+                <dataObjects>
+                    <SiteFrame>
+                        <stopPlaces>
+                            <StopPlace id="SAM:StopPlace:1">
+                                <TransportMode>tram</TransportMode>
+                                <StopPlaceType>other</StopPlaceType>
+                            </StopPlace>
+                        </stopPlaces>
+                    </SiteFrame>
+                </dataObjects>
+            </PublicationDelivery>
+        """.trimIndent()
+
+        val xmlFile = tempDir.resolve("test.xml").toFile()
+        xmlFile.writeText(inputXml)
+
+        processor.process(xmlFile)
+
+        val result = xmlFile.readText()
+        assertThat(result).contains("<TransportMode>tram</TransportMode>")
+        assertThat(result).contains("<StopPlaceType>onstreetTram</StopPlaceType>")
+    }
+
+    @Test
+    fun shouldNormalizeStopPlaceTypeFromOtherToOnstreetBusForBusMode(@TempDir tempDir: Path) {
+        val inputXml = """
+            <?xml version="1.0" encoding="UTF-8"?>
+            <PublicationDelivery xmlns="http://www.netex.org.uk/netex">
+                <dataObjects>
+                    <SiteFrame>
+                        <stopPlaces>
+                            <StopPlace id="SAM:StopPlace:1">
+                                <TransportMode>bus</TransportMode>
+                                <StopPlaceType>other</StopPlaceType>
+                            </StopPlace>
+                        </stopPlaces>
+                    </SiteFrame>
+                </dataObjects>
+            </PublicationDelivery>
+        """.trimIndent()
+
+        val xmlFile = tempDir.resolve("test.xml").toFile()
+        xmlFile.writeText(inputXml)
+
+        processor.process(xmlFile)
+
+        val result = xmlFile.readText()
+        assertThat(result).contains("<TransportMode>bus</TransportMode>")
+        assertThat(result).contains("<StopPlaceType>onstreetBus</StopPlaceType>")
+    }
+
+    @Test
+    fun shouldNormalizeStopPlaceTypeFromOtherToOnstreetBusWhenNoTransportMode(@TempDir tempDir: Path) {
+        val inputXml = """
+            <?xml version="1.0" encoding="UTF-8"?>
+            <PublicationDelivery xmlns="http://www.netex.org.uk/netex">
+                <dataObjects>
+                    <SiteFrame>
+                        <stopPlaces>
+                            <StopPlace id="SAM:StopPlace:1">
+                                <StopPlaceType>other</StopPlaceType>
+                            </StopPlace>
+                        </stopPlaces>
+                    </SiteFrame>
+                </dataObjects>
+            </PublicationDelivery>
+        """.trimIndent()
+
+        val xmlFile = tempDir.resolve("test.xml").toFile()
+        xmlFile.writeText(inputXml)
+
+        processor.process(xmlFile)
+
+        val result = xmlFile.readText()
+        assertThat(result).contains("<StopPlaceType>onstreetBus</StopPlaceType>")
+    }
 }

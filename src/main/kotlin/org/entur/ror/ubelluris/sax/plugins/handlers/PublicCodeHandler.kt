@@ -31,6 +31,7 @@ class PublicCodeHandler(val stopPlacePurgingRepository: StopPlacePurgingReposito
                 parentEntityId,
                 QuayData(currentEntity.id, publicCode)
             )
+            context.quayHasPublicCode = true
         }
 
         stringBuilder.clear()

@@ -6,6 +6,7 @@ import org.entur.ror.ubelluris.model.NetexTypes
 import org.entur.ror.ubelluris.sax.plugins.handlers.BlacklistQuayHandler
 import org.entur.ror.ubelluris.sax.plugins.handlers.ParentSiteRefHandler
 import org.entur.ror.ubelluris.sax.plugins.handlers.PublicCodeHandler
+import org.entur.ror.ubelluris.sax.plugins.handlers.QuayTrackingHandler
 import org.xml.sax.Attributes
 
 class StopPlacePurgingPlugin(
@@ -18,9 +19,13 @@ class StopPlacePurgingPlugin(
     private val elementHandlers: Map<String, StopPlacePurgingDataCollector> by lazy {
         mapOf(
             NetexTypes.PUBLIC_CODE to PublicCodeHandler(stopPlacePurgingRepository),
-            NetexTypes.QUAY to BlacklistQuayHandler(stopPlacePurgingRepository, java.io.File(blacklistFilePath)),
+            NetexTypes.QUAY to QuayTrackingHandler(stopPlacePurgingRepository),
             NetexTypes.PARENT_SITE_REF to ParentSiteRefHandler(stopPlacePurgingRepository)
         )
+    }
+
+    private val blacklistQuayHandler by lazy {
+        BlacklistQuayHandler(stopPlacePurgingRepository, java.io.File(blacklistFilePath))
     }
 
     override fun getName(): String = TODO("Not yet implemented")
@@ -32,6 +37,9 @@ class StopPlacePurgingPlugin(
     override fun startElement(elementName: String, attributes: Attributes?, currentEntity: Entity?) {
         currentEntity?.let { entity ->
             elementHandlers[elementName]?.startElement(parsingContext, attributes, entity)
+            if (elementName == NetexTypes.QUAY) {
+                blacklistQuayHandler.startElement(parsingContext, attributes, entity)
+            }
         }
     }
 

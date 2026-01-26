@@ -32,11 +32,30 @@ class StopPlacePurgingEntitySelector(val stopPlacePurgingRepository: StopPlacePu
                             quay.quayId !in stopPlacePurgingRepository.entityIds
                         }
 
-                        if (stopPlacePurgingRepository.isChildStopPlace(entity.key) && remainingQuays.isEmpty()) {
-                            stopPlacesToRemove.add(entity.key)
-                            return@filter false
+                        // Remove stop places with single quay with illegal public code
+                        if (remainingQuays.size == 1) {
+                            val singleQuay = remainingQuays.first()
+                            if (singleQuay.publicCode in stopPlacePurgingRepository.illegalPublicCodes) {
+                                stopPlacesToRemove.add(entity.key)
+                                return@filter false
+                            }
                         }
 
+                        // Remove stop places with no quays
+                        if (remainingQuays.isEmpty()) {
+                            // Child stop place with no quays
+                            if (stopPlacePurgingRepository.isChildStopPlace(entity.key)) {
+                                stopPlacesToRemove.add(entity.key)
+                                return@filter false
+                            }
+
+                            // Stop place that is NOT a parent (orphaned stop place)
+                            val isParent = stopPlacePurgingRepository.parentSiteRefsPerStopPlace.containsKey(entity.key)
+                            if (!isParent) {
+                                stopPlacesToRemove.add(entity.key)
+                                return@filter false
+                            }
+                        }
                         true
                     }
                 }

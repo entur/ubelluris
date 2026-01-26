@@ -4,7 +4,7 @@ import org.entur.netex.tools.lib.output.DelegatingXMLElementWriter
 import org.entur.netex.tools.lib.output.XMLElementHandler
 import org.xml.sax.Attributes
 import java.time.Clock
-import java.time.LocalDateTime
+import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 
 /**
@@ -13,7 +13,7 @@ import java.time.format.DateTimeFormatter
 class ValidBetweenFromDateHandler(
     private val clock: Clock = Clock.systemDefaultZone()
 ) : XMLElementHandler {
-    private val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss")
+    private val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ssXXX")
 
     override fun startElement(
         uri: String?,
@@ -31,7 +31,7 @@ class ValidBetweenFromDateHandler(
         length: Int,
         writer: DelegatingXMLElementWriter
     ) {
-        val timestamp = LocalDateTime.now(clock).format(formatter)
+        val timestamp = ZonedDateTime.now(clock).format(formatter)
         writer.characters(timestamp.toCharArray(), 0, timestamp.length)
     }
 

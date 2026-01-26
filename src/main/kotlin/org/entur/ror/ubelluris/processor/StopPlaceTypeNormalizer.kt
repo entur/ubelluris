@@ -56,8 +56,20 @@ class StopPlaceTypeNormalizer {
         val currentType = stopPlaceType.text?.trim()
 
         if (currentType == "other") {
-            stopPlaceType.text = "onstreetBus"
-            logger.debug("Normalized StopPlaceType 'other' -> 'onstreetBus' for ${stopPlace.getAttributeValue("id")}")
+            val transportModeValue = transportMode?.text?.trim()
+            val normalizedType = when (transportModeValue) {
+                "water" -> "ferryStop"
+                "tram" -> "onstreetTram"
+                else -> "onstreetBus"
+            }
+            stopPlaceType.text = normalizedType
+            logger.debug(
+                "Normalized StopPlaceType 'other' -> '$normalizedType' (TransportMode='$transportModeValue') for ${
+                    stopPlace.getAttributeValue(
+                        "id"
+                    )
+                }"
+            )
             return
         }
 
