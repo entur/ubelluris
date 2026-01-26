@@ -11,6 +11,8 @@ Ubelluris downloads stop place and timetable data from Trafiklab, and subsequent
 ## Running Ubelluris locally
 A minimal local setup requires Trafiklab API keys for "**Stops data**" and "**NeTEx Regional Static data**".
 
+Add ```STOPS_DATA_API_KEY=<your_stops_data_api_key>``` and ```TIMETABLE_DATA_API_KEY=<your_timetable_data_api_key>``` to environment variables.
+
 The main function takes two arguments:
 * A CLI config file
 * A txt file specifying any blacklisted quays
@@ -22,9 +24,7 @@ Running the main method in UbellurisApplication.kt with the necessary API keys w
 ```json
 {
   "stopsDataUrl": "https://urlForStopsData",
-  "stopsDataApiKey": "stopsDataApiKey",
   "timetableDataUrl": "https://urlForTimetableData",
-  "timetableDataApiKey": "timetableDataApiKey",
   "timetableProviders": [
     "provider1",
     "provider2",

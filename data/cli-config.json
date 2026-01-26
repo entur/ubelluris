@@ -1,12 +1,13 @@
 {
   "stopsDataUrl": "https://opendata.samtrafiken.se/stopsregister-netex-sweden/sweden.zip?key=",
-  "stopsDataApiKey": "foo1",
   "timetableDataUrl": "https://opendata.samtrafiken.se/netex/",
-  "timetableDataApiKey": "foo2",
   "timetableProviders": [
     "vt",
     "halland",
     "skane"
   ],
-  "illegalPublicCodes": ["*", "-"]
+  "illegalPublicCodes": [
+    "*",
+    "-"
+  ]
 }
