@@ -6,8 +6,7 @@ import org.entur.ror.ubelluris.sax.plugins.StopPlacePurgingRepository
 import org.xml.sax.Attributes
 
 /**
- * Skips writing TransportMode, StopPlaceType, and Weighting
- * for parent StopPlaces
+ * Skips TransportMode, StopPlaceType, and Weighting for parent StopPlaces
  */
 class ParentStopPlaceAttributeSkipHandler(
     private val repository: StopPlacePurgingRepository

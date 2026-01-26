@@ -159,7 +159,6 @@ class StopPlacePurgingEntitySelectorTest {
         val child1 = defaultEntity(id = "child1", type = NetexTypes.STOP_PLACE)
 
         repository.addChildStopToParent("parentStop", "child1")
-        // child1 has no quays, so it will be removed as a child with no quays
 
         setupEntities(
             mapOf(

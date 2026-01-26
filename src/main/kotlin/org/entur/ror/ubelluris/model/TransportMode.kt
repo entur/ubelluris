@@ -1,8 +1,5 @@
 package org.entur.ror.ubelluris.model
 
-/**
- * NeTEx TransportMode values
- */
 enum class TransportMode(val netexValue: String) {
     BUS("bus"),
     TRAM("tram"),

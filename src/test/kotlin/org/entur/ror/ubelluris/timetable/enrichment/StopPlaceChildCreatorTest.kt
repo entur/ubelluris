@@ -461,7 +461,6 @@ class StopPlaceChildCreatorTest {
             parentRef = "SAM:StopPlace:1000_parent"
         )
 
-        // Verify original StopPlace is not modified
         assertThat(originalStopPlace.getAttributeValue("id")).isEqualTo("SAM:StopPlace:1000")
         assertThat(originalStopPlace.getChild("TransportMode", namespace)).isNull()
         assertThat(originalStopPlace.getChild("ParentSiteRef", namespace)).isNull()
@@ -470,7 +469,6 @@ class StopPlaceChildCreatorTest {
             .getChildren("Quay", namespace)
         assertThat(originalQuays).hasSize(originalQuayCount)
 
-        // Verify child StopPlace modified
         assertThat(child.getAttributeValue("id")).isEqualTo("SAM:StopPlace:1000_tram")
         assertThat(child.getChildText("TransportMode", namespace)).isEqualTo("tram")
 

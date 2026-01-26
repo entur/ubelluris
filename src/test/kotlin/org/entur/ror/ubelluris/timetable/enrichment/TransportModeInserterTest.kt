@@ -141,12 +141,10 @@ class TransportModeInserterTest {
 
         val updatedXml = Files.readString(xmlFile)
 
-        // parent and children stops created
         assert(updatedXml.contains("_1000_parent"))
         assert(updatedXml.contains("_1000_tram"))
         assert(updatedXml.contains("_1000_bus"))
 
-        // correct transport modes on children
         assert(updatedXml.contains("<TransportMode>tram</TransportMode>"))
         assert(updatedXml.contains("<TransportMode>bus</TransportMode>"))
 
@@ -239,13 +237,10 @@ class TransportModeInserterTest {
 
         val updatedXml = Files.readString(xmlFile)
 
-        // children created
         assert(updatedXml.contains("_4000_tram"))
         assert(updatedXml.contains("_4000_bus"))
 
-        // existing parent reused (no generated parent)
         assert(!updatedXml.contains("_4000_parent"))
-
         assert(updatedXml.contains("""ParentSiteRef ref="SAM:StopPlace:PARENT""""))
     }
 

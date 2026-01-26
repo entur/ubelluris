@@ -4,9 +4,6 @@ import org.entur.ror.ubelluris.model.TransportMode
 import java.nio.file.Path
 import java.nio.file.Paths
 
-/**
- * Configuration for timetable fetching and processing
- */
 data class TimetableConfig(
     val apiUrl: String,
     val apiKey: String,

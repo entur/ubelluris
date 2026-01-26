@@ -8,7 +8,7 @@ import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 
 /**
- * Handler that replaces the ValidBetween/FromDate content with the current datetime.
+ * Handler that replaces the ValidBetween instance content with the current datetime.
  */
 class ValidBetweenFromDateHandler(
     private val clock: Clock = Clock.systemDefaultZone()
