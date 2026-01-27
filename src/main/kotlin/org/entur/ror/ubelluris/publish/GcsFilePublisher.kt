@@ -26,6 +26,6 @@ class GcsFilePublisher(
         }
 
         logger.info("Successfully uploaded filtered file to Ubelluris bucket.")
-        return Path.of("gs://${config.bucketName}/${blobName}")
+        return Path.of("${config.bucketName}/${blobName}")
     }
 }
