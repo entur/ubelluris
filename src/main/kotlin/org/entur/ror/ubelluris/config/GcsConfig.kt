@@ -3,7 +3,7 @@ package org.entur.ror.ubelluris.config
 data class GcsConfig(
     val projectId: String,
     val bucketName: String,
-    val enabled: Boolean
+    val gcsEnabled: Boolean
 ) {
     companion object {
         fun fromEnvironment(): GcsConfig {
@@ -13,7 +13,7 @@ data class GcsConfig(
                 return GcsConfig(
                     projectId = "",
                     bucketName = "",
-                    enabled = false
+                    gcsEnabled = false
                 )
             }
 
