@@ -1,7 +1,5 @@
 FROM eclipse-temurin:21-jre
-
 WORKDIR /app
-
-COPY target/ubelluris-1.0-SNAPSHOT.jar app.jar
-
-ENTRYPOINT ["java", "-jar", "/app/app.jar"]
+COPY target/lib/ lib/
+COPY target/ubelluris-*-SNAPSHOT.jar app.jar
+ENTRYPOINT ["java", "-jar", "app.jar"]
