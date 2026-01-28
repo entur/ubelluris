@@ -43,3 +43,20 @@ Running the main method in UbellurisApplication.kt with the necessary API keys w
 SE:050:Quay:0000
 SE:050:Quay:0001
 ```
+
+## Publishing to GCS Bucket
+
+Ubelluris can publish results to a Google Cloud Storage bucket.
+
+### Environment Variables
+
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `GCS_UPLOAD_ENABLED` | No | Set to `true` to enable GCS publishing (default: `false`) |
+| `GCS_PROJECT_ID` | When enabled | GCP project ID |
+| `GCS_BUCKET_NAME` | When enabled | Target GCS bucket name |
+
+### Behavior
+
+- **Enabled**: Files are uploaded to the specified GCS bucket
+- **Disabled** (default): Files are saved locally to a `results/` directory
