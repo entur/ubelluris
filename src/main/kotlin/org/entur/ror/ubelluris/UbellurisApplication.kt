@@ -1,11 +1,12 @@
 package org.entur.ror.ubelluris
 
 import org.entur.ror.ubelluris.config.ApiKeys
+import org.entur.ror.ubelluris.config.GcsConfig
 import org.entur.ror.ubelluris.config.JsonConfig
 import org.entur.ror.ubelluris.file.HttpFileFetcher
+import org.entur.ror.ubelluris.file.UbellurisBucketService
 import org.entur.ror.ubelluris.filter.FilterService
 import org.entur.ror.ubelluris.model.TransportMode
-import org.entur.ror.ubelluris.publish.LocalFilePublisher
 import org.entur.ror.ubelluris.timetable.TimetableProcessor
 import org.entur.ror.ubelluris.timetable.config.TimetableConfig
 import org.entur.ror.ubelluris.timetable.fetch.HttpTimetableFetcher
@@ -24,10 +25,11 @@ fun main(args: Array<String>) {
         .use { inputStream ->
             JsonConfig.loadCliConfig(inputStream)
         }
+    val blacklistFilePath = args[1]
 
     val apiKeys = ApiKeys.fromEnvironment()
-
-    val blacklistFilePath = args[1]
+    val gcsConfig = GcsConfig.fromEnvironment()
+    val bucketService = UbellurisBucketService(gcsConfig)
 
     val timetableConfig = TimetableConfig(
         apiUrl = cliConfig.timetableDataUrl,
@@ -50,7 +52,7 @@ fun main(args: Array<String>) {
             timetableProcessor = timetableProcessor,
             blacklistFilePath = blacklistFilePath
         ),
-        publisher = LocalFilePublisher()
+        publisher = bucketService.createPublisher()
     ).run()
 }
 
