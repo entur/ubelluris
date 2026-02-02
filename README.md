@@ -13,9 +13,11 @@ A minimal local setup requires Trafiklab API keys for "**Stops data**" and "**Ne
 
 Add ```STOPS_DATA_API_KEY=<your_stops_data_api_key>``` and ```TIMETABLE_DATA_API_KEY=<your_timetable_data_api_key>``` to environment variables.
 
-The main function takes two arguments:
-* A CLI config file
-* A txt file specifying any blacklisted quays
+The main function takes one argument:
+* Path to a .json configuration file 
+
+A second argument may be provided: 
+* Path to a .txt file specifying any blacklisted quays
 
 Running the main method in UbellurisApplication.kt with the necessary API keys will download stops data and produce a filtered result file.
 
