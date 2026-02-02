@@ -15,7 +15,7 @@ import kotlin.system.exitProcess
 
 fun main(args: Array<String>) {
 
-    if (args.size != 2) {
+    if (args.isEmpty()) {
         printHelp()
         exitProcess(1)
     }
@@ -25,7 +25,8 @@ fun main(args: Array<String>) {
         .use { inputStream ->
             JsonConfig.loadCliConfig(inputStream)
         }
-    val blacklistFilePath = args[1]
+
+    val blacklistFilePath = args.getOrElse(1) { "" }
 
     val apiKeys = ApiKeys.fromEnvironment()
     val gcsConfig = GcsConfig.fromEnvironment()
@@ -59,9 +60,10 @@ fun main(args: Array<String>) {
 fun printHelp() {
     println(
         """
-        The app takes 2 arguments:
-       - <cli-config-file-name>      : The name of the configuration file for CLI, relative to the local directory.
-       - <blacklist-quays-file-path> : Path to the blacklist quays file (e.g., processing/blacklist-quays.txt)
+        Ubelluris takes one mandatory argument:
+       - <cli-config-file-path>      : Path to the configuration file relative to the local directory (e.g. config/cli-config.json)
+       An optional argument:
+       - <blacklist-quays-file-path> : Path to the blacklist quays file (e.g. processing/blacklist-quays.txt)
     """.trimIndent()
     )
 }
