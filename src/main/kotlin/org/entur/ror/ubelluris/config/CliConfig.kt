@@ -6,6 +6,8 @@ import kotlinx.serialization.Serializable
 data class CliConfig(
     var stopsDataUrl: String,
     var timetableDataUrl: String,
+    var sourceCodespace: String,
+    var targetCodespace: String,
     var timetableProviders: List<String>,
     val illegalPublicCodes: List<String> = listOf("*", "-")
 ) {

@@ -11,7 +11,7 @@ import org.mockito.kotlin.verify
 import org.xml.sax.Attributes
 
 class XmlnsHandlerTest {
-    private val handler = XmlnsHandler()
+    private val handler = XmlnsHandler("SE:050", "SAM")
 
     private val writer = mock<DelegatingXMLElementWriter>()
 

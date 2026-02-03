@@ -5,7 +5,7 @@ import org.entur.netex.tools.lib.output.XMLElementHandler
 import org.entur.ror.ubelluris.model.NetexTypes
 import org.xml.sax.Attributes
 
-class XmlnsHandler() : XMLElementHandler {
+class XmlnsHandler(val sourceCodespace: String, val targetCodespace: String) : XMLElementHandler {
     private val contentBuffer = StringBuilder()
 
     override fun startElement(
@@ -36,7 +36,7 @@ class XmlnsHandler() : XMLElementHandler {
         qName: String?,
         writer: DelegatingXMLElementWriter
     ) {
-        val transformedContent = contentBuffer.toString().replace("SE:050", "SAM")
+        val transformedContent = contentBuffer.toString().replace(sourceCodespace, targetCodespace)
         val charArray = transformedContent.toCharArray()
         writer.characters(charArray, 0, charArray.size)
         writer.endElement(uri, NetexTypes.XML_NS, NetexTypes.XML_NS)

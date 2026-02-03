@@ -1,14 +1,15 @@
 package org.entur.ror.ubelluris.sax.handlers
 
-import org.entur.ror.ubelluris.model.NetexTypes
 import org.entur.netex.tools.lib.extensions.addNewAttribute
 import org.entur.netex.tools.lib.output.DelegatingXMLElementWriter
 import org.entur.netex.tools.lib.output.XMLElementHandler
+import org.entur.ror.ubelluris.model.NetexTypes
 import org.entur.ror.ubelluris.sax.handlers.util.AttributeReplacer
 import org.xml.sax.Attributes
 import org.xml.sax.helpers.AttributesImpl
 
 class StopPlaceParentSiteRefHandler(
+    private val attributeReplacer: AttributeReplacer
 ) : XMLElementHandler {
     override fun startElement(
         uri: String?,
@@ -17,7 +18,7 @@ class StopPlaceParentSiteRefHandler(
         attributes: Attributes?,
         writer: DelegatingXMLElementWriter
     ) {
-        val idValue = AttributeReplacer.replaceAttribute(attributes, "ref")
+        val idValue = attributeReplacer.replaceAttribute(attributes, "ref")
         val newAttributes = AttributesImpl()
         newAttributes.addNewAttribute("ref", idValue)
         newAttributes.addNewAttribute("version", "1")

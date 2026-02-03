@@ -3,6 +3,7 @@ package org.entur.ror.ubelluris.sax.handlers
 import org.assertj.core.api.Assertions.assertThat
 import org.entur.netex.tools.lib.output.DelegatingXMLElementWriter
 import org.entur.ror.ubelluris.model.NetexTypes
+import org.entur.ror.ubelluris.sax.handlers.util.AttributeReplacer
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito.mock
 import org.mockito.kotlin.argumentCaptor
@@ -13,7 +14,8 @@ import org.xml.sax.Attributes
 import org.xml.sax.helpers.AttributesImpl
 
 class StopPlaceParentSiteRefHandlerTest {
-    private val handler = StopPlaceParentSiteRefHandler()
+    private val attributeReplacer = AttributeReplacer("SE:050", "SAM")
+    private val handler = StopPlaceParentSiteRefHandler(attributeReplacer)
     private val writer = mock<DelegatingXMLElementWriter>()
 
     @Test
