@@ -8,22 +8,24 @@ import org.xml.sax.Attributes
 
 class AttributeReplacerTest {
 
+    private val attributeReplacer = AttributeReplacer("SE:050", "SAM")
+
     @Test
-    fun shouldReplaceSE050WithSAM() {
+    fun shouldReplaceSourceCodespaceWithTargetCodespace() {
         val attrs: Attributes = mock()
         whenever(attrs.getValue("id")).thenReturn("SE:050:StopPlace:123")
 
-        val result = AttributeReplacer.replaceAttribute(attrs, "id")
+        val result = attributeReplacer.replaceAttribute(attrs, "id")
 
         assertThat(result).isEqualTo("SAM:StopPlace:123")
     }
 
     @Test
-    fun shouldReturnUnchangedValueWhenSE050NotPresent() {
+    fun shouldReturnUnchangedValueWhenNoMatchOnSourceCodespaceNotPresent() {
         val attrs: Attributes = mock()
         whenever(attrs.getValue("name")).thenReturn("Some:Other:Value")
 
-        val result = AttributeReplacer.replaceAttribute(attrs, "name")
+        val result = attributeReplacer.replaceAttribute(attrs, "name")
 
         assertThat(result).isEqualTo("Some:Other:Value")
     }
@@ -33,14 +35,14 @@ class AttributeReplacerTest {
         val attrs: Attributes = mock()
         whenever(attrs.getValue("nonexistent")).thenReturn(null)
 
-        val result = AttributeReplacer.replaceAttribute(attrs, "nonexistent")
+        val result = attributeReplacer.replaceAttribute(attrs, "nonexistent")
 
         assertThat(result).isEmpty()
     }
 
     @Test
     fun shouldReturnEmptyStringWhenAttributeIsNull() {
-        val result = AttributeReplacer.replaceAttribute(null, "id")
+        val result = attributeReplacer.replaceAttribute(null, "id")
 
         assertThat(result).isEmpty()
     }
@@ -50,18 +52,29 @@ class AttributeReplacerTest {
         val attrs: Attributes = mock()
         whenever(attrs.getValue("id")).thenReturn("")
 
-        val result = AttributeReplacer.replaceAttribute(attrs, "id")
+        val result = attributeReplacer.replaceAttribute(attrs, "id")
 
         assertThat(result).isEmpty()
     }
 
     @Test
-    fun shouldHandleAttributeWithOnlySE050Value() {
+    fun shouldHandleAttributeWithOnlySourceCodespaceValueMatch() {
         val attrs: Attributes = mock()
         whenever(attrs.getValue("id")).thenReturn("SE:050")
 
-        val result = AttributeReplacer.replaceAttribute(attrs, "id")
+        val result = attributeReplacer.replaceAttribute(attrs, "id")
 
         assertThat(result).isEqualTo("SAM")
+    }
+
+    @Test
+    fun shouldReplaceWithCustomSourceAndTarget() {
+        val customReplacer = AttributeReplacer("NO:123", "NSR")
+        val attrs: Attributes = mock()
+        whenever(attrs.getValue("id")).thenReturn("NO:123:StopPlace:456")
+
+        val result = customReplacer.replaceAttribute(attrs, "id")
+
+        assertThat(result).isEqualTo("NSR:StopPlace:456")
     }
 }

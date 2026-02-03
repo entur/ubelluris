@@ -9,6 +9,7 @@ import org.xml.sax.Attributes
 import org.xml.sax.helpers.AttributesImpl
 
 class StopPlaceIdHandler(
+    private val attributeReplacer: AttributeReplacer,
     private val parentStopPlaceAttributeSkipHandler: ParentStopPlaceAttributeSkipHandler? = null
 ) : XMLElementHandler {
     override fun startElement(
@@ -19,7 +20,7 @@ class StopPlaceIdHandler(
         writer: DelegatingXMLElementWriter
     ) {
         val originalId = attributes?.getValue("id")
-        val idValue = AttributeReplacer.replaceAttribute(attributes, "id")
+        val idValue = attributeReplacer.replaceAttribute(attributes, "id")
         val newAttributes = AttributesImpl()
         newAttributes.addNewAttribute("id", idValue)
         newAttributes.addNewAttribute("version", "1")

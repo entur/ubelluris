@@ -9,6 +9,7 @@ import org.xml.sax.Attributes
 import org.xml.sax.helpers.AttributesImpl
 
 class StopPlaceQuayHandler(
+    private val attributeReplacer: AttributeReplacer
 ) : XMLElementHandler {
     override fun startElement(
         uri: String?,
@@ -17,7 +18,7 @@ class StopPlaceQuayHandler(
         attributes: Attributes?,
         writer: DelegatingXMLElementWriter
     ) {
-        val idValue = AttributeReplacer.replaceAttribute(attributes, "id")
+        val idValue = attributeReplacer.replaceAttribute(attributes, "id")
         val newAttributes = AttributesImpl()
         newAttributes.addNewAttribute("id", idValue)
         newAttributes.addNewAttribute("version", "1")

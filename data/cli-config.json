@@ -1,6 +1,8 @@
 {
   "stopsDataUrl": "https://opendata.samtrafiken.se/stopsregister-netex-sweden/sweden.zip?key=",
   "timetableDataUrl": "https://opendata.samtrafiken.se/netex/",
+  "sourceCodespace": "SE:050",
+  "targetCodespace": "SAM",
   "timetableProviders": [
     "vt",
     "halland",
