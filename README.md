@@ -27,6 +27,8 @@ Running the main method in UbellurisApplication.kt with the necessary API keys w
 {
   "stopsDataUrl": "https://urlForStopsData",
   "timetableDataUrl": "https://urlForTimetableData",
+  "sourceCodespace": "replaceThis",
+  "targetCodespace": "withThis",
   "timetableProviders": [
     "provider1",
     "provider2",
