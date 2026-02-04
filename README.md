@@ -34,6 +34,10 @@ Running the main method in UbellurisApplication.kt with the necessary API keys w
     "provider2",
     "provider3"
   ],
+  "transportModes": [
+    "tram",
+    "water"
+  ],
   "illegalPublicCodes": [
     "*",
     "-"
