@@ -6,7 +6,6 @@ import org.entur.ror.ubelluris.config.JsonConfig
 import org.entur.ror.ubelluris.file.HttpFileFetcher
 import org.entur.ror.ubelluris.file.UbellurisBucketService
 import org.entur.ror.ubelluris.filter.FilterService
-import org.entur.ror.ubelluris.model.TransportMode
 import org.entur.ror.ubelluris.timetable.TimetableProcessor
 import org.entur.ror.ubelluris.timetable.config.TimetableConfig
 import org.entur.ror.ubelluris.timetable.fetch.HttpTimetableFetcher
@@ -36,10 +35,7 @@ fun main(args: Array<String>) {
         apiUrl = cliConfig.timetableDataUrl,
         apiKey = apiKeys.timetableDataApiKey,
         providers = cliConfig.timetableProviders,
-        modeFilter = setOf(
-            TransportMode.TRAM,
-            TransportMode.WATER
-        ),
+        modeFilter = cliConfig.transportModes.toSet(),
         blacklist = emptyMap()
     )
 
