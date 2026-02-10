@@ -19,8 +19,6 @@ class TimetableProcessorTest {
     lateinit var tempDir: Path
 
     private val config = TimetableConfig(
-        apiUrl = "timetableUrl",
-        apiKey = "timetableKey",
         providers = listOf("provider1"),
         modeFilter = setOf(TransportMode.TRAM, TransportMode.WATER),
         blacklist = emptyMap(),

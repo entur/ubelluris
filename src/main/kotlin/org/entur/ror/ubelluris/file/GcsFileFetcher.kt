@@ -1,18 +1,16 @@
 package org.entur.ror.ubelluris.file
 
+import com.google.cloud.storage.Storage
 import org.slf4j.LoggerFactory
-import java.net.URI
-import java.net.http.HttpClient
-import java.net.http.HttpRequest
-import java.net.http.HttpResponse
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.StandardOpenOption
 import java.time.LocalDate
 import java.util.zip.ZipInputStream
 
-class HttpFileFetcher(
-    private val url: String,
+class GcsFileFetcher(
+    private val storage: Storage,
+    private val inputBucketName: String,
     private val downloadDir: Path = Path.of("downloads")
 ) : FileFetcher {
     private val logger = LoggerFactory.getLogger(javaClass)
@@ -28,22 +26,13 @@ class HttpFileFetcher(
             return outputPath
         }
 
-        logger.info("No existing download for $today found. Downloading from $url...")
+        val blobPath = "${today.year}/${"%02d".format(today.monthValue)}/${"%02d".format(today.dayOfMonth)}/sweden.zip"
+        logger.info("Fetching stops data from GCS: $inputBucketName/$blobPath")
 
-        val client = HttpClient.newHttpClient()
-        val request = HttpRequest.newBuilder()
-            .uri(URI.create(url))
-            .header("Accept-Encoding", "gzip")
-            .GET()
-            .build()
+        val blob = storage.get(inputBucketName, blobPath)
+            ?: error("Blob not found: $inputBucketName/$blobPath")
 
-        val response = client.send(request, HttpResponse.BodyHandlers.ofByteArray())
-
-        if (response.statusCode() != 200) {
-            error("Failed to fetch file. HTTP ${response.statusCode()}: ${String(response.body())}")
-        }
-
-        val zipBytes = response.body()
+        val zipBytes = blob.getContent()
 
         ZipInputStream(zipBytes.inputStream()).use { zip ->
             var entry = zip.nextEntry
@@ -55,7 +44,7 @@ class HttpFileFetcher(
                         StandardOpenOption.CREATE,
                         StandardOpenOption.TRUNCATE_EXISTING
                     )
-                    logger.info("Downloaded and saved to: $outputPath")
+                    logger.info("Extracted and saved to: $outputPath")
                     return outputPath
                 }
                 entry = zip.nextEntry

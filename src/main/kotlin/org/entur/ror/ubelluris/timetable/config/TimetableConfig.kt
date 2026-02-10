@@ -5,12 +5,8 @@ import java.nio.file.Path
 import java.nio.file.Paths
 
 data class TimetableConfig(
-    val apiUrl: String,
-    val apiKey: String,
     val providers: List<String>,
     val modeFilter: Set<TransportMode>,
     val blacklist: Map<String, List<String>>,
-    val cacheDir: Path = Paths.get("downloads"),
     val helperDir: Path = Paths.get("transport-mode-helpers")
-) {
-}
+)
