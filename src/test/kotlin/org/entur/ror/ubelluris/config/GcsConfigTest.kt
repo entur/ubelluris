@@ -10,11 +10,13 @@ class GcsConfigTest {
         val config = GcsConfig(
             projectId = "test-project",
             bucketName = "test-bucket",
+            inputBucketName = "test-input-bucket",
             gcsEnabled = true
         )
 
         assertThat(config.gcsEnabled).isEqualTo(true)
         assertThat(config.projectId).isEqualTo("test-project")
         assertThat(config.bucketName).isEqualTo("test-bucket")
+        assertThat(config.inputBucketName).isEqualTo("test-input-bucket")
     }
 }

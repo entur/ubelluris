@@ -21,6 +21,7 @@ class GcsFilePublisherTest {
     private val config = GcsConfig(
         "test-project",
         "test-bucket",
+        "test-input-bucket",
         true
     )
 

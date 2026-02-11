@@ -1,14 +1,13 @@
 package org.entur.ror.ubelluris
 
-import org.entur.ror.ubelluris.config.ApiKeys
 import org.entur.ror.ubelluris.config.GcsConfig
 import org.entur.ror.ubelluris.config.JsonConfig
-import org.entur.ror.ubelluris.file.HttpFileFetcher
+import org.entur.ror.ubelluris.file.GcsFileFetcher
 import org.entur.ror.ubelluris.file.UbellurisBucketService
 import org.entur.ror.ubelluris.filter.FilterService
 import org.entur.ror.ubelluris.timetable.TimetableProcessor
 import org.entur.ror.ubelluris.timetable.config.TimetableConfig
-import org.entur.ror.ubelluris.timetable.fetch.HttpTimetableFetcher
+import org.entur.ror.ubelluris.timetable.fetch.GcsTimetableFetcher
 import java.io.File
 import kotlin.system.exitProcess
 
@@ -27,23 +26,21 @@ fun main(args: Array<String>) {
 
     val blacklistFilePath = args.getOrElse(1) { "" }
 
-    val apiKeys = ApiKeys.fromEnvironment()
     val gcsConfig = GcsConfig.fromEnvironment()
     val bucketService = UbellurisBucketService(gcsConfig)
+    val storage = bucketService.createStorage()
 
     val timetableConfig = TimetableConfig(
-        apiUrl = cliConfig.timetableDataUrl,
-        apiKey = apiKeys.timetableDataApiKey,
         providers = cliConfig.timetableProviders,
         modeFilter = cliConfig.transportModes.toSet(),
         blacklist = emptyMap()
     )
 
-    val timetableFetcher = HttpTimetableFetcher(timetableConfig)
+    val timetableFetcher = GcsTimetableFetcher(timetableConfig, storage, gcsConfig.inputBucketName)
     val timetableProcessor = TimetableProcessor(timetableFetcher, timetableConfig)
 
     UbellurisService(
-        fetcher = HttpFileFetcher("${cliConfig.stopsDataUrl}${apiKeys.stopsDataApiKey}"),
+        fetcher = GcsFileFetcher(storage, gcsConfig.inputBucketName),
         processor = FilterService(
             cliConfig = cliConfig,
             timetableProcessor = timetableProcessor,
@@ -63,4 +60,3 @@ fun printHelp() {
     """.trimIndent()
     )
 }
-

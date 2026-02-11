@@ -1,37 +1,27 @@
 package org.entur.ror.ubelluris.timetable.fetch
 
+import com.google.cloud.storage.Storage
 import org.entur.ror.ubelluris.timetable.config.TimetableConfig
 import org.entur.ror.ubelluris.timetable.model.TimetableData
 import org.jdom2.filter.Filters
 import org.jdom2.input.SAXBuilder
 import org.slf4j.LoggerFactory
-import java.net.URI
-import java.net.http.HttpClient
-import java.net.http.HttpRequest
-import java.net.http.HttpResponse
 import java.nio.file.Files
 import java.nio.file.Path
-import java.nio.file.StandardCopyOption
 import java.time.LocalDate
-import java.time.format.DateTimeFormatter
 import java.util.zip.ZipInputStream
 
-/**
- * Downloads timetable ZIPs from API, caches them, and filters for relevant transport modes
- */
-class HttpTimetableFetcher(
-    private val config: TimetableConfig
+class GcsTimetableFetcher(
+    private val config: TimetableConfig,
+    private val storage: Storage,
+    private val inputBucketName: String
 ) : TimetableFetcher {
 
     private val logger = LoggerFactory.getLogger(javaClass)
-    private val httpClient: HttpClient = HttpClient.newBuilder()
-        .followRedirects(HttpClient.Redirect.NORMAL)
-        .build()
 
     override fun fetch(providers: List<String>): Map<String, TimetableData> {
         logger.info("Fetching timetables for providers: $providers")
 
-        Files.createDirectories(config.cacheDir)
         Files.createDirectories(config.helperDir)
 
         return providers.associateWith { provider ->
@@ -42,39 +32,19 @@ class HttpTimetableFetcher(
     private fun fetchProviderData(provider: String): TimetableData {
         logger.info("Fetching timetable data for provider: $provider")
 
-        val today = LocalDate.now().format(DateTimeFormatter.ISO_DATE)
-        val cachedZip = config.cacheDir.resolve("${today}_${provider}.zip")
+        val today = LocalDate.now()
+        val blobPath = "${today.year}/${"%02d".format(today.monthValue)}/${"%02d".format(today.dayOfMonth)}/$provider.zip"
+        logger.info("Reading timetable from GCS: $inputBucketName/$blobPath")
 
-        if (!Files.exists(cachedZip)) {
-            downloadTimetable(provider, cachedZip)
-        } else {
-            logger.info("Using cached timetable: $cachedZip")
-        }
+        val blob = storage.get(inputBucketName, blobPath)
+            ?: throw RuntimeException("Blob not found: $inputBucketName/$blobPath")
 
-        return extractAndFilter(provider, cachedZip)
+        val zipBytes = blob.getContent()
+
+        return extractAndFilter(provider, zipBytes)
     }
 
-    private fun downloadTimetable(provider: String, destination: Path) {
-        val url = "${config.apiUrl}/$provider/$provider.zip?key=${config.apiKey}"
-        logger.info("Downloading timetable from: ${url.replace(config.apiKey, "***")}")
-
-        val request = HttpRequest.newBuilder()
-            .uri(URI.create(url))
-            .header("Accept-Encoding", "gzip")
-            .GET()
-            .build()
-
-        val response = httpClient.send(request, HttpResponse.BodyHandlers.ofInputStream())
-
-        if (response.statusCode() != 200) {
-            throw RuntimeException("Failed to download timetable for $provider: HTTP ${response.statusCode()}")
-        }
-
-        Files.copy(response.body(), destination, StandardCopyOption.REPLACE_EXISTING)
-        logger.info("Downloaded timetable to: $destination")
-    }
-
-    private fun extractAndFilter(provider: String, zipFile: Path): TimetableData {
+    private fun extractAndFilter(provider: String, zipBytes: ByteArray): TimetableData {
         logger.info("Extracting and filtering timetable files for provider: $provider")
 
         val providerHelperDir = config.helperDir.resolve(provider)
@@ -84,7 +54,7 @@ class HttpTimetableFetcher(
         val modeHelperFiles = mutableListOf<Path>()
         val blacklistPatterns = config.blacklist[provider] ?: emptyList()
 
-        ZipInputStream(Files.newInputStream(zipFile)).use { zipStream ->
+        ZipInputStream(zipBytes.inputStream()).use { zipStream ->
             var entry = zipStream.nextEntry
             while (entry != null) {
                 if (!entry.isDirectory && entry.name.endsWith(".xml", ignoreCase = true)) {
