@@ -2,37 +2,34 @@
 
 Ubelluris performs a transformation and filtering job on NeTEx PublicationDelivery datasets.
 
-> Ubelluris is still a work in progress!
-> It is currently tailored to filter and transform data from Trafiklab only!
-
 ## How it works
-Ubelluris downloads stop place and timetable data from Trafiklab, and subsequently processes it to produce a filtered .xml file.
+Ubelluris fetches stop place and timetable data from a GCS (Google Cloud Storage) input bucket, and subsequently processes it to produce a filtered .xml file.
 
 ## Running Ubelluris locally
-A minimal local setup requires Trafiklab API keys for "**Stops data**" and "**NeTEx Regional Static data**".
-
-Add ```STOPS_DATA_API_KEY=<your_stops_data_api_key>``` and ```TIMETABLE_DATA_API_KEY=<your_timetable_data_api_key>``` to environment variables.
+A minimal local setup requires access to a GCS input bucket containing stop place and timetable data.
 
 The main function takes one argument:
-* Path to a .json configuration file 
+* Path to a .json configuration file
 
-A second argument may be provided: 
+A second argument may be provided:
 * Path to a .txt file specifying any blacklisted quays
 
-Running the main method in UbellurisApplication.kt with the necessary API keys will download stops data and produce a filtered result file.
+Running the main method in UbellurisApplication.kt with the necessary GCS configuration will fetch stops data and produce a filtered result file.
 
 ### cli-config file
 
 ```json
 {
-  "stopsDataUrl": "https://urlForStopsData",
-  "timetableDataUrl": "https://urlForTimetableData",
   "sourceCodespace": "replaceThis",
   "targetCodespace": "withThis",
   "timetableProviders": [
     "provider1",
     "provider2",
     "provider3"
+  ],
+  "transportModes": [
+    "tram",
+    "water"
   ],
   "illegalPublicCodes": [
     "*",
@@ -48,19 +45,21 @@ SE:050:Quay:0000
 SE:050:Quay:0001
 ```
 
-## Publishing to GCS Bucket
+## GCS Configuration
 
-Ubelluris can publish results to a Google Cloud Storage bucket.
+Ubelluris fetches input data from and can publish results to Google Cloud Storage buckets.
 
 ### Environment Variables
 
 | Variable | Required | Description |
 |----------|----------|-------------|
+| `GCS_PROJECT_ID` | Yes | GCP project ID |
+| `GCS_INPUT_BUCKET` | Yes | Source GCS bucket containing stop place and timetable data |
 | `GCS_UPLOAD_ENABLED` | No | Set to `true` to enable GCS publishing (default: `false`) |
-| `GCS_PROJECT_ID` | When enabled | GCP project ID |
-| `GCS_BUCKET_NAME` | When enabled | Target GCS bucket name |
+| `GCS_BUCKET_NAME` | When upload enabled | Target GCS bucket for publishing results |
 
 ### Behavior
 
-- **Enabled**: Files are uploaded to the specified GCS bucket
-- **Disabled** (default): Files are saved locally to a `results/` directory
+- Input data (stops and timetables) is always fetched from the `GCS_INPUT_BUCKET`
+- **Upload enabled**: Result files are uploaded to the specified `GCS_BUCKET_NAME`
+- **Upload disabled** (default): Result files are saved locally to a `results/` directory

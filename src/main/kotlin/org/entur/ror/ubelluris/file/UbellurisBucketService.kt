@@ -16,9 +16,13 @@ class UbellurisBucketService(
             .service
     }
 ) {
+    fun createStorage(): Storage {
+        return storageProvider()
+    }
+
     fun createPublisher(): FilePublisher {
         if (config.gcsEnabled) {
-            val storage = storageProvider()
+            val storage = createStorage()
             return GcsFilePublisher(config, storage)
         }
 

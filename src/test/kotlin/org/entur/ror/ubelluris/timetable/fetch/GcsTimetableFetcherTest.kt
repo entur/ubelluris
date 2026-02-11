@@ -1,43 +1,44 @@
 package org.entur.ror.ubelluris.timetable.fetch
 
+import com.google.cloud.storage.Blob
+import com.google.cloud.storage.Storage
 import org.assertj.core.api.Assertions.assertThat
 import org.entur.ror.ubelluris.model.TransportMode
 import org.entur.ror.ubelluris.timetable.config.TimetableConfig
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.io.TempDir
-import java.nio.file.Files
+import org.mockito.kotlin.eq
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.whenever
+import java.io.ByteArrayOutputStream
 import java.nio.file.Path
 import java.time.LocalDate
-import java.time.format.DateTimeFormatter
 import java.util.zip.ZipEntry
 import java.util.zip.ZipOutputStream
 
-class HttpTimetableFetcherTest {
+class GcsTimetableFetcherTest {
 
     @TempDir
     lateinit var tempDir: Path
 
+    private val storage: Storage = mock()
+
     @Test
     fun shouldFetchRelevantTimetableDataForMultipleProviders() {
-        val cacheDir = tempDir.resolve("cache")
         val helperDir = tempDir.resolve("helper")
+        val inputBucket = "test-input-bucket"
 
         val config = TimetableConfig(
-            apiUrl = "http://unused",
-            apiKey = "unused",
             providers = listOf("provider1", "provider2"),
             modeFilter = setOf(TransportMode.TRAM, TransportMode.WATER),
             blacklist = emptyMap(),
-            cacheDir = cacheDir,
             helperDir = helperDir
         )
 
-        Files.createDirectories(cacheDir)
+        val today = LocalDate.now()
+        val datePath = "${today.year}/${"%02d".format(today.monthValue)}/${"%02d".format(today.dayOfMonth)}"
 
-        val today = LocalDate.now().format(DateTimeFormatter.ISO_DATE)
-
-        createZip(
-            cacheDir.resolve("${today}_provider1.zip"),
+        val provider1Zip = createZipBytes(
             mapOf(
                 "line_p1_001.xml" to """
                 <PublicationDelivery xmlns="http://www.netex.org.uk/netex">
@@ -56,8 +57,7 @@ class HttpTimetableFetcherTest {
             )
         )
 
-        createZip(
-            cacheDir.resolve("${today}_provider2.zip"),
+        val provider2Zip = createZipBytes(
             mapOf(
                 "line_p2_001.xml" to """
                 <PublicationDelivery xmlns="http://www.netex.org.uk/netex">
@@ -76,7 +76,15 @@ class HttpTimetableFetcherTest {
             )
         )
 
-        val fetcher = HttpTimetableFetcher(config)
+        val blob1: Blob = mock()
+        whenever(blob1.getContent()).thenReturn(provider1Zip)
+        whenever(storage.get(eq(inputBucket), eq("$datePath/provider1.zip"))).thenReturn(blob1)
+
+        val blob2: Blob = mock()
+        whenever(blob2.getContent()).thenReturn(provider2Zip)
+        whenever(storage.get(eq(inputBucket), eq("$datePath/provider2.zip"))).thenReturn(blob2)
+
+        val fetcher = GcsTimetableFetcher(config, storage, inputBucket)
 
         val result = fetcher.fetch(listOf("provider1", "provider2"))
 
@@ -96,27 +104,22 @@ class HttpTimetableFetcherTest {
 
     @Test
     fun shouldHandleBlacklistedFiles() {
-        val cacheDir = tempDir.resolve("cache")
         val helperDir = tempDir.resolve("helper")
+        val inputBucket = "test-input-bucket"
 
         val config = TimetableConfig(
-            apiUrl = "http://unused",
-            apiKey = "unused",
             providers = listOf("provider1"),
             modeFilter = setOf(TransportMode.TRAM),
             blacklist = mapOf(
                 "provider1" to listOf("blacklisted_*.xml")
             ),
-            cacheDir = cacheDir,
             helperDir = helperDir
         )
 
-        Files.createDirectories(cacheDir)
+        val today = LocalDate.now()
+        val datePath = "${today.year}/${"%02d".format(today.monthValue)}/${"%02d".format(today.dayOfMonth)}"
 
-        val today = LocalDate.now().format(DateTimeFormatter.ISO_DATE)
-
-        createZip(
-            cacheDir.resolve("${today}_provider1.zip"),
+        val zipBytes = createZipBytes(
             mapOf(
                 "line_ok.xml" to """
                 <PublicationDelivery xmlns="http://www.netex.org.uk/netex">
@@ -135,7 +138,11 @@ class HttpTimetableFetcherTest {
             )
         )
 
-        val fetcher = HttpTimetableFetcher(config)
+        val blob: Blob = mock()
+        whenever(blob.getContent()).thenReturn(zipBytes)
+        whenever(storage.get(eq(inputBucket), eq("$datePath/provider1.zip"))).thenReturn(blob)
+
+        val fetcher = GcsTimetableFetcher(config, storage, inputBucket)
 
         val result = fetcher.fetch(listOf("provider1"))
         val data = result["provider1"]!!
@@ -151,25 +158,20 @@ class HttpTimetableFetcherTest {
 
     @Test
     fun shouldHandleNoLines() {
-        val cacheDir = tempDir.resolve("cache")
         val helperDir = tempDir.resolve("helper")
+        val inputBucket = "test-input-bucket"
 
         val config = TimetableConfig(
-            apiUrl = "http://unused",
-            apiKey = "unused",
             providers = listOf("provider1"),
             modeFilter = setOf(TransportMode.TRAM),
             blacklist = emptyMap(),
-            cacheDir = cacheDir,
             helperDir = helperDir
         )
 
-        Files.createDirectories(cacheDir)
+        val today = LocalDate.now()
+        val datePath = "${today.year}/${"%02d".format(today.monthValue)}/${"%02d".format(today.dayOfMonth)}"
 
-        val today = LocalDate.now().format(DateTimeFormatter.ISO_DATE)
-
-        createZip(
-            cacheDir.resolve("${today}_provider1.zip"),
+        val zipBytes = createZipBytes(
             mapOf(
                 "no_lines.xml" to """
                 <PublicationDelivery xmlns="http://www.netex.org.uk/netex">
@@ -181,7 +183,11 @@ class HttpTimetableFetcherTest {
             )
         )
 
-        val fetcher = HttpTimetableFetcher(config)
+        val blob: Blob = mock()
+        whenever(blob.getContent()).thenReturn(zipBytes)
+        whenever(storage.get(eq(inputBucket), eq("$datePath/provider1.zip"))).thenReturn(blob)
+
+        val fetcher = GcsTimetableFetcher(config, storage, inputBucket)
 
         val result = fetcher.fetch(listOf("provider1"))
         val data = result["provider1"]!!
@@ -195,25 +201,20 @@ class HttpTimetableFetcherTest {
 
     @Test
     fun shouldHandleInvalidXml() {
-        val cacheDir = tempDir.resolve("cache")
         val helperDir = tempDir.resolve("helper")
+        val inputBucket = "test-input-bucket"
 
         val config = TimetableConfig(
-            apiUrl = "http://unused",
-            apiKey = "unused",
             providers = listOf("provider1"),
             modeFilter = setOf(TransportMode.TRAM),
             blacklist = emptyMap(),
-            cacheDir = cacheDir,
             helperDir = helperDir
         )
 
-        Files.createDirectories(cacheDir)
+        val today = LocalDate.now()
+        val datePath = "${today.year}/${"%02d".format(today.monthValue)}/${"%02d".format(today.dayOfMonth)}"
 
-        val today = LocalDate.now().format(DateTimeFormatter.ISO_DATE)
-
-        createZip(
-            cacheDir.resolve("${today}_provider1.zip"),
+        val zipBytes = createZipBytes(
             mapOf(
                 "invalid.xml" to """
                 <PublicationDelivery xmlns="http://www.netex.org.uk/netex">
@@ -224,7 +225,11 @@ class HttpTimetableFetcherTest {
             )
         )
 
-        val fetcher = HttpTimetableFetcher(config)
+        val blob: Blob = mock()
+        whenever(blob.getContent()).thenReturn(zipBytes)
+        whenever(storage.get(eq(inputBucket), eq("$datePath/provider1.zip"))).thenReturn(blob)
+
+        val fetcher = GcsTimetableFetcher(config, storage, inputBucket)
 
         val result = fetcher.fetch(listOf("provider1"))
         val data = result["provider1"]!!
@@ -236,18 +241,15 @@ class HttpTimetableFetcherTest {
         assertThat(data.modeHelperFiles).isEmpty()
     }
 
-
-    private fun createZip(
-        zipPath: Path,
-        files: Map<String, String>
-    ) {
-        ZipOutputStream(Files.newOutputStream(zipPath)).use { zip ->
+    private fun createZipBytes(files: Map<String, String>): ByteArray {
+        val baos = ByteArrayOutputStream()
+        ZipOutputStream(baos).use { zip ->
             files.forEach { (name, content) ->
                 zip.putNextEntry(ZipEntry(name))
                 zip.write(content.toByteArray())
                 zip.closeEntry()
             }
         }
+        return baos.toByteArray()
     }
-
 }
