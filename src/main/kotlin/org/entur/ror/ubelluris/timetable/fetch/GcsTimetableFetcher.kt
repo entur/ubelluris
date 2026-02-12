@@ -33,7 +33,7 @@ class GcsTimetableFetcher(
         logger.info("Fetching timetable data for provider: $provider")
 
         val today = LocalDate.now()
-        val blobPath = "${today.year}/${"%02d".format(today.monthValue)}/${"%02d".format(today.dayOfMonth)}/$provider.zip"
+        val blobPath = "${today.year}/${"%02d".format(today.monthValue)}/${"%02d".format(today.dayOfMonth)}/timetable/$provider.zip"
         logger.info("Reading timetable from GCS: $inputBucketName/$blobPath")
 
         val blob = storage.get(inputBucketName, blobPath)
