@@ -78,11 +78,11 @@ class GcsTimetableFetcherTest {
 
         val blob1: Blob = mock()
         whenever(blob1.getContent()).thenReturn(provider1Zip)
-        whenever(storage.get(eq(inputBucket), eq("$datePath/provider1.zip"))).thenReturn(blob1)
+        whenever(storage.get(eq(inputBucket), eq("$datePath/timetable/provider1.zip"))).thenReturn(blob1)
 
         val blob2: Blob = mock()
         whenever(blob2.getContent()).thenReturn(provider2Zip)
-        whenever(storage.get(eq(inputBucket), eq("$datePath/provider2.zip"))).thenReturn(blob2)
+        whenever(storage.get(eq(inputBucket), eq("$datePath/timetable/provider2.zip"))).thenReturn(blob2)
 
         val fetcher = GcsTimetableFetcher(config, storage, inputBucket)
 
@@ -140,7 +140,7 @@ class GcsTimetableFetcherTest {
 
         val blob: Blob = mock()
         whenever(blob.getContent()).thenReturn(zipBytes)
-        whenever(storage.get(eq(inputBucket), eq("$datePath/provider1.zip"))).thenReturn(blob)
+        whenever(storage.get(eq(inputBucket), eq("$datePath/timetable/provider1.zip"))).thenReturn(blob)
 
         val fetcher = GcsTimetableFetcher(config, storage, inputBucket)
 
@@ -185,7 +185,7 @@ class GcsTimetableFetcherTest {
 
         val blob: Blob = mock()
         whenever(blob.getContent()).thenReturn(zipBytes)
-        whenever(storage.get(eq(inputBucket), eq("$datePath/provider1.zip"))).thenReturn(blob)
+        whenever(storage.get(eq(inputBucket), eq("$datePath/timetable/provider1.zip"))).thenReturn(blob)
 
         val fetcher = GcsTimetableFetcher(config, storage, inputBucket)
 
@@ -227,7 +227,7 @@ class GcsTimetableFetcherTest {
 
         val blob: Blob = mock()
         whenever(blob.getContent()).thenReturn(zipBytes)
-        whenever(storage.get(eq(inputBucket), eq("$datePath/provider1.zip"))).thenReturn(blob)
+        whenever(storage.get(eq(inputBucket), eq("$datePath/timetable/provider1.zip"))).thenReturn(blob)
 
         val fetcher = GcsTimetableFetcher(config, storage, inputBucket)
 

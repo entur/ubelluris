@@ -26,7 +26,7 @@ class GcsFileFetcher(
             return outputPath
         }
 
-        val blobPath = "${today.year}/${"%02d".format(today.monthValue)}/${"%02d".format(today.dayOfMonth)}/sweden.zip"
+        val blobPath = "${today.year}/${"%02d".format(today.monthValue)}/${"%02d".format(today.dayOfMonth)}/stops/sweden.zip"
         logger.info("Fetching stops data from GCS: $inputBucketName/$blobPath")
 
         val blob = storage.get(inputBucketName, blobPath)
