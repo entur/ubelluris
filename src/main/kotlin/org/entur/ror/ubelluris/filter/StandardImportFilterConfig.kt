@@ -47,6 +47,7 @@ class StandardImportFilterConfig(
                     "/PublicationDelivery/dataObjects/SiteFrame/stopPlaces/StopPlace/quays/Quay/Name",
                     "/PublicationDelivery/dataObjects/SiteFrame/stopPlaces/StopPlace/quays/Quay/ShortName",
                     "/PublicationDelivery/dataObjects/SiteFrame/stopPlaces/StopPlace/tariffZones",
+                    "/PublicationDelivery/dataObjects/SiteFrame/stopPlaces/StopPlace/ValidBetween/ToDate"
                 )
             )
             .withCustomElementHandlers(
