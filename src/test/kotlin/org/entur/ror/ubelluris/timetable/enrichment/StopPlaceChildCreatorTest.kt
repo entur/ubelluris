@@ -69,7 +69,7 @@ class StopPlaceChildCreatorTest {
         val quays = child.getChild("quays", namespace)!!.getChildren("Quay", namespace)
         assertThat(quays)
             .hasSize(1)
-            .extracting { it.getAttributeValue("id") }
+            .extracting<String> { it.getAttributeValue("id") }
             .containsExactly("SAM:Quay:50001")
     }
 
@@ -257,7 +257,7 @@ class StopPlaceChildCreatorTest {
         val quays = child.getChild("quays", namespace)!!.getChildren("Quay", namespace)
         assertThat(quays)
             .hasSize(2)
-            .extracting { it.getAttributeValue("id") }
+            .extracting<String> { it.getAttributeValue("id") }
             .containsExactlyInAnyOrder("SAM:Quay:50001", "SAM:Quay:50003")
     }
 
@@ -479,7 +479,7 @@ class StopPlaceChildCreatorTest {
         val childQuays = child.getChild("quays", namespace)!!.getChildren("Quay", namespace)
         assertThat(childQuays)
             .hasSize(1)
-            .extracting { it.getAttributeValue("id") }
+            .extracting<String> { it.getAttributeValue("id") }
             .containsExactly("SAM:Quay:50001")
     }
 }

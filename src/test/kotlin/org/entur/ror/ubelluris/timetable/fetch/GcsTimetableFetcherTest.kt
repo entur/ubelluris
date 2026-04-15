@@ -98,7 +98,7 @@ class GcsTimetableFetcherTest {
         assertThat(provider2Data.allFiles).hasSize(2)
         assertThat(provider2Data.modeHelperFiles).hasSize(2)
         assertThat(provider2Data.modeHelperFiles)
-            .extracting { it.fileName.toString() }
+            .extracting<String> { it.fileName.toString() }
             .containsExactlyInAnyOrder("line_p2_001.xml", "line_p2_002.xml")
     }
 
@@ -148,11 +148,11 @@ class GcsTimetableFetcherTest {
         val data = result["provider1"]!!
 
         assertThat(data.allFiles)
-            .extracting { it.fileName.toString() }
+            .extracting<String> { it.fileName.toString() }
             .containsExactly("line_ok.xml")
 
         assertThat(data.modeHelperFiles)
-            .extracting { it.fileName.toString() }
+            .extracting<String> { it.fileName.toString() }
             .containsExactly("line_ok.xml")
     }
 
@@ -193,7 +193,7 @@ class GcsTimetableFetcherTest {
         val data = result["provider1"]!!
 
         assertThat(data.allFiles)
-            .extracting { it.fileName.toString() }
+            .extracting<String> { it.fileName.toString() }
             .containsExactly("no_lines.xml")
 
         assertThat(data.modeHelperFiles).isEmpty()
@@ -235,7 +235,7 @@ class GcsTimetableFetcherTest {
         val data = result["provider1"]!!
 
         assertThat(data.allFiles)
-            .extracting { it.fileName.toString() }
+            .extracting<String> { it.fileName.toString() }
             .containsExactly("invalid.xml")
 
         assertThat(data.modeHelperFiles).isEmpty()

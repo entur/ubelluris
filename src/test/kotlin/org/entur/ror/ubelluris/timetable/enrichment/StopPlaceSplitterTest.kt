@@ -77,12 +77,12 @@ class StopPlaceSplitterTest {
 
         assertThat(tramQuays)
             .hasSize(1)
-            .extracting { it.getAttributeValue("id") }
+            .extracting<String> { it.getAttributeValue("id") }
             .containsOnly("SAM:Quay:50001")
 
         assertThat(busQuays)
             .hasSize(1)
-            .extracting { it.getAttributeValue("id") }
+            .extracting<String> { it.getAttributeValue("id") }
             .containsOnly("SAM:Quay:50002")
     }
 
@@ -259,7 +259,7 @@ class StopPlaceSplitterTest {
 
         assertThat(stopPlaces)
             .hasSize(1)
-            .extracting { it.getAttributeValue("id") }
+            .extracting<String> { it.getAttributeValue("id") }
             .containsExactly("SAM:StopPlace:EXISTING")
     }
 
