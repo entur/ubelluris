@@ -5,13 +5,15 @@ import java.nio.file.Path
 import java.nio.file.StandardCopyOption
 
 class LocalFilePublisher(
+    private val storagePath: Path,
     private val resultsDir: Path = Path.of("results")
 ) : FilePublisher {
 
     override fun publish(file: Path): Path {
-        Files.createDirectories(resultsDir)
+        val targetDir = resultsDir.resolve(storagePath)
+        Files.createDirectories(targetDir)
 
-        val targetFile = resultsDir.resolve(file.fileName)
+        val targetFile = targetDir.resolve(file.fileName)
 
         Files.move(
             file,

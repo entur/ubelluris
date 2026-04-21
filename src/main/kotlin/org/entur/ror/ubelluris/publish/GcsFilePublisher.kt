@@ -10,14 +10,15 @@ import java.nio.file.Path
 
 class GcsFilePublisher(
     private val config: GcsConfig,
-    private val storage: Storage
+    private val storage: Storage,
+    private val storagePath: Path
 ) : FilePublisher {
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
     override fun publish(file: Path): Path {
-        val blobName = file.fileName.toString()
-        val blobId = BlobId.of(config.bucketName, blobName)
+        val blobName = storagePath.resolve(file.fileName)
+        val blobId = BlobId.of(config.bucketName, blobName.joinToString("/"))
         val blobInfo = BlobInfo.newBuilder(blobId).build()
 
         logger.info("Uploading filtered file to Ubelluris bucket")
@@ -26,6 +27,6 @@ class GcsFilePublisher(
         }
 
         logger.info("Successfully uploaded filtered file to Ubelluris bucket.")
-        return Path.of("${config.bucketName}/${blobName}")
+        return Path.of(config.bucketName).resolve(blobName)
     }
 }

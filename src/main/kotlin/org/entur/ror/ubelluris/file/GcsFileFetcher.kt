@@ -1,32 +1,34 @@
 package org.entur.ror.ubelluris.file
 
+import com.google.cloud.storage.Blob
 import com.google.cloud.storage.Storage
 import org.slf4j.LoggerFactory
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.StandardOpenOption
-import java.time.LocalDate
 import java.util.zip.ZipInputStream
+
+fun Storage.get(bucketName: String, blobPath: Path): Blob? = this.get(bucketName, blobPath.joinToString("/"))
 
 class GcsFileFetcher(
     private val storage: Storage,
     private val inputBucketName: String,
+    private val storagePath: Path,
     private val downloadDir: Path = Path.of("downloads")
 ) : FileFetcher {
     private val logger = LoggerFactory.getLogger(javaClass)
 
     override fun fetch(): Path {
-        val today = LocalDate.now()
-        val outputPath = downloadDir.resolve("${today}_stop_places.xml")
+        val outputPath = downloadDir.resolve(storagePath).resolve("sweden_stop_places.xml")
 
         Files.createDirectories(downloadDir)
 
         if (Files.exists(outputPath)) {
-            logger.info("Found existing download for $today: $outputPath")
+            logger.info("Found existing download for $outputPath")
             return outputPath
         }
 
-        val blobPath = "${today.year}/${"%02d".format(today.monthValue)}/${"%02d".format(today.dayOfMonth)}/stops/sweden.zip"
+        val blobPath = storagePath.resolve("sweden.zip")
         logger.info("Fetching stops data from GCS: $inputBucketName/$blobPath")
 
         val blob = storage.get(inputBucketName, blobPath)
@@ -38,6 +40,7 @@ class GcsFileFetcher(
             var entry = zip.nextEntry
             while (entry != null) {
                 if (!entry.isDirectory && entry.name.endsWith(".xml")) {
+                    Files.createDirectories(outputPath.parent)
                     Files.write(
                         outputPath,
                         zip.readBytes(),
