@@ -1,14 +1,11 @@
 package org.entur.ror.ubelluris.file
 
-import com.google.cloud.storage.Blob
 import com.google.cloud.storage.Storage
 import org.slf4j.LoggerFactory
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.StandardOpenOption
 import java.util.zip.ZipInputStream
-
-fun Storage.get(bucketName: String, blobPath: Path): Blob? = this.get(bucketName, blobPath.joinToString("/"))
 
 class GcsFileFetcher(
     private val storage: Storage,
@@ -31,7 +28,7 @@ class GcsFileFetcher(
         val blobPath = storagePath.resolve("sweden.zip")
         logger.info("Fetching stops data from GCS: $inputBucketName/$blobPath")
 
-        val blob = storage.get(inputBucketName, blobPath)
+        val blob = storage.get(inputBucketName, blobPath.joinToString("/"))
             ?: error("Blob not found: $inputBucketName/$blobPath")
 
         val zipBytes = blob.getContent()
