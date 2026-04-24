@@ -9,6 +9,8 @@ import org.entur.ror.ubelluris.timetable.TimetableProcessor
 import org.entur.ror.ubelluris.timetable.config.TimetableConfig
 import org.entur.ror.ubelluris.timetable.fetch.GcsTimetableFetcher
 import java.io.File
+import java.time.LocalDate
+import kotlin.io.path.Path
 import kotlin.system.exitProcess
 
 fun main(args: Array<String>) {
@@ -30,6 +32,9 @@ fun main(args: Array<String>) {
     val bucketService = UbellurisBucketService(gcsConfig)
     val storage = bucketService.createStorage()
 
+    val today = LocalDate.now()
+    val stopPlaceStoragePath = Path("${today.year}", "%02d".format(today.monthValue), "%02d".format(today.dayOfMonth), "stops")
+
     val timetableConfig = TimetableConfig(
         providers = cliConfig.timetableProviders,
         modeFilter = cliConfig.transportModes.toSet(),
@@ -40,13 +45,13 @@ fun main(args: Array<String>) {
     val timetableProcessor = TimetableProcessor(timetableFetcher, timetableConfig)
 
     UbellurisService(
-        fetcher = GcsFileFetcher(storage, gcsConfig.inputBucketName),
+        fetcher = GcsFileFetcher(storage, gcsConfig.inputBucketName, stopPlaceStoragePath),
         processor = FilterService(
             cliConfig = cliConfig,
             timetableProcessor = timetableProcessor,
             blacklistFilePath = blacklistFilePath
         ),
-        publisher = bucketService.createPublisher()
+        publisher = bucketService.createPublisher(stopPlaceStoragePath)
     ).run()
 }
 

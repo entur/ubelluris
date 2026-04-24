@@ -7,11 +7,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.entur.ror.ubelluris.config.GcsConfig
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.io.TempDir
-import org.mockito.kotlin.any
-import org.mockito.kotlin.argumentCaptor
-import org.mockito.kotlin.mock
-import org.mockito.kotlin.verify
-import org.mockito.kotlin.whenever
+import org.mockito.kotlin.*
 import java.io.InputStream
 import java.nio.file.Files
 import java.nio.file.Path
@@ -27,15 +23,17 @@ class GcsFilePublisherTest {
 
     private val mockStorage: Storage = mock()
     private val mockBlob: Blob = mock()
+    private val storagePath = Path.of("2026", "01", "01", "stops")
 
-    private val filePublisher = GcsFilePublisher(config, mockStorage)
+    private val filePublisher = GcsFilePublisher(config, mockStorage, storagePath)
 
     @TempDir
     lateinit var tempDir: Path
 
     @Test
     fun shouldPublishFile() {
-        val xmlFile = tempDir.resolve("file_to_publish.xml")
+        val xmlFile = tempDir.resolve(storagePath).resolve("file_to_publish.xml")
+        Files.createDirectories(xmlFile.parent)
 
         Files.writeString(
             xmlFile,
@@ -56,7 +54,7 @@ class GcsFilePublisherTest {
 
         val result = filePublisher.publish(xmlFile)
 
-        assertThat(result).isEqualTo(Path.of("test-bucket/file_to_publish.xml"))
+        assertThat(result).isEqualTo(Path.of("test-bucket/2026/01/01/stops/file_to_publish.xml"))
     }
 
     @Test
@@ -73,6 +71,6 @@ class GcsFilePublisherTest {
 
         val capturedBlobInfo = blobInfoCaptor.firstValue
         assertThat(capturedBlobInfo.bucket).isEqualTo("test-bucket")
-        assertThat(capturedBlobInfo.name).isEqualTo("test_file.xml")
+        assertThat(capturedBlobInfo.name).isEqualTo("2026/01/01/stops/test_file.xml")
     }
 }

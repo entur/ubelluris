@@ -6,6 +6,7 @@ import org.entur.ror.ubelluris.config.GcsConfig
 import org.entur.ror.ubelluris.publish.FilePublisher
 import org.entur.ror.ubelluris.publish.GcsFilePublisher
 import org.entur.ror.ubelluris.publish.LocalFilePublisher
+import java.nio.file.Path
 
 class UbellurisBucketService(
     private val config: GcsConfig,
@@ -20,12 +21,12 @@ class UbellurisBucketService(
         return storageProvider()
     }
 
-    fun createPublisher(): FilePublisher {
+    fun createPublisher(storagePath: Path): FilePublisher {
         if (config.gcsEnabled) {
             val storage = createStorage()
-            return GcsFilePublisher(config, storage)
+            return GcsFilePublisher(config, storage, storagePath)
         }
 
-        return LocalFilePublisher()
+        return LocalFilePublisher(storagePath)
     }
 }
