@@ -3,5 +3,10 @@ package org.entur.ror.ubelluris.publish
 import java.nio.file.Path
 
 interface FilePublisher {
-    fun publish(file: Path): Path
+    fun publish(stopPlacePath: Path, timetablePaths: Map<String, Path>): Path
+
+    companion object {
+        const val STOPS_DIR = "stops"
+        const val TIMETABLE_DIR = "timetable"
+    }
 }

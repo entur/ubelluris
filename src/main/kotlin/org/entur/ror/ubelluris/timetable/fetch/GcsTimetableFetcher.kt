@@ -11,6 +11,8 @@ import java.nio.file.Path
 import java.time.LocalDate
 import java.util.zip.ZipInputStream
 
+
+// TODO: Replaced with "generic" GcsFileFetcher, can be removed but need to ensure tests and relevant TransportMode functionality is kept and passed over to StopPlaceFilter
 class GcsTimetableFetcher(
     private val config: TimetableConfig,
     private val storage: Storage,
@@ -84,6 +86,7 @@ class GcsTimetableFetcher(
 
         return TimetableData(
             provider = provider,
+            providerDir = providerHelperDir,
             modeHelperFiles = modeHelperFiles,
             allFiles = allFiles
         )
@@ -96,6 +99,7 @@ class GcsTimetableFetcher(
         }
     }
 
+    // TODO: Recrate this as a plugin for the timetable filter config
     private fun containsRelevantModes(xmlContent: ByteArray): Boolean {
         return try {
             val saxBuilder = SAXBuilder()

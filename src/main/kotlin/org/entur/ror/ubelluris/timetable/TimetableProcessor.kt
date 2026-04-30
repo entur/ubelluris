@@ -11,6 +11,7 @@ import org.entur.ror.ubelluris.timetable.model.QuayModeMapping
 import org.slf4j.LoggerFactory
 import java.nio.file.Path
 
+@Deprecated("This is not used anymore, will be removed in the future")
 class TimetableProcessor(
     private val timetableFetcher: TimetableFetcher,
     private val config: TimetableConfig
@@ -28,11 +29,11 @@ class TimetableProcessor(
         logger.info("Starting timetable processing for: $stopsXmlPath")
 
         try {
-            val timetableDataMap = timetableFetcher.fetch(config.providers)
+            val timetableDataMap = timetableFetcher.fetch(config.providers)  //DONE, now part of the GcsFileFetcher
 
-            val quayModeMapping = mapQuaysToTransportModes(stopsXmlPath, timetableDataMap)
+            val quayModeMapping = mapQuaysToTransportModes(stopsXmlPath, timetableDataMap) //Done, moved to plugin
 
-            val processedPath = modifyStopPlaces(stopsXmlPath, quayModeMapping)
+            val processedPath = modifyStopPlaces(stopsXmlPath, quayModeMapping) //TODO: Move to be part of the stop place processor
 
             logger.info("Timetable processing complete")
             return processedPath

@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<PublicationDelivery xmlns="http://www.netex.org.uk/netex" xmlns:ns2="http://www.opengis.net/gml/3.2" xmlns:ns3="http://www.siri.org.uk/siri" xmlns:ns4="http://www.samtrafiken.se/netex" version="1.15:NO-NeTEx-networktimetable:1.5">
+  <dataObjects>
+    <CompositeFrame version="1" id="SE:001:CompositeFrame:001">
+      <frames>
+        <ServiceFrame version="1" id="SE:001:ServiceFrame:001">
+          <routes>
+            <Route version="any" id="SE:001:Route:R-tram">
+              <LineRef ref="SE:001:Line:L-tram" version="1"/>
+            </Route>
+            <Route version="any" id="SE:001:Route:R-water">
+              <LineRef ref="SE:001:Line:L-water" version="1"/>
+            </Route>
+            <Route version="any" id="SE:001:Route:R-bus">
+              <LineRef ref="SE:001:Line:L-bus" version="1"/>
+            </Route>
+          </routes>
+          <lines>
+            <Line version="1" id="SE:001:Line:L-tram">
+              <TransportMode>tram</TransportMode>
+            </Line>
+            <Line version="1" id="SE:001:Line:L-water">
+              <TransportMode>water</TransportMode>
+            </Line>
+            <Line version="1" id="SE:001:Line:L-bus">
+              <TransportMode>bus</TransportMode>
+            </Line>
+          </lines>
+          <journeyPatterns>
+            <JourneyPattern version="any" id="SE:001:JourneyPattern:JP-tram">
+              <RouteRef ref="SE:001:Route:R-tram" version="any"/>
+              <pointsInSequence>
+                <StopPointInJourneyPattern order="1" version="any" id="SE:001:StopPointInJourneyPattern:SPIJP-tram-1">
+                  <ScheduledStopPointRef ref="SE:001:ScheduledStopPoint:101"/>
+                </StopPointInJourneyPattern>
+                <StopPointInJourneyPattern order="2" version="any" id="SE:001:StopPointInJourneyPattern:SPIJP-tram-2">
+                  <ScheduledStopPointRef ref="SE:001:ScheduledStopPoint:102"/>
+                </StopPointInJourneyPattern>
+              </pointsInSequence>
+            </JourneyPattern>
+            <JourneyPattern version="any" id="SE:001:JourneyPattern:JP-water">
+              <RouteRef ref="SE:001:Route:R-water" version="any"/>
+              <pointsInSequence>
+                <StopPointInJourneyPattern order="1" version="any" id="SE:001:StopPointInJourneyPattern:SPIJP-water-1">
+                  <ScheduledStopPointRef ref="SE:001:ScheduledStopPoint:201"/>
+                </StopPointInJourneyPattern>
+              </pointsInSequence>
+            </JourneyPattern>
+            <JourneyPattern version="any" id="SE:001:JourneyPattern:JP-bus">
+              <RouteRef ref="SE:001:Route:R-bus" version="any"/>
+              <pointsInSequence>
+                <StopPointInJourneyPattern order="1" version="any" id="SE:001:StopPointInJourneyPattern:SPIJP-bus-1">
+                  <ScheduledStopPointRef ref="SE:001:ScheduledStopPoint:301"/>
+                </StopPointInJourneyPattern>
+              </pointsInSequence>
+            </JourneyPattern>
+          </journeyPatterns>
+        </ServiceFrame>
+      </frames>
+    </CompositeFrame>
+  </dataObjects>
+</PublicationDelivery>

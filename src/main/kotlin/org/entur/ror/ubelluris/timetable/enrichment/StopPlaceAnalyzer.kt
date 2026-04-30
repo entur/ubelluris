@@ -43,7 +43,11 @@ class StopPlaceAnalyzer {
             }
 
             val quayModes = quayIds.associateWith { quayId ->
-                quayModeMapping.quayToModes[quayId]?.first() ?: return@associateWith null
+                val modes = quayModeMapping.quayToModes[quayId] ?: return@associateWith null
+                if (modes.size > 1) {
+                    logger.warn("Quay $quayId is associated with several transportModes, using first mode (${modes.first()}) of $modes")
+                }
+                modes.first()
             }.filterValues { it != null }.mapValues { it.value!! }
 
             val totalQuays = countQuays(stopPlaceElement, namespace)

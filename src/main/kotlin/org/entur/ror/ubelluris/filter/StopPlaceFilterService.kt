@@ -4,29 +4,39 @@ import org.entur.netex.tools.pipeline.app.FilterNetexApp
 import org.entur.ror.ubelluris.config.CliConfig
 import org.entur.ror.ubelluris.processor.KeyValueMigrationProcessor
 import org.entur.ror.ubelluris.processor.StopPlaceTypeNormalizer
-import org.entur.ror.ubelluris.timetable.TimetableProcessor
+import org.entur.ror.ubelluris.timetable.enrichment.StopPlaceAnalyzer
+import org.entur.ror.ubelluris.timetable.enrichment.StopPlaceSplitter
+import org.entur.ror.ubelluris.timetable.enrichment.TransportModeInserter
+import org.entur.ror.ubelluris.timetable.extraction.QuayModeMatcher
+import org.entur.ror.ubelluris.timetable.model.TimetableData
 import org.slf4j.LoggerFactory
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.StandardCopyOption
+import kotlin.io.path.Path
 
-class FilterService(
+class StopPlaceFilterService(
     val cliConfig: CliConfig,
-    private val resultsDir: Path = Path.of("results"),
-    private val timetableProcessor: TimetableProcessor? = null,
     val blacklistFilePath: String
 ) : XmlProcessor {
     private val filterConfig = StandardImportFilterConfig(cliConfig, blacklistFilePath)
+    private val resultsDir = Path(cliConfig.resultsDir)
     private val logger = LoggerFactory.getLogger(javaClass)
 
-    override fun process(inputFile: Path): Path {
+    private val quayModeMatcher = QuayModeMatcher()
+    private val stopPlaceAnalyzer = StopPlaceAnalyzer()
+    private val transportModeInserter = TransportModeInserter(StopPlaceSplitter())
+
+    fun process(inputFile: Path, timetableData: Map<String, TimetableData>): Path {
         val outputFile = resultsDir.resolve(
             inputFile.fileName.toString().replace(".xml", "_filtered.xml")
         )
-        return filter(inputFile, outputFile)
+        return filter(inputFile, outputFile, timetableData)
     }
 
-    fun filter(inputFile: Path, outputFile: Path): Path {
+    override fun process(inputFile: Path): Path = process(inputFile, emptyMap())
+
+    fun filter(inputFile: Path, outputFile: Path, timetableData: Map<String, TimetableData> = emptyMap()): Path {
         Files.createDirectories(resultsDir)
 
         val tempDir = Files.createTempDirectory("ubelluris-filter-")
@@ -35,16 +45,17 @@ class FilterService(
         val tempInputFile = tempDir.resolve(inputFile.fileName)
         Files.copy(inputFile, tempInputFile, StandardCopyOption.REPLACE_EXISTING)
 
-        if (timetableProcessor != null) {
-            logger.info("Running timetable processing")
-            try {
-                timetableProcessor.process(tempInputFile)
-                logger.info("Done running timetable processing")
-            } catch (e: Exception) {
-                logger.error("Timetable processing failed", e)
-            }
-        } else {
-            logger.info("No timetable processor configured")
+        if (timetableData.isNotEmpty()) {
+            logger.info("Running stop place enrichment from timetable data")
+            val aggregatedQuayModes = timetableData.values
+                .flatMap { it.quayModes.entries }
+                .groupBy({ it.key }, { it.value })
+                .mapValues { (_, sets) -> sets.flatten().toSet() }
+
+            val quayModeMapping = quayModeMatcher.match(tempInputFile, aggregatedQuayModes)
+            val analyses = stopPlaceAnalyzer.analyze(tempInputFile, quayModeMapping)
+            transportModeInserter.insert(tempInputFile, analyses)
+            logger.info("Done running stop place enrichment")
         }
 
         Files.list(tempDir)

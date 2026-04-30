@@ -9,14 +9,14 @@ class GcsConfigTest {
     fun shouldCreateConfigWithValuesFromConstructor() {
         val config = GcsConfig(
             projectId = "test-project",
-            bucketName = "test-bucket",
+            outputBucketName = "test-bucket",
             inputBucketName = "test-input-bucket",
             gcsEnabled = true
         )
 
         assertThat(config.gcsEnabled).isEqualTo(true)
         assertThat(config.projectId).isEqualTo("test-project")
-        assertThat(config.bucketName).isEqualTo("test-bucket")
+        assertThat(config.outputBucketName).isEqualTo("test-bucket")
         assertThat(config.inputBucketName).isEqualTo("test-input-bucket")
     }
 }

@@ -7,6 +7,6 @@ import java.nio.file.Paths
 data class TimetableConfig(
     val providers: List<String>,
     val modeFilter: Set<TransportMode>,
-    val blacklist: Map<String, List<String>>,
+    val blacklist: Map<String, List<String>>, // TODO: find a smart way to implement the provider black list, want to not read specific lines and such
     val helperDir: Path = Paths.get("transport-mode-helpers")
 )

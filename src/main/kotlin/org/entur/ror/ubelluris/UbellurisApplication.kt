@@ -4,10 +4,9 @@ import org.entur.ror.ubelluris.config.GcsConfig
 import org.entur.ror.ubelluris.config.JsonConfig
 import org.entur.ror.ubelluris.file.GcsFileFetcher
 import org.entur.ror.ubelluris.file.UbellurisBucketService
-import org.entur.ror.ubelluris.filter.FilterService
-import org.entur.ror.ubelluris.timetable.TimetableProcessor
-import org.entur.ror.ubelluris.timetable.config.TimetableConfig
-import org.entur.ror.ubelluris.timetable.fetch.GcsTimetableFetcher
+import org.entur.ror.ubelluris.filter.StopPlaceFilterService
+import org.entur.ror.ubelluris.filter.TimetableNetexProcessor
+import org.entur.ror.ubelluris.publish.LocalFilePublisher
 import java.io.File
 import java.time.LocalDate
 import kotlin.io.path.Path
@@ -33,25 +32,23 @@ fun main(args: Array<String>) {
     val storage = bucketService.createStorage()
 
     val today = LocalDate.now()
-    val stopPlaceStoragePath = Path("${today.year}", "%02d".format(today.monthValue), "%02d".format(today.dayOfMonth), "stops")
-
-    val timetableConfig = TimetableConfig(
-        providers = cliConfig.timetableProviders,
-        modeFilter = cliConfig.transportModes.toSet(),
-        blacklist = emptyMap()
-    )
-
-    val timetableFetcher = GcsTimetableFetcher(timetableConfig, storage, gcsConfig.inputBucketName)
-    val timetableProcessor = TimetableProcessor(timetableFetcher, timetableConfig)
+    val storagePath = Path("${today.year}", "%02d".format(today.monthValue), "%02d".format(today.dayOfMonth))
 
     UbellurisService(
-        fetcher = GcsFileFetcher(storage, gcsConfig.inputBucketName, stopPlaceStoragePath),
-        processor = FilterService(
+        fetcher = GcsFileFetcher(
+            storage = storage,
+            inputBucketName = gcsConfig.inputBucketName,
+            stopPlaceBlobPath = storagePath.resolve("stops/sweden.zip").joinToString("/"),
+            timetableBlobPaths = cliConfig.timetableProviders.associateWith { provider ->
+                storagePath.resolve("timetable/$provider.zip").joinToString("/")
+            }
+        ),
+        timetableProcessor = TimetableNetexProcessor(cliConfig),
+        stopPlaceProcessor = StopPlaceFilterService(
             cliConfig = cliConfig,
-            timetableProcessor = timetableProcessor,
             blacklistFilePath = blacklistFilePath
         ),
-        publisher = bucketService.createPublisher(stopPlaceStoragePath)
+        publisher = bucketService.createPublisher(storagePath, Path(cliConfig.resultsDir))
     ).run()
 }
 

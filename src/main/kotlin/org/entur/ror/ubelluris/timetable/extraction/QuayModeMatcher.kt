@@ -20,8 +20,15 @@ class QuayModeMatcher {
 
     fun match(stopsXmlPath: Path, scheduledStopPointRefs: List<ScheduledStopPointRef>): QuayModeMapping {
         logger.info("Matching ${scheduledStopPointRefs.size} ScheduledStopPointRefs to quays in stops data")
+        return matchByLocalIds(stopsXmlPath, buildRefToModeMap(scheduledStopPointRefs))
+    }
 
-        val refToModeMap = buildRefToModeMap(scheduledStopPointRefs)
+    fun match(stopsXmlPath: Path, localIdToModes: Map<String, Set<TransportMode>>): QuayModeMapping {
+        logger.info("Matching ${localIdToModes.size} local IDs to quays in stops data")
+        return matchByLocalIds(stopsXmlPath, localIdToModes)
+    }
+
+    private fun matchByLocalIds(stopsXmlPath: Path, refToModeMap: Map<String, Set<TransportMode>>): QuayModeMapping {
         logger.info("Built index of ${refToModeMap.size} unique refs")
 
         val document = saxBuilder.build(stopsXmlPath.toFile())
