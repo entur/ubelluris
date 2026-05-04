@@ -7,7 +7,12 @@ import org.assertj.core.api.Assertions.assertThat
 import org.entur.ror.ubelluris.config.GcsConfig
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.io.TempDir
-import org.mockito.kotlin.*
+import org.mockito.Mockito.mock
+import org.mockito.Mockito.times
+import org.mockito.kotlin.any
+import org.mockito.kotlin.argumentCaptor
+import org.mockito.kotlin.verify
+import org.mockito.kotlin.whenever
 import java.io.InputStream
 import java.nio.file.Files
 import java.nio.file.Path
