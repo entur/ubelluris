@@ -9,8 +9,9 @@ import org.xml.sax.Attributes
 import java.io.File
 import kotlin.collections.iterator
 
-class TransportModeToLocalScheduledStopPointMapper(private val transportModes: List<TransportMode>) : AbstractNetexPlugin() {
-
+class TransportModeToLocalScheduledStopPointMapper(
+    private val transportModes: List<TransportMode>,
+) : AbstractNetexPlugin() {
     private val log = LoggerFactory.getLogger(javaClass)
 
     private val modeTextBuffer = StringBuilder()
@@ -22,17 +23,21 @@ class TransportModeToLocalScheduledStopPointMapper(private val transportModes: L
 
     override fun getName(): String = javaClass.name
 
-    override fun getDescription(): String =
-        "Extracts provider stop point IDs and their transport modes from timetable files"
+    override fun getDescription(): String = "Extracts provider stop point IDs and their transport modes from timetable files"
 
-    override fun getSupportedElementTypes() = setOf(
-        "${NetexTypes.ROUTE}/${NetexTypes.LINE_REF}",
-        "${NetexTypes.LINE}/${NetexTypes.TRANSPORT_MODE}",
-        "${NetexTypes.JOURNEY_PATTERN}/${NetexTypes.ROUTE_REF}",
-        "${NetexTypes.STOP_POINT_IN_JOURNEY_PATTERN}/${NetexTypes.SCHEDULED_STOP_POINT_REF}",
-    )
+    override fun getSupportedElementTypes() =
+        setOf(
+            "${NetexTypes.ROUTE}/${NetexTypes.LINE_REF}",
+            "${NetexTypes.LINE}/${NetexTypes.TRANSPORT_MODE}",
+            "${NetexTypes.JOURNEY_PATTERN}/${NetexTypes.ROUTE_REF}",
+            "${NetexTypes.STOP_POINT_IN_JOURNEY_PATTERN}/${NetexTypes.SCHEDULED_STOP_POINT_REF}",
+        )
 
-    override fun startElement(elementName: String, attributes: Attributes?, currentEntity: Entity?) {
+    override fun startElement(
+        elementName: String,
+        attributes: Attributes?,
+        currentEntity: Entity?,
+    ) {
         when (elementName) {
             NetexTypes.LINE_REF -> {
                 val ref = attributes?.getValue("ref") ?: return
@@ -54,13 +59,21 @@ class TransportModeToLocalScheduledStopPointMapper(private val transportModes: L
         }
     }
 
-    override fun characters(elementName: String, ch: CharArray?, start: Int, length: Int) {
+    override fun characters(
+        elementName: String,
+        ch: CharArray?,
+        start: Int,
+        length: Int,
+    ) {
         if (elementName == NetexTypes.TRANSPORT_MODE && ch != null) {
             modeTextBuffer.appendRange(ch, start, start + length)
         }
     }
 
-    override fun endElement(elementName: String, currentEntity: Entity?) {
+    override fun endElement(
+        elementName: String,
+        currentEntity: Entity?,
+    ) {
         if (elementName == NetexTypes.TRANSPORT_MODE) {
             val mode = TransportMode.Companion.fromNetexValue(modeTextBuffer.toString())
             val transportMode = mode?.takeIf { it in transportModes }

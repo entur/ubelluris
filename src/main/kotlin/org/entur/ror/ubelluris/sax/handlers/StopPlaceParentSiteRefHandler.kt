@@ -9,14 +9,14 @@ import org.xml.sax.Attributes
 import org.xml.sax.helpers.AttributesImpl
 
 class StopPlaceParentSiteRefHandler(
-    private val attributeReplacer: AttributeReplacer
+    private val attributeReplacer: AttributeReplacer,
 ) : XMLElementHandler {
     override fun startElement(
         uri: String?,
         localName: String?,
         qName: String?,
         attributes: Attributes?,
-        writer: DelegatingXMLElementWriter
+        writer: DelegatingXMLElementWriter,
     ) {
         val idValue = attributeReplacer.replaceAttribute(attributes, "ref")
         val newAttributes = AttributesImpl()
@@ -29,7 +29,7 @@ class StopPlaceParentSiteRefHandler(
         ch: CharArray?,
         start: Int,
         length: Int,
-        writer: DelegatingXMLElementWriter
+        writer: DelegatingXMLElementWriter,
     ) {
         writer.characters(ch, start, length)
     }
@@ -38,7 +38,7 @@ class StopPlaceParentSiteRefHandler(
         uri: String?,
         localName: String?,
         qName: String?,
-        writer: DelegatingXMLElementWriter
+        writer: DelegatingXMLElementWriter,
     ) {
         writer.endElement(uri, NetexTypes.PARENT_SITE_REF, NetexTypes.PARENT_SITE_REF)
     }

@@ -30,12 +30,11 @@ class CodespaceIdHandlerTest {
                 eq(null),
                 eq(NetexTypes.CODESPACE),
                 eq(NetexTypes.CODESPACE),
-                capture()
+                capture(),
             )
 
             val rewrittenId = firstValue.getValue("id")
             assertThat(rewrittenId).isEqualTo("SAM")
         }
-
     }
 }

@@ -22,7 +22,10 @@ class TimetableFilterService(
         }
     }
 
-    private fun filterProvider(provider: String, rawData: File): TimetableData {
+    private fun filterProvider(
+        provider: String,
+        rawData: File,
+    ): TimetableData {
         logger.info("Filtering timetables for provider: $provider  from: $rawData")
 
         val resultsDir = Path(cliConfig.resultsDir).resolve(provider)
@@ -32,7 +35,7 @@ class TimetableFilterService(
         FilterNetexApp(
             filterConfig = filterConfig.build(),
             input = rawData,
-            target = resultsDir.toFile()
+            target = resultsDir.toFile(),
         ).run()
 
         val quayModes = filterConfig.plugin.getCollectedData()

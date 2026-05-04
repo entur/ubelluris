@@ -75,5 +75,4 @@ class PublicCodeHandlerTest {
         assertThat(stopPlacePurgingRepository.quaysPerStopPlace).isEmpty()
         assertThat(context.quayHasPublicCode).isEqualTo(false)
     }
-
 }

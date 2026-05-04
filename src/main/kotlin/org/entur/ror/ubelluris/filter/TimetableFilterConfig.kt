@@ -9,22 +9,19 @@ import org.entur.ror.ubelluris.sax.plugins.TransportModeToLocalScheduledStopPoin
 class TimetableFilterConfig(
     private val cliConfig: CliConfig,
 ) : FilterProfileConfiguration {
-
     val plugin = TransportModeToLocalScheduledStopPointMapper(cliConfig.transportModes)
 
-    override fun build(): FilterConfig {
-        return FilterConfigBuilder()
+    override fun build(): FilterConfig =
+        FilterConfigBuilder()
             .withSkipElements(listOf())
             .withCustomElementHandlers(
                 mapOf(
-                    "/PublicationDelivery/PublicationTimestamp" to PublicationTimestampHandler()
-                )
-            )
-            .withPlugins(listOf(plugin))
+                    "/PublicationDelivery/PublicationTimestamp" to PublicationTimestampHandler(),
+                ),
+            ).withPlugins(listOf(plugin))
             .withRemovePrivateData(false)
             .withPreserveComments(false)
             .withUseSelfClosingTagsWhereApplicable(true)
             .withPruneReferences(false)
             .build()
-    }
 }

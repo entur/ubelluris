@@ -8,7 +8,6 @@ import java.nio.file.Files
 import java.nio.file.Path
 
 class QuayModeMatcherTest {
-
     private val quayModeMatcher = QuayModeMatcher()
 
     @TempDir
@@ -16,61 +15,62 @@ class QuayModeMatcherTest {
 
     @Test
     fun shouldMatchScheduledStopPointRefsAcrossMultipleStopPlaces() {
-        val scheduledStopPointRefs = mapOf(
+        val scheduledStopPointRefs =
+            mapOf(
                 "1:001" to setOf(TransportMode.WATER),
                 "1:011" to setOf(TransportMode.WATER),
                 "1:002" to setOf(TransportMode.TRAM),
-                "1:003" to setOf(TransportMode.BUS)
-        )
+                "1:003" to setOf(TransportMode.BUS),
+            )
 
         val xmlFile = tempDir.resolve("stop_places.xml")
 
         Files.writeString(
             xmlFile,
             """
-                <PublicationDelivery xmlns="http://www.netex.org.uk/netex">
-                <stopPlaces>
-                  <StopPlace id="SAM:StopPlace:1000">
-                    <Quay id="SAM:Quay:50001">
-                      <keyList>
-                        <KeyValue>
-                          <Key>local-stoppoint-gid</Key>
-                          <Value>1:001</Value>
-                        </KeyValue>
-                      </keyList>
-                    </Quay>
-                    <Quay id="SAM:Quay:50002">
-                      <keyList>
-                        <KeyValue>
-                          <Key>local-stoppoint-gid</Key>
-                          <Value>1:011</Value>
-                        </KeyValue>
-                      </keyList>
-                    </Quay>
-                  </StopPlace>
+            <PublicationDelivery xmlns="http://www.netex.org.uk/netex">
+            <stopPlaces>
+              <StopPlace id="SAM:StopPlace:1000">
+                <Quay id="SAM:Quay:50001">
+                  <keyList>
+                    <KeyValue>
+                      <Key>local-stoppoint-gid</Key>
+                      <Value>1:001</Value>
+                    </KeyValue>
+                  </keyList>
+                </Quay>
+                <Quay id="SAM:Quay:50002">
+                  <keyList>
+                    <KeyValue>
+                      <Key>local-stoppoint-gid</Key>
+                      <Value>1:011</Value>
+                    </KeyValue>
+                  </keyList>
+                </Quay>
+              </StopPlace>
 
-                  <StopPlace id="SAM:StopPlace:2000">
-                    <Quay id="SAM:Quay:60001">
-                      <keyList>
-                        <KeyValue>
-                          <Key>local-stoppoint-gid</Key>
-                          <Value>1:002</Value>
-                        </KeyValue>
-                      </keyList>
-                    </Quay>
+              <StopPlace id="SAM:StopPlace:2000">
+                <Quay id="SAM:Quay:60001">
+                  <keyList>
+                    <KeyValue>
+                      <Key>local-stoppoint-gid</Key>
+                      <Value>1:002</Value>
+                    </KeyValue>
+                  </keyList>
+                </Quay>
 
-                    <Quay id="SAM:Quay:60002">
-                      <keyList>
-                        <KeyValue>
-                          <Key>local-stoppoint-gid</Key>
-                          <Value>1:003</Value>
-                        </KeyValue>
-                      </keyList>
-                    </Quay>
-                  </StopPlace>
-                  </stopPlaces>
-                </PublicationDelivery>
-            """.trimIndent()
+                <Quay id="SAM:Quay:60002">
+                  <keyList>
+                    <KeyValue>
+                      <Key>local-stoppoint-gid</Key>
+                      <Value>1:003</Value>
+                    </KeyValue>
+                  </keyList>
+                </Quay>
+              </StopPlace>
+              </stopPlaces>
+            </PublicationDelivery>
+            """.trimIndent(),
         )
 
         val result = quayModeMatcher.match(xmlFile, scheduledStopPointRefs)
@@ -110,7 +110,7 @@ class QuayModeMatcherTest {
                 </Quay>
               </StopPlace>
             </PublicationDelivery>
-        """.trimIndent()
+            """.trimIndent(),
         )
 
         val result = quayModeMatcher.match(xmlFile, scheduledStopPointRefs)
@@ -121,10 +121,11 @@ class QuayModeMatcherTest {
 
     @Test
     fun shouldHandleQuayWithMultipleGids() {
-        val scheduledStopPointRefs = mapOf(
+        val scheduledStopPointRefs =
+            mapOf(
                 "1:001" to setOf(TransportMode.TRAM),
-                "1:002" to setOf(TransportMode.BUS)
-        )
+                "1:002" to setOf(TransportMode.BUS),
+            )
 
         val xmlFile = tempDir.resolve("stop_places.xml")
 
@@ -143,7 +144,7 @@ class QuayModeMatcherTest {
                 </Quay>
               </StopPlace>
             </PublicationDelivery>
-        """.trimIndent()
+            """.trimIndent(),
         )
 
         val result = quayModeMatcher.match(xmlFile, scheduledStopPointRefs)
@@ -153,14 +154,13 @@ class QuayModeMatcherTest {
         assertThat(result.quayToModes["SAM:Quay:50571"])
             .containsExactlyInAnyOrder(
                 TransportMode.TRAM,
-                TransportMode.BUS
+                TransportMode.BUS,
             )
 
         assertThat(result.quayToStopPlace)
             .hasSize(1)
             .containsEntry("SAM:Quay:50571", "SAM:StopPlace:1234")
     }
-
 
     @Test
     fun shouldHandleQuayWithNoMatch() {
@@ -183,7 +183,7 @@ class QuayModeMatcherTest {
                 </Quay>
               </StopPlace>
             </PublicationDelivery>
-        """.trimIndent()
+            """.trimIndent(),
         )
 
         val result = quayModeMatcher.match(xmlFile, scheduledStopPointRefs)
@@ -208,7 +208,7 @@ class QuayModeMatcherTest {
                 </Quay>
               </StopPlace>
             </PublicationDelivery>
-        """.trimIndent()
+            """.trimIndent(),
         )
 
         val result = quayModeMatcher.match(xmlFile, scheduledStopPointRefs)
@@ -216,5 +216,4 @@ class QuayModeMatcherTest {
         assertThat(result.quayToModes).isEmpty()
         assertThat(result.quayToStopPlace).isEmpty()
     }
-
 }

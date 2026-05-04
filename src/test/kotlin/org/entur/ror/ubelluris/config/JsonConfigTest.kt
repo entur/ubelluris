@@ -5,16 +5,16 @@ import org.entur.ror.ubelluris.model.TransportMode
 import org.junit.jupiter.api.Test
 
 class JsonConfigTest {
-
     @Test
     fun shouldDeserializeCliConfigFromJson() {
-        val json = """
-        {
-          "sourceCodespace": "SE:050",
-          "targetCodespace": "SAM",
-          "illegalPublicCodes": ["*", "-"]
-        }
-        """.trimIndent()
+        val json =
+            """
+            {
+              "sourceCodespace": "SE:050",
+              "targetCodespace": "SAM",
+              "illegalPublicCodes": ["*", "-"]
+            }
+            """.trimIndent()
 
         val config = JsonConfig.loadCliConfig(json.byteInputStream())
 
@@ -27,14 +27,15 @@ class JsonConfigTest {
 
     @Test
     fun shouldDeserializeCliConfigWithOverrides() {
-        val json = """
-        {
-          "sourceCodespace": "SE:050",
-          "targetCodespace": "SAM",
-          "timetableProviders": ["provider1"],
-          "transportModes": ["tram"]
-        }
-        """.trimIndent()
+        val json =
+            """
+            {
+              "sourceCodespace": "SE:050",
+              "targetCodespace": "SAM",
+              "timetableProviders": ["provider1"],
+              "transportModes": ["tram"]
+            }
+            """.trimIndent()
 
         val config = JsonConfig.loadCliConfig(json.byteInputStream())
 
@@ -43,5 +44,4 @@ class JsonConfigTest {
         assertThat(config.timetableProviders).containsExactly("provider1")
         assertThat(config.transportModes).containsExactly(TransportMode.TRAM)
     }
-
 }

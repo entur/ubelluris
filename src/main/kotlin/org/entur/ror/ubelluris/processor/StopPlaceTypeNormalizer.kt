@@ -10,7 +10,6 @@ import org.slf4j.LoggerFactory
 import java.io.File
 
 class StopPlaceTypeNormalizer {
-
     private val logger = LoggerFactory.getLogger(javaClass)
     private val ns = Namespace.getNamespace("http://www.netex.org.uk/netex")
 
@@ -26,9 +25,10 @@ class StopPlaceTypeNormalizer {
     }
 
     private fun processStopPlaces(doc: Document) {
-        val stopPlaces = doc.rootElement.descendants
-            .filterIsInstance<Element>()
-            .filter { it.name == "StopPlace" }
+        val stopPlaces =
+            doc.rootElement.descendants
+                .filterIsInstance<Element>()
+                .filter { it.name == "StopPlace" }
 
         for (stopPlace in stopPlaces) {
             normalizeTransportMode(stopPlace)
@@ -57,18 +57,19 @@ class StopPlaceTypeNormalizer {
 
         if (currentType == "other") {
             val transportModeValue = transportMode?.text?.trim()
-            val normalizedType = when (transportModeValue) {
-                "water" -> "ferryStop"
-                "tram" -> "onstreetTram"
-                else -> "onstreetBus"
-            }
+            val normalizedType =
+                when (transportModeValue) {
+                    "water" -> "ferryStop"
+                    "tram" -> "onstreetTram"
+                    else -> "onstreetBus"
+                }
             stopPlaceType.text = normalizedType
             logger.debug(
                 "Normalized StopPlaceType 'other' -> '$normalizedType' (TransportMode='$transportModeValue') for ${
                     stopPlace.getAttributeValue(
-                        "id"
+                        "id",
                     )
-                }"
+                }",
             )
             return
         }
@@ -86,26 +87,29 @@ class StopPlaceTypeNormalizer {
             if (quayCount < 6 && currentType == "busStation") {
                 stopPlaceType.text = "onstreetBus"
                 logger.debug(
-                    "Normalized StopPlaceType 'busStation' -> 'onstreetBus' (${quayCount} quays) for ${
+                    "Normalized StopPlaceType 'busStation' -> 'onstreetBus' ($quayCount quays) for ${
                         stopPlace.getAttributeValue(
-                            "id"
+                            "id",
                         )
-                    }"
+                    }",
                 )
             } else if (quayCount >= 6 && currentType == "onstreetBus") {
                 stopPlaceType.text = "busStation"
                 logger.debug(
-                    "Normalized StopPlaceType 'onstreetBus' -> 'busStation' (${quayCount} quays) for ${
+                    "Normalized StopPlaceType 'onstreetBus' -> 'busStation' ($quayCount quays) for ${
                         stopPlace.getAttributeValue(
-                            "id"
+                            "id",
                         )
-                    }"
+                    }",
                 )
             }
         }
     }
 
-    private fun writeDocument(doc: Document, file: File) {
+    private fun writeDocument(
+        doc: Document,
+        file: File,
+    ) {
         val out = XMLOutputter()
         out.format = Format.getPrettyFormat().setEncoding("UTF-8")
         file.outputStream().use { out.output(doc, it) }

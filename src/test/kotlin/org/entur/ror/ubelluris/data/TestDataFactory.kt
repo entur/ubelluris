@@ -8,11 +8,12 @@ object TestDataFactory {
         id: String,
         type: String = "testType",
         publication: String = PublicationEnumeration.PUBLIC.toString().lowercase(),
-        parent: Entity? = null
-    ): Entity = Entity(
-        id = id,
-        type = type,
-        publication = publication,
-        parent = parent,
-    )
+        parent: Entity? = null,
+    ): Entity =
+        Entity(
+            id = id,
+            type = type,
+            publication = publication,
+            parent = parent,
+        )
 }

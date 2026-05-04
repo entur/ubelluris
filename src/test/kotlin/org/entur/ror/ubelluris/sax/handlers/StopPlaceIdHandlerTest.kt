@@ -31,7 +31,7 @@ class StopPlaceIdHandlerTest {
                 eq(null),
                 eq(NetexTypes.STOP_PLACE),
                 eq(NetexTypes.STOP_PLACE),
-                capture()
+                capture(),
             )
 
             val rewrittenId = firstValue.getValue("id")

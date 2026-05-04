@@ -5,6 +5,5 @@ package org.entur.ror.ubelluris.model
  */
 data class QuayModeMapping(
     val quayToModes: Map<String, Set<TransportMode>>,
-    val quayToStopPlace: Map<String, String>
+    val quayToStopPlace: Map<String, String>,
 )
-

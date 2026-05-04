@@ -1,16 +1,15 @@
 package org.entur.ror.ubelluris.sax.enrichment
 
 import org.assertj.core.api.Assertions.assertThat
-import org.entur.ror.ubelluris.model.TransportMode
 import org.entur.ror.ubelluris.model.QuayModeMapping
 import org.entur.ror.ubelluris.model.Scenario
+import org.entur.ror.ubelluris.model.TransportMode
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.io.TempDir
 import java.nio.file.Files
 import java.nio.file.Path
 
 class StopPlaceAnalyzerTest {
-
     private val stopPlaceAnalyzer = StopPlaceAnalyzer()
 
     @TempDir
@@ -32,17 +31,20 @@ class StopPlaceAnalyzerTest {
                 </StopPlace>
               </stopPlaces>
             </PublicationDelivery>
-        """.trimIndent()
+            """.trimIndent(),
         )
 
-        val quayModeMapping = QuayModeMapping(
-            quayToModes = mapOf(
-                "SAM:Quay:50001" to setOf(TransportMode.TRAM),
-            ),
-            quayToStopPlace = mapOf(
-                "SAM:Quay:50001" to "SAM:StopPlace:1000",
+        val quayModeMapping =
+            QuayModeMapping(
+                quayToModes =
+                    mapOf(
+                        "SAM:Quay:50001" to setOf(TransportMode.TRAM),
+                    ),
+                quayToStopPlace =
+                    mapOf(
+                        "SAM:Quay:50001" to "SAM:StopPlace:1000",
+                    ),
             )
-        )
 
         val result = stopPlaceAnalyzer.analyze(xmlFile, quayModeMapping)
 
@@ -72,19 +74,22 @@ class StopPlaceAnalyzerTest {
                 </StopPlace>
               </stopPlaces>
             </PublicationDelivery>
-        """.trimIndent()
+            """.trimIndent(),
         )
 
-        val quayModeMapping = QuayModeMapping(
-            quayToModes = mapOf(
-                "SAM:Quay:60001" to setOf(TransportMode.WATER),
-                "SAM:Quay:60002" to setOf(TransportMode.WATER)
-            ),
-            quayToStopPlace = mapOf(
-                "SAM:Quay:60001" to "SAM:StopPlace:2000",
-                "SAM:Quay:60002" to "SAM:StopPlace:2000"
+        val quayModeMapping =
+            QuayModeMapping(
+                quayToModes =
+                    mapOf(
+                        "SAM:Quay:60001" to setOf(TransportMode.WATER),
+                        "SAM:Quay:60002" to setOf(TransportMode.WATER),
+                    ),
+                quayToStopPlace =
+                    mapOf(
+                        "SAM:Quay:60001" to "SAM:StopPlace:2000",
+                        "SAM:Quay:60002" to "SAM:StopPlace:2000",
+                    ),
             )
-        )
 
         val result = stopPlaceAnalyzer.analyze(xmlFile, quayModeMapping)
 
@@ -96,7 +101,6 @@ class StopPlaceAnalyzerTest {
             .containsEntry("SAM:Quay:60001", TransportMode.WATER)
             .containsEntry("SAM:Quay:60002", TransportMode.WATER)
     }
-
 
     @Test
     fun shouldDetectStopPlacesWithMixedQuayMode() {
@@ -115,19 +119,22 @@ class StopPlaceAnalyzerTest {
                 </StopPlace>
               </stopPlaces>
             </PublicationDelivery>
-        """.trimIndent()
+            """.trimIndent(),
         )
 
-        val quayModeMapping = QuayModeMapping(
-            quayToModes = mapOf(
-                "SAM:Quay:50001" to setOf(TransportMode.TRAM),
-                "SAM:Quay:50002" to setOf(TransportMode.BUS)
-            ),
-            quayToStopPlace = mapOf(
-                "SAM:Quay:50001" to "SAM:StopPlace:1000",
-                "SAM:Quay:50002" to "SAM:StopPlace:1000"
+        val quayModeMapping =
+            QuayModeMapping(
+                quayToModes =
+                    mapOf(
+                        "SAM:Quay:50001" to setOf(TransportMode.TRAM),
+                        "SAM:Quay:50002" to setOf(TransportMode.BUS),
+                    ),
+                quayToStopPlace =
+                    mapOf(
+                        "SAM:Quay:50001" to "SAM:StopPlace:1000",
+                        "SAM:Quay:50002" to "SAM:StopPlace:1000",
+                    ),
             )
-        )
 
         val result = stopPlaceAnalyzer.analyze(xmlFile, quayModeMapping)
 
@@ -158,17 +165,20 @@ class StopPlaceAnalyzerTest {
                 </StopPlace>
               </stopPlaces>
             </PublicationDelivery>
-        """.trimIndent()
+            """.trimIndent(),
         )
 
-        val quayModeMapping = QuayModeMapping(
-            quayToModes = mapOf(
-                "SAM:Quay:50001" to setOf(TransportMode.TRAM)
-            ),
-            quayToStopPlace = mapOf(
-                "SAM:Quay:50001" to "SAM:StopPlace:1000"
+        val quayModeMapping =
+            QuayModeMapping(
+                quayToModes =
+                    mapOf(
+                        "SAM:Quay:50001" to setOf(TransportMode.TRAM),
+                    ),
+                quayToStopPlace =
+                    mapOf(
+                        "SAM:Quay:50001" to "SAM:StopPlace:1000",
+                    ),
             )
-        )
 
         val result = stopPlaceAnalyzer.analyze(xmlFile, quayModeMapping)
 
@@ -198,13 +208,14 @@ class StopPlaceAnalyzerTest {
                 </StopPlace>
               </stopPlaces>
             </PublicationDelivery>
-        """.trimIndent()
+            """.trimIndent(),
         )
 
-        val quayModeMapping = QuayModeMapping(
-            quayToModes = emptyMap(),
-            quayToStopPlace = emptyMap()
-        )
+        val quayModeMapping =
+            QuayModeMapping(
+                quayToModes = emptyMap(),
+                quayToStopPlace = emptyMap(),
+            )
 
         val result = stopPlaceAnalyzer.analyze(xmlFile, quayModeMapping)
 
@@ -228,18 +239,21 @@ class StopPlaceAnalyzerTest {
                 </StopPlace>
               </stopPlaces>
             </PublicationDelivery>
-        """.trimIndent()
+            """.trimIndent(),
         )
 
-        val quayModeMapping = QuayModeMapping(
-            quayToModes = mapOf(
-                "SAM:Quay:50001" to setOf(TransportMode.TRAM)
-            ),
-            quayToStopPlace = mapOf(
-                "SAM:Quay:50001" to "SAM:StopPlace:1000",
-                "SAM:Quay:50002" to "SAM:StopPlace:1000"
+        val quayModeMapping =
+            QuayModeMapping(
+                quayToModes =
+                    mapOf(
+                        "SAM:Quay:50001" to setOf(TransportMode.TRAM),
+                    ),
+                quayToStopPlace =
+                    mapOf(
+                        "SAM:Quay:50001" to "SAM:StopPlace:1000",
+                        "SAM:Quay:50002" to "SAM:StopPlace:1000",
+                    ),
             )
-        )
 
         val result = stopPlaceAnalyzer.analyze(xmlFile, quayModeMapping)
 
@@ -255,7 +269,7 @@ class StopPlaceAnalyzerTest {
 
     @Test
     fun shouldHandleStopPlaceWithMultipleQuayModesBySelectingFirst() {
-        //undefined behavior, currently log warn and select first
+        // undefined behavior, currently log warn and select first
 
         val xmlFile = tempDir.resolve("stop_places.xml")
 
@@ -271,17 +285,20 @@ class StopPlaceAnalyzerTest {
                 </StopPlace>
               </stopPlaces>
             </PublicationDelivery>
-        """.trimIndent()
+            """.trimIndent(),
         )
 
-        val quayModeMapping = QuayModeMapping(
-            quayToModes = mapOf(
-                "SAM:Quay:50001" to setOf(TransportMode.TRAM, TransportMode.BUS)
-            ),
-            quayToStopPlace = mapOf(
-                "SAM:Quay:50001" to "SAM:StopPlace:1000",
+        val quayModeMapping =
+            QuayModeMapping(
+                quayToModes =
+                    mapOf(
+                        "SAM:Quay:50001" to setOf(TransportMode.TRAM, TransportMode.BUS),
+                    ),
+                quayToStopPlace =
+                    mapOf(
+                        "SAM:Quay:50001" to "SAM:StopPlace:1000",
+                    ),
             )
-        )
 
         val result = stopPlaceAnalyzer.analyze(xmlFile, quayModeMapping)
 
@@ -312,17 +329,20 @@ class StopPlaceAnalyzerTest {
                 </StopPlace>
               </stopPlaces>
             </PublicationDelivery>
-        """.trimIndent()
+            """.trimIndent(),
         )
 
-        val quayModeMapping = QuayModeMapping(
-            quayToModes = mapOf(
-                "SAM:Quay:50001" to setOf(TransportMode.TRAM)
-            ),
-            quayToStopPlace = mapOf(
-                "SAM:Quay:50001" to "SAM:StopPlace:1000"
+        val quayModeMapping =
+            QuayModeMapping(
+                quayToModes =
+                    mapOf(
+                        "SAM:Quay:50001" to setOf(TransportMode.TRAM),
+                    ),
+                quayToStopPlace =
+                    mapOf(
+                        "SAM:Quay:50001" to "SAM:StopPlace:1000",
+                    ),
             )
-        )
 
         val result = stopPlaceAnalyzer.analyze(xmlFile, quayModeMapping)
 
@@ -344,30 +364,32 @@ class StopPlaceAnalyzerTest {
         Files.writeString(
             xmlFile,
             """
-        <PublicationDelivery xmlns="http://www.netex.org.uk/netex">
-          <stopPlaces>
-            <StopPlace>
-              <quays>
-                <Quay id="SAM:Quay:50001"/>
-              </quays>
-            </StopPlace>
-          </stopPlaces>
-        </PublicationDelivery>
-        """.trimIndent()
+            <PublicationDelivery xmlns="http://www.netex.org.uk/netex">
+              <stopPlaces>
+                <StopPlace>
+                  <quays>
+                    <Quay id="SAM:Quay:50001"/>
+                  </quays>
+                </StopPlace>
+              </stopPlaces>
+            </PublicationDelivery>
+            """.trimIndent(),
         )
 
-        val quayModeMapping = QuayModeMapping(
-            quayToModes = mapOf(
-                "SAM:Quay:50001" to setOf(TransportMode.TRAM)
-            ),
-            quayToStopPlace = mapOf(
-                "SAM:Quay:50001" to "SAM:StopPlace:1000"
+        val quayModeMapping =
+            QuayModeMapping(
+                quayToModes =
+                    mapOf(
+                        "SAM:Quay:50001" to setOf(TransportMode.TRAM),
+                    ),
+                quayToStopPlace =
+                    mapOf(
+                        "SAM:Quay:50001" to "SAM:StopPlace:1000",
+                    ),
             )
-        )
 
         val result = stopPlaceAnalyzer.analyze(xmlFile, quayModeMapping)
 
         assertThat(result).isEmpty()
     }
-
 }

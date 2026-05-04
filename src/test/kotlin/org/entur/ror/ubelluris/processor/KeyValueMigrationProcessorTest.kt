@@ -6,12 +6,14 @@ import org.junit.jupiter.api.io.TempDir
 import java.nio.file.Path
 
 class KeyValueMigrationProcessorTest {
-
     private val processor = KeyValueMigrationProcessor()
 
     @Test
-    fun shouldZeroPadOwnerValueWhenNumeric(@TempDir tempDir: Path) {
-        val inputXml = """
+    fun shouldZeroPadOwnerValueWhenNumeric(
+        @TempDir tempDir: Path,
+    ) {
+        val inputXml =
+            """
             <?xml version="1.0" encoding="UTF-8"?>
             <PublicationDelivery xmlns="http://www.netex.org.uk/netex">
                 <dataObjects>
@@ -25,7 +27,7 @@ class KeyValueMigrationProcessorTest {
                     </StopPlace>
                 </dataObjects>
             </PublicationDelivery>
-        """.trimIndent()
+            """.trimIndent()
 
         val xmlFile = tempDir.resolve("test.xml").toFile()
         xmlFile.writeText(inputXml)
@@ -37,8 +39,11 @@ class KeyValueMigrationProcessorTest {
     }
 
     @Test
-    fun shouldZeroPadDataFromValueWhenNumeric(@TempDir tempDir: Path) {
-        val inputXml = """
+    fun shouldZeroPadDataFromValueWhenNumeric(
+        @TempDir tempDir: Path,
+    ) {
+        val inputXml =
+            """
             <?xml version="1.0" encoding="UTF-8"?>
             <PublicationDelivery xmlns="http://www.netex.org.uk/netex">
                 <dataObjects>
@@ -52,7 +57,7 @@ class KeyValueMigrationProcessorTest {
                     </StopPlace>
                 </dataObjects>
             </PublicationDelivery>
-        """.trimIndent()
+            """.trimIndent()
 
         val xmlFile = tempDir.resolve("test.xml").toFile()
         xmlFile.writeText(inputXml)
@@ -64,8 +69,11 @@ class KeyValueMigrationProcessorTest {
     }
 
     @Test
-    fun shouldNotZeroPadNonNumericValues(@TempDir tempDir: Path) {
-        val inputXml = """
+    fun shouldNotZeroPadNonNumericValues(
+        @TempDir tempDir: Path,
+    ) {
+        val inputXml =
+            """
             <?xml version="1.0" encoding="UTF-8"?>
             <PublicationDelivery xmlns="http://www.netex.org.uk/netex">
                 <dataObjects>
@@ -79,7 +87,7 @@ class KeyValueMigrationProcessorTest {
                     </StopPlace>
                 </dataObjects>
             </PublicationDelivery>
-        """.trimIndent()
+            """.trimIndent()
 
         val xmlFile = tempDir.resolve("test.xml").toFile()
         xmlFile.writeText(inputXml)
@@ -91,8 +99,11 @@ class KeyValueMigrationProcessorTest {
     }
 
     @Test
-    fun shouldNotZeroPadValuesForKeysNotPresentInZeroPadList(@TempDir tempDir: Path) {
-        val inputXml = """
+    fun shouldNotZeroPadValuesForKeysNotPresentInZeroPadList(
+        @TempDir tempDir: Path,
+    ) {
+        val inputXml =
+            """
             <?xml version="1.0" encoding="UTF-8"?>
             <PublicationDelivery xmlns="http://www.netex.org.uk/netex">
                 <dataObjects>
@@ -106,7 +117,7 @@ class KeyValueMigrationProcessorTest {
                     </StopPlace>
                 </dataObjects>
             </PublicationDelivery>
-        """.trimIndent()
+            """.trimIndent()
 
         val xmlFile = tempDir.resolve("test.xml").toFile()
         xmlFile.writeText(inputXml)
@@ -119,8 +130,11 @@ class KeyValueMigrationProcessorTest {
     }
 
     @Test
-    fun shouldRemoveBlacklistedKeyValueElements(@TempDir tempDir: Path) {
-        val inputXml = """
+    fun shouldRemoveBlacklistedKeyValueElements(
+        @TempDir tempDir: Path,
+    ) {
+        val inputXml =
+            """
             <?xml version="1.0" encoding="UTF-8"?>
             <PublicationDelivery xmlns="http://www.netex.org.uk/netex">
                 <dataObjects>
@@ -138,7 +152,7 @@ class KeyValueMigrationProcessorTest {
                     </StopPlace>
                 </dataObjects>
             </PublicationDelivery>
-        """.trimIndent()
+            """.trimIndent()
 
         val xmlFile = tempDir.resolve("test.xml").toFile()
         xmlFile.writeText(inputXml)
@@ -152,8 +166,11 @@ class KeyValueMigrationProcessorTest {
     }
 
     @Test
-    fun shouldRemoveAllBlacklistedKeys(@TempDir tempDir: Path) {
-        val inputXml = """
+    fun shouldRemoveAllBlacklistedKeys(
+        @TempDir tempDir: Path,
+    ) {
+        val inputXml =
+            """
             <?xml version="1.0" encoding="UTF-8"?>
             <PublicationDelivery xmlns="http://www.netex.org.uk/netex">
                 <dataObjects>
@@ -179,7 +196,7 @@ class KeyValueMigrationProcessorTest {
                     </StopPlace>
                 </dataObjects>
             </PublicationDelivery>
-        """.trimIndent()
+            """.trimIndent()
 
         val xmlFile = tempDir.resolve("test.xml").toFile()
         xmlFile.writeText(inputXml)
@@ -195,8 +212,11 @@ class KeyValueMigrationProcessorTest {
     }
 
     @Test
-    fun shouldHandleMultipleKeyValueElementsCorrectly(@TempDir tempDir: Path) {
-        val inputXml = """
+    fun shouldHandleMultipleKeyValueElementsCorrectly(
+        @TempDir tempDir: Path,
+    ) {
+        val inputXml =
+            """
             <?xml version="1.0" encoding="UTF-8"?>
             <PublicationDelivery xmlns="http://www.netex.org.uk/netex">
                 <dataObjects>
@@ -222,7 +242,7 @@ class KeyValueMigrationProcessorTest {
                     </StopPlace>
                 </dataObjects>
             </PublicationDelivery>
-        """.trimIndent()
+            """.trimIndent()
 
         val xmlFile = tempDir.resolve("test.xml").toFile()
         xmlFile.writeText(inputXml)
@@ -241,8 +261,11 @@ class KeyValueMigrationProcessorTest {
     }
 
     @Test
-    fun shouldHandleEmptyKeyList(@TempDir tempDir: Path) {
-        val inputXml = """
+    fun shouldHandleEmptyKeyList(
+        @TempDir tempDir: Path,
+    ) {
+        val inputXml =
+            """
             <?xml version="1.0" encoding="UTF-8"?>
             <PublicationDelivery xmlns="http://www.netex.org.uk/netex">
                 <dataObjects>
@@ -252,7 +275,7 @@ class KeyValueMigrationProcessorTest {
                     </StopPlace>
                 </dataObjects>
             </PublicationDelivery>
-        """.trimIndent()
+            """.trimIndent()
 
         val xmlFile = tempDir.resolve("test.xml").toFile()
         xmlFile.writeText(inputXml)
@@ -262,5 +285,4 @@ class KeyValueMigrationProcessorTest {
         val result = xmlFile.readText()
         assertThat(result).contains("<keyList>")
     }
-
 }

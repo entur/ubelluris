@@ -7,7 +7,6 @@ import org.mockito.kotlin.whenever
 import org.xml.sax.Attributes
 
 class AttributeReplacerTest {
-
     private val attributeReplacer = AttributeReplacer("SE:050", "SAM")
 
     @Test

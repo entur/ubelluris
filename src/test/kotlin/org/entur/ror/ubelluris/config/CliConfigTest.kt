@@ -5,15 +5,15 @@ import org.entur.ror.ubelluris.model.TransportMode
 import org.junit.jupiter.api.Test
 
 class CliConfigTest {
-
     @Test
     fun config() {
-        val config = CliConfig(
-            sourceCodespace = "sourceCodespace",
-            targetCodespace = "targetCodespace",
-            timetableProviders = listOf("foo1", "foo2", "foo3"),
-            transportModes = listOf(TransportMode.TRAM, TransportMode.WATER),
-        )
+        val config =
+            CliConfig(
+                sourceCodespace = "sourceCodespace",
+                targetCodespace = "targetCodespace",
+                timetableProviders = listOf("foo1", "foo2", "foo3"),
+                transportModes = listOf(TransportMode.TRAM, TransportMode.WATER),
+            )
         assertThat(config.sourceCodespace).isEqualTo("sourceCodespace")
         assertThat(config.targetCodespace).isEqualTo("targetCodespace")
         assertThat(config.timetableProviders)
@@ -24,10 +24,11 @@ class CliConfigTest {
 
     @Test
     fun shouldUseDefaults() {
-        val config = CliConfig(
-            sourceCodespace = "SE:050",
-            targetCodespace = "SAM",
-        )
+        val config =
+            CliConfig(
+                sourceCodespace = "SE:050",
+                targetCodespace = "SAM",
+            )
         assertThat(config.timetableProviders)
             .containsExactly("vt", "halland", "skane")
         assertThat(config.transportModes)
@@ -35,5 +36,4 @@ class CliConfigTest {
         assertThat(config.illegalPublicCodes)
             .containsExactly("*", "-")
     }
-
 }

@@ -9,7 +9,6 @@ import org.entur.ror.ubelluris.sax.plugins.data.QuayData
 import org.junit.jupiter.api.Test
 
 class QuayTrackingHandlerTest {
-
     private val context = StopPlacePurgingParsingContext()
 
     private val stopPlacePurgingRepository = StopPlacePurgingRepository()

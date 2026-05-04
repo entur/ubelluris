@@ -13,16 +13,21 @@ import java.nio.file.Path
  * Uses local-stoppoint-gid KeyValue for matching
  */
 class QuayModeMatcher {
-
     private val logger = LoggerFactory.getLogger(javaClass)
     private val saxBuilder = SAXBuilder()
 
-    fun match(stopsXmlPath: Path, localIdToModes: Map<String, Set<TransportMode>>): QuayModeMapping {
+    fun match(
+        stopsXmlPath: Path,
+        localIdToModes: Map<String, Set<TransportMode>>,
+    ): QuayModeMapping {
         logger.info("Matching ${localIdToModes.size} local IDs to quays in stops data")
         return matchByLocalIds(stopsXmlPath, localIdToModes)
     }
 
-    private fun matchByLocalIds(stopsXmlPath: Path, refToModeMap: Map<String, Set<TransportMode>>): QuayModeMapping {
+    private fun matchByLocalIds(
+        stopsXmlPath: Path,
+        refToModeMap: Map<String, Set<TransportMode>>,
+    ): QuayModeMapping {
         logger.info("Built index of ${refToModeMap.size} unique refs")
 
         val document = saxBuilder.build(stopsXmlPath.toFile())
@@ -42,9 +47,11 @@ class QuayModeMatcher {
             quays.forEach { quayElement ->
                 val quayId = quayElement.getAttributeValue("id") ?: return@forEach
 
-                val keyValues = quayElement.getChild("keyList", namespace)
-                    ?.getChildren(NetexTypes.KEY_VALUE, namespace)
-                    ?: emptyList()
+                val keyValues =
+                    quayElement
+                        .getChild("keyList", namespace)
+                        ?.getChildren(NetexTypes.KEY_VALUE, namespace)
+                        ?: emptyList()
 
                 keyValues.forEach { keyValue ->
                     val key = keyValue.getChildText(NetexTypes.KEY, namespace)
@@ -76,7 +83,7 @@ class QuayModeMatcher {
 
         return QuayModeMapping(
             quayToModes = quayToModes,
-            quayToStopPlace = quayToStopPlace
+            quayToStopPlace = quayToStopPlace,
         )
     }
 }

@@ -6,37 +6,39 @@ import org.jdom2.Element
 import org.jdom2.Namespace
 
 class StopPlaceChildCreator {
-
     fun createChildStopPlace(
         originalStopPlace: Element,
         childId: String,
         mode: TransportMode,
         quayIds: List<String>,
         namespace: Namespace,
-        parentRef: String
+        parentRef: String,
     ): Element {
         val childStopPlace = originalStopPlace.clone()
         childStopPlace.setAttribute("id", childId)
         childStopPlace.setAttribute("version", "1")
 
-        val transportModeElement = childStopPlace.getChild(NetexTypes.TRANSPORT_MODE, namespace)
-            ?: Element(NetexTypes.TRANSPORT_MODE, namespace).also { childStopPlace.addContent(0, it) }
+        val transportModeElement =
+            childStopPlace.getChild(NetexTypes.TRANSPORT_MODE, namespace)
+                ?: Element(NetexTypes.TRANSPORT_MODE, namespace).also { childStopPlace.addContent(0, it) }
         transportModeElement.text = mode.netexValue
 
         val stopPlaceTypeElement = childStopPlace.getChild(NetexTypes.STOP_PLACE_TYPE, namespace)
         if (stopPlaceTypeElement != null) {
-            stopPlaceTypeElement.text = when (mode) {
-                TransportMode.TRAM -> "onstreetTram"
-                TransportMode.WATER -> "ferryStop"
-                TransportMode.BUS -> stopPlaceTypeElement.text
-            }
+            stopPlaceTypeElement.text =
+                when (mode) {
+                    TransportMode.TRAM -> "onstreetTram"
+                    TransportMode.WATER -> "ferryStop"
+                    TransportMode.BUS -> stopPlaceTypeElement.text
+                }
         }
 
-        val parentSiteRef = childStopPlace.getChild(NetexTypes.PARENT_SITE_REF, namespace)
-            ?: Element(NetexTypes.PARENT_SITE_REF, namespace).also {
-                val modeIndex = childStopPlace.indexOf(transportModeElement)
-                childStopPlace.addContent(modeIndex + 1, it)
-            }
+        val parentSiteRef =
+            childStopPlace.getChild(NetexTypes.PARENT_SITE_REF, namespace)
+                ?: Element(NetexTypes.PARENT_SITE_REF, namespace).also {
+                    val modeIndex = childStopPlace.indexOf(transportModeElement)
+                    childStopPlace.addContent(modeIndex + 1, it)
+                }
         parentSiteRef.setAttribute("ref", parentRef)
         parentSiteRef.setAttribute("version", "1")
 

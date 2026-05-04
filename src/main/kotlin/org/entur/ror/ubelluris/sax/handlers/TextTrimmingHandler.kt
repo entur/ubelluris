@@ -5,13 +5,12 @@ import org.entur.netex.tools.lib.output.XMLElementHandler
 import org.xml.sax.Attributes
 
 class TextTrimmingHandler : XMLElementHandler {
-
     override fun startElement(
         uri: String?,
         localName: String?,
         qName: String?,
         attributes: Attributes?,
-        writer: DelegatingXMLElementWriter
+        writer: DelegatingXMLElementWriter,
     ) {
         writer.startElement(uri, localName, qName, attributes)
     }
@@ -20,7 +19,7 @@ class TextTrimmingHandler : XMLElementHandler {
         ch: CharArray?,
         start: Int,
         length: Int,
-        writer: DelegatingXMLElementWriter
+        writer: DelegatingXMLElementWriter,
     ) {
         if (ch == null) {
             writer.characters(ch, start, length)
@@ -39,7 +38,7 @@ class TextTrimmingHandler : XMLElementHandler {
         uri: String?,
         localName: String?,
         qName: String?,
-        writer: DelegatingXMLElementWriter
+        writer: DelegatingXMLElementWriter,
     ) {
         writer.endElement(uri, localName, qName)
     }

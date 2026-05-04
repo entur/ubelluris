@@ -1,8 +1,8 @@
 package org.entur.ror.ubelluris.sax.enrichment
 
 import org.entur.ror.ubelluris.model.NetexTypes
-import org.entur.ror.ubelluris.model.TransportMode
 import org.entur.ror.ubelluris.model.StopPlaceAnalysis
+import org.entur.ror.ubelluris.model.TransportMode
 import org.jdom2.Document
 import org.jdom2.Element
 import org.jdom2.Namespace
@@ -13,20 +13,24 @@ import org.slf4j.LoggerFactory
  * Handles splitting of MIXED_MODE StopPlaces into multiple child StopPlaces
  */
 class StopPlaceSplitter {
-
     private val logger = LoggerFactory.getLogger(javaClass)
 
-    fun split(document: Document, mixedModeAnalyses: List<StopPlaceAnalysis>) {
+    fun split(
+        document: Document,
+        mixedModeAnalyses: List<StopPlaceAnalysis>,
+    ) {
         logger.info("Splitting ${mixedModeAnalyses.size} MIXED_MODE StopPlaces")
 
         val root = document.rootElement
         val namespace = root.namespace
 
-        val stopPlacesContainer = root.getDescendants(Filters.element("stopPlaces", namespace))
-            .firstOrNull() ?: run {
-            logger.error("Could not find stopPlaces container")
-            return
-        }
+        val stopPlacesContainer =
+            root
+                .getDescendants(Filters.element("stopPlaces", namespace))
+                .firstOrNull() ?: run {
+                logger.error("Could not find stopPlaces container")
+                return
+            }
 
         mixedModeAnalyses.forEach { analysis ->
             val stopPlaceElement = findStopPlaceById(stopPlacesContainer, namespace, analysis.stopPlaceId)
@@ -45,11 +49,12 @@ class StopPlaceSplitter {
     private fun performSplit(
         originalStopPlace: Element,
         namespace: Namespace,
-        analysis: StopPlaceAnalysis
+        analysis: StopPlaceAnalysis,
     ): List<String> {
         val originalId = analysis.stopPlaceId
-        val quaysContainer = originalStopPlace.getChild("quays", namespace)
-            ?: throw IllegalStateException("StopPlace has no quays container: $originalId")
+        val quaysContainer =
+            originalStopPlace.getChild("quays", namespace)
+                ?: throw IllegalStateException("StopPlace has no quays container: $originalId")
 
         val quaysByMode = analysis.quayModes.entries.groupBy({ it.value }, { it.key })
 
@@ -60,14 +65,15 @@ class StopPlaceSplitter {
             val childId = generateChildId(originalId, mode)
             childStopPlaceIds.add(childId)
 
-            val childStopPlace = StopPlaceChildCreator().createChildStopPlace(
-                originalStopPlace = originalStopPlace,
-                childId = childId,
-                mode = mode,
-                quayIds = quayIds,
-                namespace = namespace,
-                parentRef = parentId!!
-            )
+            val childStopPlace =
+                StopPlaceChildCreator().createChildStopPlace(
+                    originalStopPlace = originalStopPlace,
+                    childId = childId,
+                    mode = mode,
+                    quayIds = quayIds,
+                    namespace = namespace,
+                    parentRef = parentId!!,
+                )
 
             val parent = originalStopPlace.parentElement
             val index = parent.indexOf(originalStopPlace)
@@ -94,22 +100,22 @@ class StopPlaceSplitter {
         return childStopPlaceIds
     }
 
-
     private fun addParentSiteRefToStopPlace(
         stopPlace: Element,
         namespace: Namespace,
-        parentId: String
+        parentId: String,
     ) {
         stopPlace.getChild(NetexTypes.PARENT_SITE_REF, namespace)?.let {
             stopPlace.removeContent(it)
         }
 
         val transportMode = stopPlace.getChild("TransportMode", namespace)
-        val insertIndex = if (transportMode != null) {
-            stopPlace.indexOf(transportMode) + 1
-        } else {
-            0
-        }
+        val insertIndex =
+            if (transportMode != null) {
+                stopPlace.indexOf(transportMode) + 1
+            } else {
+                0
+            }
 
         val parentSiteRef = Element(NetexTypes.PARENT_SITE_REF, namespace)
         parentSiteRef.setAttribute("ref", parentId)
@@ -118,10 +124,14 @@ class StopPlaceSplitter {
         stopPlace.addContent(insertIndex, parentSiteRef)
     }
 
-    private fun findStopPlaceById(container: Element, namespace: Namespace, stopPlaceId: String): Element? {
-        return container.getChildren(NetexTypes.STOP_PLACE, namespace)
+    private fun findStopPlaceById(
+        container: Element,
+        namespace: Namespace,
+        stopPlaceId: String,
+    ): Element? =
+        container
+            .getChildren(NetexTypes.STOP_PLACE, namespace)
             .find { it.getAttributeValue("id") == stopPlaceId }
-    }
 
     private fun generateParentId(originalId: String): String {
         val baseId = originalId.substringAfterLast(":")
@@ -129,7 +139,10 @@ class StopPlaceSplitter {
         return "$codespace:0000000_${baseId}_parent"
     }
 
-    private fun generateChildId(originalId: String, mode: TransportMode): String {
+    private fun generateChildId(
+        originalId: String,
+        mode: TransportMode,
+    ): String {
         val baseId = originalId.substringAfterLast(":")
         val codespace = originalId.substringBeforeLast(":")
         return "$codespace:0000000_${baseId}_${mode.netexValue}"

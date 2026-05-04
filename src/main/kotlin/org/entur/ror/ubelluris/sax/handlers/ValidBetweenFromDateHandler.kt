@@ -11,7 +11,7 @@ import java.time.format.DateTimeFormatter
  * Handler that replaces the ValidBetween instance content with the current datetime.
  */
 class ValidBetweenFromDateHandler(
-    private val clock: Clock = Clock.systemDefaultZone()
+    private val clock: Clock = Clock.systemDefaultZone(),
 ) : XMLElementHandler {
     private val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ssXXX")
 
@@ -20,7 +20,7 @@ class ValidBetweenFromDateHandler(
         localName: String?,
         qName: String?,
         attributes: Attributes?,
-        writer: DelegatingXMLElementWriter
+        writer: DelegatingXMLElementWriter,
     ) {
         writer.startElement(uri, localName, qName, attributes)
     }
@@ -29,7 +29,7 @@ class ValidBetweenFromDateHandler(
         ch: CharArray?,
         start: Int,
         length: Int,
-        writer: DelegatingXMLElementWriter
+        writer: DelegatingXMLElementWriter,
     ) {
         val timestamp = ZonedDateTime.now(clock).format(formatter)
         writer.characters(timestamp.toCharArray(), 0, timestamp.length)
@@ -39,7 +39,7 @@ class ValidBetweenFromDateHandler(
         uri: String?,
         localName: String?,
         qName: String?,
-        writer: DelegatingXMLElementWriter
+        writer: DelegatingXMLElementWriter,
     ) {
         writer.endElement(uri, localName, qName)
     }

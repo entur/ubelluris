@@ -9,9 +9,8 @@ import org.xml.sax.Attributes
  * Skips TransportMode, StopPlaceType, and Weighting for parent StopPlaces
  */
 class ParentStopPlaceAttributeSkipHandler(
-    private val repository: StopPlacePurgingRepository
+    private val repository: StopPlacePurgingRepository,
 ) : XMLElementHandler {
-
     private var currentStopPlaceId: String? = null
     private var isInsideParentStopPlace = false
 
@@ -32,7 +31,7 @@ class ParentStopPlaceAttributeSkipHandler(
         localName: String?,
         qName: String?,
         attributes: Attributes?,
-        writer: DelegatingXMLElementWriter
+        writer: DelegatingXMLElementWriter,
     ) {
         if (!isInsideParentStopPlace) {
             writer.startElement(uri, localName, qName, attributes)
@@ -43,7 +42,7 @@ class ParentStopPlaceAttributeSkipHandler(
         ch: CharArray?,
         start: Int,
         length: Int,
-        writer: DelegatingXMLElementWriter
+        writer: DelegatingXMLElementWriter,
     ) {
         if (!isInsideParentStopPlace) {
             writer.characters(ch, start, length)
@@ -54,7 +53,7 @@ class ParentStopPlaceAttributeSkipHandler(
         uri: String?,
         localName: String?,
         qName: String?,
-        writer: DelegatingXMLElementWriter
+        writer: DelegatingXMLElementWriter,
     ) {
         if (!isInsideParentStopPlace) {
             writer.endElement(uri, localName, qName)

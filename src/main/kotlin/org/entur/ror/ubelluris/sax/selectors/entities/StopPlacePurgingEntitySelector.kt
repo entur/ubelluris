@@ -7,8 +7,9 @@ import org.entur.netex.tools.lib.selectors.entities.EntitySelectorContext
 import org.entur.ror.ubelluris.model.NetexTypes
 import org.entur.ror.ubelluris.sax.plugins.StopPlacePurgingRepository
 
-class StopPlacePurgingEntitySelector(val stopPlacePurgingRepository: StopPlacePurgingRepository) : EntitySelector {
-
+class StopPlacePurgingEntitySelector(
+    val stopPlacePurgingRepository: StopPlacePurgingRepository,
+) : EntitySelector {
     override fun selectEntities(context: EntitySelectorContext): EntitySelection {
         val model = context.entityModel
         val activeEntitiesMap = mutableMapOf<String, MutableMap<String, Entity>>()
@@ -16,75 +17,79 @@ class StopPlacePurgingEntitySelector(val stopPlacePurgingRepository: StopPlacePu
         val stopPlacesToRemove = mutableSetOf<String>()
 
         entitiesByTypeAndId.forEach { (type, entities) ->
-            val entitiesToKeep = when (type) {
-
-                NetexTypes.QUAY -> {
-                    entities.filter { entity ->
-                        entity.key !in stopPlacePurgingRepository.entityIds
+            val entitiesToKeep =
+                when (type) {
+                    NetexTypes.QUAY -> {
+                        entities.filter { entity ->
+                            entity.key !in stopPlacePurgingRepository.entityIds
+                        }
                     }
-                }
 
-                NetexTypes.STOP_PLACE -> {
-                    entities.filter { entity ->
-                        val quays = stopPlacePurgingRepository.quaysPerStopPlace[entity.key].orEmpty()
+                    NetexTypes.STOP_PLACE -> {
+                        entities.filter { entity ->
+                            val quays = stopPlacePurgingRepository.quaysPerStopPlace[entity.key].orEmpty()
 
-                        val remainingQuays = quays.filter { quay ->
-                            quay.quayId !in stopPlacePurgingRepository.entityIds
-                        }
+                            val remainingQuays =
+                                quays.filter { quay ->
+                                    quay.quayId !in stopPlacePurgingRepository.entityIds
+                                }
 
-                        // Remove stop places with single quay with illegal public code
-                        if (remainingQuays.size == 1) {
-                            val singleQuay = remainingQuays.first()
-                            if (singleQuay.publicCode in stopPlacePurgingRepository.illegalPublicCodes) {
-                                stopPlacesToRemove.add(entity.key)
-                                return@filter false
-                            }
-                        }
-
-                        // Remove stop places with no quays
-                        if (remainingQuays.isEmpty()) {
-                            // Child stop place with no quays
-                            if (stopPlacePurgingRepository.isChildStopPlace(entity.key)) {
-                                stopPlacesToRemove.add(entity.key)
-                                return@filter false
+                            // Remove stop places with single quay with illegal public code
+                            if (remainingQuays.size == 1) {
+                                val singleQuay = remainingQuays.first()
+                                if (singleQuay.publicCode in stopPlacePurgingRepository.illegalPublicCodes) {
+                                    stopPlacesToRemove.add(entity.key)
+                                    return@filter false
+                                }
                             }
 
-                            // Stop place that is NOT a parent (orphaned stop place)
-                            val isParent = stopPlacePurgingRepository.parentSiteRefsPerStopPlace.containsKey(entity.key)
-                            if (!isParent) {
-                                stopPlacesToRemove.add(entity.key)
-                                return@filter false
+                            // Remove stop places with no quays
+                            if (remainingQuays.isEmpty()) {
+                                // Child stop place with no quays
+                                if (stopPlacePurgingRepository.isChildStopPlace(entity.key)) {
+                                    stopPlacesToRemove.add(entity.key)
+                                    return@filter false
+                                }
+
+                                // Stop place that is NOT a parent (orphaned stop place)
+                                val isParent = stopPlacePurgingRepository.parentSiteRefsPerStopPlace.containsKey(entity.key)
+                                if (!isParent) {
+                                    stopPlacesToRemove.add(entity.key)
+                                    return@filter false
+                                }
                             }
+                            true
                         }
-                        true
                     }
-                }
 
-                else -> entities
-            }
+                    else -> entities
+                }
             activeEntitiesMap[type] = entitiesToKeep.toMutableMap()
         }
 
         val stopPlaceEntities = activeEntitiesMap[NetexTypes.STOP_PLACE]
         if (stopPlaceEntities != null) {
-            val finalStopPlaces = stopPlaceEntities.filter { (stopPlaceId) ->
-                val children = stopPlacePurgingRepository.parentSiteRefsPerStopPlace[stopPlaceId]
-                if (children != null) {
-                    val remainingChildren = children.filter { childId ->
-                        childId !in stopPlacesToRemove && stopPlaceEntities.containsKey(childId)
-                    }
+            val finalStopPlaces =
+                stopPlaceEntities.filter { (stopPlaceId) ->
+                    val children = stopPlacePurgingRepository.parentSiteRefsPerStopPlace[stopPlaceId]
+                    if (children != null) {
+                        val remainingChildren =
+                            children.filter { childId ->
+                                childId !in stopPlacesToRemove && stopPlaceEntities.containsKey(childId)
+                            }
 
-                    val quays = stopPlacePurgingRepository.quaysPerStopPlace[stopPlaceId].orEmpty()
-                    val remainingQuays = quays.filter { quay ->
-                        quay.quayId !in stopPlacePurgingRepository.entityIds
-                    }
+                        val quays = stopPlacePurgingRepository.quaysPerStopPlace[stopPlaceId].orEmpty()
+                        val remainingQuays =
+                            quays.filter { quay ->
+                                quay.quayId !in stopPlacePurgingRepository.entityIds
+                            }
 
-                    if (remainingQuays.isEmpty() && remainingChildren.size <= 1) {
-                        return@filter false
+                        if (remainingQuays.isEmpty() && remainingChildren.size <= 1) {
+                            return@filter false
+                        }
                     }
+                    true
                 }
-                true
-            }
             activeEntitiesMap[NetexTypes.STOP_PLACE] = finalStopPlaces.toMutableMap()
         }
 

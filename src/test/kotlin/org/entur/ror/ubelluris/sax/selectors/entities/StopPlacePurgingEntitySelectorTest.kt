@@ -13,7 +13,6 @@ import org.mockito.Mockito.mock
 import org.mockito.kotlin.whenever
 
 class StopPlacePurgingEntitySelectorTest {
-
     private val repository = StopPlacePurgingRepository()
     private val selector = StopPlacePurgingEntitySelector(repository)
 
@@ -115,12 +114,13 @@ class StopPlacePurgingEntitySelectorTest {
 
         setupEntities(
             mapOf(
-                NetexTypes.STOP_PLACE to mapOf(
-                    "parentStop" to parentStopPlace,
-                    "child1" to child1,
-                    "child2" to child2
-                )
-            )
+                NetexTypes.STOP_PLACE to
+                    mapOf(
+                        "parentStop" to parentStopPlace,
+                        "child1" to child1,
+                        "child2" to child2,
+                    ),
+            ),
         )
 
         val result = selector.selectEntities(context)
@@ -140,11 +140,12 @@ class StopPlacePurgingEntitySelectorTest {
 
         setupEntities(
             mapOf(
-                NetexTypes.STOP_PLACE to mapOf(
-                    "parentStop" to parentStopPlace,
-                    "child1" to child1
-                )
-            )
+                NetexTypes.STOP_PLACE to
+                    mapOf(
+                        "parentStop" to parentStopPlace,
+                        "child1" to child1,
+                    ),
+            ),
         )
 
         val result = selector.selectEntities(context)
@@ -162,11 +163,12 @@ class StopPlacePurgingEntitySelectorTest {
 
         setupEntities(
             mapOf(
-                NetexTypes.STOP_PLACE to mapOf(
-                    "parentStop" to parentStopPlace,
-                    "child1" to child1
-                )
-            )
+                NetexTypes.STOP_PLACE to
+                    mapOf(
+                        "parentStop" to parentStopPlace,
+                        "child1" to child1,
+                    ),
+            ),
         )
 
         val result = selector.selectEntities(context)
@@ -213,8 +215,8 @@ class StopPlacePurgingEntitySelectorTest {
         setupEntities(
             mapOf(
                 NetexTypes.STOP_PLACE to mapOf("stopPlace1" to stopPlace),
-                NetexTypes.QUAY to mapOf("quay1" to quay1, "quay2" to quay2)
-            )
+                NetexTypes.QUAY to mapOf("quay1" to quay1, "quay2" to quay2),
+            ),
         )
 
         val result = selector.selectEntities(context)
@@ -235,8 +237,8 @@ class StopPlacePurgingEntitySelectorTest {
         setupEntities(
             mapOf(
                 NetexTypes.STOP_PLACE to mapOf("stopPlace1" to stopPlace),
-                NetexTypes.QUAY to mapOf("quay1" to quay1)
-            )
+                NetexTypes.QUAY to mapOf("quay1" to quay1),
+            ),
         )
 
         val result = selector.selectEntities(context)

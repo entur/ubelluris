@@ -14,7 +14,6 @@ import org.xml.sax.Attributes
 import org.xml.sax.helpers.AttributesImpl
 
 class StopPlaceQuayHandlerTest {
-
     private val attributeReplacer = AttributeReplacer("SE:050", "SAM")
     private val handler = StopPlaceQuayHandler(attributeReplacer)
     private val writer = mock<DelegatingXMLElementWriter>()
@@ -32,7 +31,7 @@ class StopPlaceQuayHandlerTest {
                 eq(null),
                 eq(NetexTypes.QUAY),
                 eq(NetexTypes.QUAY),
-                capture()
+                capture(),
             )
 
             val rewrittenId = firstValue.getValue("id")

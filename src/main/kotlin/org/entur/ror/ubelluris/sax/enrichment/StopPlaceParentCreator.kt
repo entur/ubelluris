@@ -11,7 +11,7 @@ class StopPlaceParentCreator {
     fun createParentStopPlace(
         originalStopPlace: Element,
         namespace: Namespace,
-        parentId: String
+        parentId: String,
     ): Element {
         val parent = Element(NetexTypes.STOP_PLACE, namespace)
         parent.setAttribute("id", parentId)
@@ -20,12 +20,16 @@ class StopPlaceParentCreator {
         val keyList = Element("keyList", namespace)
         parent.addContent(keyList)
 
-        val ownerKv = originalStopPlace.getChild("keyList", namespace)
-            ?.getChildren(NetexTypes.KEY_VALUE, namespace)
-            ?.find { it.getChildText(NetexTypes.KEY, namespace) == "owner" }
-        val dataFromKv = originalStopPlace.getChild("keyList", namespace)
-            ?.getChildren(NetexTypes.KEY_VALUE, namespace)
-            ?.find { it.getChildText(NetexTypes.KEY, namespace) == "data-from" }
+        val ownerKv =
+            originalStopPlace
+                .getChild("keyList", namespace)
+                ?.getChildren(NetexTypes.KEY_VALUE, namespace)
+                ?.find { it.getChildText(NetexTypes.KEY, namespace) == "owner" }
+        val dataFromKv =
+            originalStopPlace
+                .getChild("keyList", namespace)
+                ?.getChildren(NetexTypes.KEY_VALUE, namespace)
+                ?.find { it.getChildText(NetexTypes.KEY, namespace) == "data-from" }
 
         if (ownerKv != null) {
             keyList.addContent(ownerKv.clone())

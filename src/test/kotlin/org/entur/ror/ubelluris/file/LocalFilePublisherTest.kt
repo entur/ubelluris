@@ -7,7 +7,6 @@ import java.nio.file.Files
 import java.nio.file.Path
 
 class LocalFilePublisherTest {
-
     private val storagePath = Path.of("2026", "01", "01")
 
     @TempDir
@@ -24,12 +23,13 @@ class LocalFilePublisherTest {
         Files.writeString(stopPlaceFile, "<StopPlaces/>")
 
         val providers = listOf("RUT", "ATB", "FLT")
-        val timetablePaths = providers.associate { provider ->
-            val dir = tempDir.resolve(storagePath).resolve("timetable").resolve(provider)
-            Files.createDirectories(dir)
-            Files.writeString(dir.resolve("${provider}_line_001.xml"), "<Line />")
-            provider to dir
-        }
+        val timetablePaths =
+            providers.associate { provider ->
+                val dir = tempDir.resolve(storagePath).resolve("timetable").resolve(provider)
+                Files.createDirectories(dir)
+                Files.writeString(dir.resolve("${provider}_line_001.xml"), "<Line />")
+                provider to dir
+            }
 
         val result = publisher.publish(stopPlaceFile, timetablePaths)
 

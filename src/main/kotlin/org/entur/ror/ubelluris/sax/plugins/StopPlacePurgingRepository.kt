@@ -7,23 +7,26 @@ class StopPlacePurgingRepository(
     val quaysPerStopPlace: MutableMap<String, MutableSet<QuayData>> = mutableMapOf(),
     val parentSiteRefsPerStopPlace: MutableMap<String, MutableSet<String>> = mutableMapOf(),
     val childStopPlaces: MutableSet<String> = mutableSetOf(),
-    val illegalPublicCodes: List<String> = listOf("*", "-")
+    val illegalPublicCodes: List<String> = listOf("*", "-"),
 ) {
-
     fun addEntityId(entityId: String) {
         entityIds.add(entityId)
     }
 
-    fun addQuayToStopPlace(stopPlaceId: String, quayData: QuayData) {
+    fun addQuayToStopPlace(
+        stopPlaceId: String,
+        quayData: QuayData,
+    ) {
         quaysPerStopPlace.getOrPut(stopPlaceId) { mutableSetOf() }.add(quayData)
     }
 
-    fun addChildStopToParent(parentSiteRef: String, childId: String) {
+    fun addChildStopToParent(
+        parentSiteRef: String,
+        childId: String,
+    ) {
         parentSiteRefsPerStopPlace.getOrPut(parentSiteRef) { mutableSetOf() }.add(childId)
         childStopPlaces.add(childId)
     }
 
-    fun isChildStopPlace(stopPlaceId: String): Boolean {
-        return stopPlaceId in childStopPlaces
-    }
+    fun isChildStopPlace(stopPlaceId: String): Boolean = stopPlaceId in childStopPlaces
 }

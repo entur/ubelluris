@@ -12,7 +12,6 @@ import java.util.zip.ZipEntry
 import java.util.zip.ZipOutputStream
 
 class GcsFileFetcherTest {
-
     @TempDir
     lateinit var tempDir: Path
 
@@ -25,13 +24,14 @@ class GcsFileFetcherTest {
         Files.createDirectories(stopsDir)
         createZipFile(stopsDir.resolve("stop_places.zip"), mapOf("stops.xml" to "<StopPlaces/>"))
 
-        val fetcher = GcsFileFetcher(
-            storage = storage,
-            inputBucketName = "test-bucket",
-            stopPlaceBlobPath = stopPlaceBlobPath,
-            timetableBlobPaths = emptyMap(),
-            downloadDir = tempDir
-        )
+        val fetcher =
+            GcsFileFetcher(
+                storage = storage,
+                inputBucketName = "test-bucket",
+                stopPlaceBlobPath = stopPlaceBlobPath,
+                timetableBlobPaths = emptyMap(),
+                downloadDir = tempDir,
+            )
 
         val result = fetcher.fetch()
 
@@ -51,23 +51,25 @@ class GcsFileFetcherTest {
         Files.createDirectories(timetableDir)
         createZipFile(
             timetableDir.resolve("provider1.zip"),
-            mapOf("line_001.xml" to "<Line/>", "line_002.xml" to "<Line/>")
+            mapOf("line_001.xml" to "<Line/>", "line_002.xml" to "<Line/>"),
         )
         createZipFile(
             timetableDir.resolve("provider2.zip"),
-            mapOf("line_001.xml" to "<Line/>")
+            mapOf("line_001.xml" to "<Line/>"),
         )
 
-        val fetcher = GcsFileFetcher(
-            storage = storage,
-            inputBucketName = "test-bucket",
-            stopPlaceBlobPath = stopPlaceBlobPath,
-            timetableBlobPaths = mapOf(
-                "provider1" to "timetable/provider1.zip",
-                "provider2" to "timetable/provider2.zip"
-            ),
-            downloadDir = tempDir
-        )
+        val fetcher =
+            GcsFileFetcher(
+                storage = storage,
+                inputBucketName = "test-bucket",
+                stopPlaceBlobPath = stopPlaceBlobPath,
+                timetableBlobPaths =
+                    mapOf(
+                        "provider1" to "timetable/provider1.zip",
+                        "provider2" to "timetable/provider2.zip",
+                    ),
+                downloadDir = tempDir,
+            )
 
         val result = fetcher.fetch()
 
@@ -91,13 +93,14 @@ class GcsFileFetcherTest {
         Files.createDirectories(stopsDir)
         createZipFile(stopsDir.resolve("stop_places.zip"), mapOf("stops.xml" to "<StopPlaces/>"))
 
-        val fetcher = GcsFileFetcher(
-            storage = storage,
-            inputBucketName = "test-bucket",
-            stopPlaceBlobPath = stopPlaceBlobPath,
-            timetableBlobPaths = emptyMap(),
-            downloadDir = tempDir
-        )
+        val fetcher =
+            GcsFileFetcher(
+                storage = storage,
+                inputBucketName = "test-bucket",
+                stopPlaceBlobPath = stopPlaceBlobPath,
+                timetableBlobPaths = emptyMap(),
+                downloadDir = tempDir,
+            )
 
         fetcher.fetch()
         val secondResult = fetcher.fetch()
@@ -105,7 +108,10 @@ class GcsFileFetcherTest {
         assertThat(secondResult.stopPlacePath).exists()
     }
 
-    private fun createZipFile(path: Path, files: Map<String, String>) {
+    private fun createZipFile(
+        path: Path,
+        files: Map<String, String>,
+    ) {
         val baos = ByteArrayOutputStream()
         ZipOutputStream(baos).use { zip ->
             files.forEach { (name, content) ->

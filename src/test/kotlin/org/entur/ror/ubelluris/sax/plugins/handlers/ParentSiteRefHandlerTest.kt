@@ -48,5 +48,4 @@ class ParentSiteRefHandlerTest {
         assertThat(stopPlacePurgingRepository.parentSiteRefsPerStopPlace).isEmpty()
         assertThat(stopPlacePurgingRepository.childStopPlaces).isEmpty()
     }
-
 }

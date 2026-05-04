@@ -8,7 +8,7 @@ import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
 class PublicationTimestampHandler(
-    private val clock: Clock = Clock.systemDefaultZone()
+    private val clock: Clock = Clock.systemDefaultZone(),
 ) : XMLElementHandler {
     private val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss")
 
@@ -17,7 +17,7 @@ class PublicationTimestampHandler(
         localName: String?,
         qName: String?,
         attributes: Attributes?,
-        writer: DelegatingXMLElementWriter
+        writer: DelegatingXMLElementWriter,
     ) {
         writer.startElement(uri, localName, qName, attributes)
     }
@@ -26,7 +26,7 @@ class PublicationTimestampHandler(
         ch: CharArray?,
         start: Int,
         length: Int,
-        writer: DelegatingXMLElementWriter
+        writer: DelegatingXMLElementWriter,
     ) {
         val timestamp = LocalDateTime.now(clock).format(formatter)
         writer.characters(timestamp.toCharArray(), 0, timestamp.length)
@@ -36,7 +36,7 @@ class PublicationTimestampHandler(
         uri: String?,
         localName: String?,
         qName: String?,
-        writer: DelegatingXMLElementWriter
+        writer: DelegatingXMLElementWriter,
     ) {
         writer.endElement(uri, localName, qName)
     }

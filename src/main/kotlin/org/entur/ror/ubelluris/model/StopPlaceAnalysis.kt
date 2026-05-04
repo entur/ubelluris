@@ -10,7 +10,7 @@ data class StopPlaceAnalysis(
     val existingMode: TransportMode?,
     val existingType: String?,
     val hasParent: Boolean,
-    val parentRef: String?
+    val parentRef: String?,
 )
 
 /**
@@ -30,5 +30,5 @@ enum class Scenario {
     /**
      * StopPlace has multiple quays with different modes - split into multiple StopPlaces
      */
-    MIXED_MODE
+    MIXED_MODE,
 }

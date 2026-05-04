@@ -13,13 +13,13 @@ import java.nio.file.Files
 import java.nio.file.Path
 
 class GcsFilePublisherTest {
-
-    private val config = GcsConfig(
-        "test-project",
-        "test-bucket",
-        "test-input-bucket",
-        true
-    )
+    private val config =
+        GcsConfig(
+            "test-project",
+            "test-bucket",
+            "test-input-bucket",
+            true,
+        )
 
     private val mockStorage: Storage = mock()
     private val mockBlob: Blob = mock()
@@ -47,7 +47,7 @@ class GcsFilePublisherTest {
                 </StopPlace>
               </stopPlaces>
             </PublicationDelivery>
-        """.trimIndent()
+            """.trimIndent(),
         )
 
         whenever(mockStorage.createFrom(any<BlobInfo>(), any<InputStream>())).thenReturn(mockBlob)
@@ -80,12 +80,13 @@ class GcsFilePublisherTest {
         Files.writeString(stopPlaceFile, "<StopPlaces/>")
 
         val providers = listOf("RUT", "ATB")
-        val timetablePaths = providers.associate { provider ->
-            val dir = tempDir.resolve("timetable").resolve(provider)
-            Files.createDirectories(dir)
-            Files.writeString(dir.resolve("${provider}_line_001.xml"), "<Line />")
-            provider to dir
-        }
+        val timetablePaths =
+            providers.associate { provider ->
+                val dir = tempDir.resolve("timetable").resolve(provider)
+                Files.createDirectories(dir)
+                Files.writeString(dir.resolve("${provider}_line_001.xml"), "<Line />")
+                provider to dir
+            }
 
         whenever(mockStorage.createFrom(any<BlobInfo>(), any<InputStream>())).thenReturn(mockBlob)
 

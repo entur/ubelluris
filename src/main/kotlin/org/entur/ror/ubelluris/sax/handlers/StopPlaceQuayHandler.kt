@@ -9,14 +9,14 @@ import org.xml.sax.Attributes
 import org.xml.sax.helpers.AttributesImpl
 
 class StopPlaceQuayHandler(
-    private val attributeReplacer: AttributeReplacer
+    private val attributeReplacer: AttributeReplacer,
 ) : XMLElementHandler {
     override fun startElement(
         uri: String?,
         localName: String?,
         qName: String?,
         attributes: Attributes?,
-        writer: DelegatingXMLElementWriter
+        writer: DelegatingXMLElementWriter,
     ) {
         val idValue = attributeReplacer.replaceAttribute(attributes, "id")
         val newAttributes = AttributesImpl()
@@ -29,7 +29,7 @@ class StopPlaceQuayHandler(
         ch: CharArray?,
         start: Int,
         length: Int,
-        writer: DelegatingXMLElementWriter
+        writer: DelegatingXMLElementWriter,
     ) {
         writer.characters(ch, start, length)
     }
@@ -38,7 +38,7 @@ class StopPlaceQuayHandler(
         uri: String?,
         localName: String?,
         qName: String?,
-        writer: DelegatingXMLElementWriter
+        writer: DelegatingXMLElementWriter,
     ) {
         writer.endElement(uri, NetexTypes.QUAY, NetexTypes.QUAY)
     }
