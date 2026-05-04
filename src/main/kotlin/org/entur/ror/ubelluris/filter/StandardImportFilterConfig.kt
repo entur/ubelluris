@@ -56,7 +56,8 @@ class StandardImportFilterConfig(
                     "/PublicationDelivery/PublicationTimestamp" to PublicationTimestampHandler(),
                     "/PublicationDelivery/dataObjects/SiteFrame" to SiteFrameHandler(attributeReplacer),
                     "/PublicationDelivery/dataObjects/SiteFrame/ValidBetween/FromDate" to ValidBetweenFromDateHandler(),
-                    "/PublicationDelivery/dataObjects/SiteFrame/stopPlaces/StopPlace/ValidBetween/FromDate" to ValidBetweenFromDateHandler(),
+                    "/PublicationDelivery/dataObjects/SiteFrame/stopPlaces/StopPlace/ValidBetween/FromDate"
+                        to ValidBetweenFromDateHandler(),
                     "/PublicationDelivery/dataObjects/SiteFrame/codespaces/Codespace" to
                         CodespaceIdHandler(
                             attributeReplacer,
@@ -85,10 +86,14 @@ class StandardImportFilterConfig(
                         PublicCodeFilterHandler(
                             cliConfig.illegalPublicCodes,
                         ),
-                    "/PublicationDelivery/dataObjects/SiteFrame/stopPlaces/StopPlace/quays/Quay/PrivateCode" to TextTrimmingHandler(),
-                    "/PublicationDelivery/dataObjects/SiteFrame/stopPlaces/StopPlace/TransportMode" to parentStopPlaceAttributeSkipHandler,
-                    "/PublicationDelivery/dataObjects/SiteFrame/stopPlaces/StopPlace/StopPlaceType" to parentStopPlaceAttributeSkipHandler,
-                    "/PublicationDelivery/dataObjects/SiteFrame/stopPlaces/StopPlace/Weighting" to parentStopPlaceAttributeSkipHandler,
+                    "/PublicationDelivery/dataObjects/SiteFrame/stopPlaces/StopPlace/quays/Quay/PrivateCode"
+                        to TextTrimmingHandler(),
+                    "/PublicationDelivery/dataObjects/SiteFrame/stopPlaces/StopPlace/TransportMode"
+                        to parentStopPlaceAttributeSkipHandler,
+                    "/PublicationDelivery/dataObjects/SiteFrame/stopPlaces/StopPlace/StopPlaceType"
+                        to parentStopPlaceAttributeSkipHandler,
+                    "/PublicationDelivery/dataObjects/SiteFrame/stopPlaces/StopPlace/Weighting"
+                        to parentStopPlaceAttributeSkipHandler,
                 ),
             ).withPlugins(
                 listOf(
