@@ -45,6 +45,5 @@ bin/
 
 ### Project Specific ###
 /downloads
-/transport-mode-helpers
-/processing
 /results
+/.claude/settings.local.json

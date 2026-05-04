@@ -4,11 +4,11 @@ import org.entur.netex.tools.pipeline.app.FilterNetexApp
 import org.entur.ror.ubelluris.config.CliConfig
 import org.entur.ror.ubelluris.processor.KeyValueMigrationProcessor
 import org.entur.ror.ubelluris.processor.StopPlaceTypeNormalizer
-import org.entur.ror.ubelluris.timetable.enrichment.StopPlaceAnalyzer
-import org.entur.ror.ubelluris.timetable.enrichment.StopPlaceSplitter
-import org.entur.ror.ubelluris.timetable.enrichment.TransportModeInserter
-import org.entur.ror.ubelluris.timetable.extraction.QuayModeMatcher
-import org.entur.ror.ubelluris.timetable.model.TimetableData
+import org.entur.ror.ubelluris.sax.enrichment.StopPlaceAnalyzer
+import org.entur.ror.ubelluris.sax.enrichment.StopPlaceSplitter
+import org.entur.ror.ubelluris.sax.enrichment.TransportModeInserter
+import org.entur.ror.ubelluris.sax.enrichment.QuayModeMatcher
+import org.entur.ror.ubelluris.model.TimetableData
 import org.slf4j.LoggerFactory
 import java.nio.file.Files
 import java.nio.file.Path
@@ -27,14 +27,12 @@ class StopPlaceFilterService(
     private val stopPlaceAnalyzer = StopPlaceAnalyzer()
     private val transportModeInserter = TransportModeInserter(StopPlaceSplitter())
 
-    fun process(inputFile: Path, timetableData: Map<String, TimetableData>): Path {
+    override fun process(inputFile: Path, timetableData: Map<String, TimetableData>): Path {
         val outputFile = resultsDir.resolve(
             inputFile.fileName.toString().replace(".xml", "_filtered.xml")
         )
         return filter(inputFile, outputFile, timetableData)
     }
-
-    override fun process(inputFile: Path): Path = process(inputFile, emptyMap())
 
     fun filter(inputFile: Path, outputFile: Path, timetableData: Map<String, TimetableData> = emptyMap()): Path {
         Files.createDirectories(resultsDir)

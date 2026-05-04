@@ -4,7 +4,7 @@ import org.entur.netex.tools.lib.config.FilterConfig
 import org.entur.netex.tools.lib.config.FilterConfigBuilder
 import org.entur.ror.ubelluris.config.CliConfig
 import org.entur.ror.ubelluris.sax.handlers.PublicationTimestampHandler
-import org.entur.ror.ubelluris.sax.plugins.timetable.TransportModeToLocalScheduledStopPointMapper
+import org.entur.ror.ubelluris.sax.plugins.TransportModeToLocalScheduledStopPointMapper
 
 class TimetableFilterConfig(
     private val cliConfig: CliConfig,

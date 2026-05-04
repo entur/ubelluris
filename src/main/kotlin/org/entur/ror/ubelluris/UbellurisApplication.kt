@@ -2,11 +2,12 @@ package org.entur.ror.ubelluris
 
 import org.entur.ror.ubelluris.config.GcsConfig
 import org.entur.ror.ubelluris.config.JsonConfig
+import org.entur.ror.ubelluris.file.FilePublisher.Companion.STOPS_DIR
+import org.entur.ror.ubelluris.file.FilePublisher.Companion.TIMETABLE_DIR
 import org.entur.ror.ubelluris.file.GcsFileFetcher
 import org.entur.ror.ubelluris.file.UbellurisBucketService
 import org.entur.ror.ubelluris.filter.StopPlaceFilterService
-import org.entur.ror.ubelluris.filter.TimetableNetexProcessor
-import org.entur.ror.ubelluris.publish.LocalFilePublisher
+import org.entur.ror.ubelluris.filter.TimetableFilterService
 import java.io.File
 import java.time.LocalDate
 import kotlin.io.path.Path
@@ -33,17 +34,19 @@ fun main(args: Array<String>) {
 
     val today = LocalDate.now()
     val storagePath = Path("${today.year}", "%02d".format(today.monthValue), "%02d".format(today.dayOfMonth))
+    val stopPlaceBlobPath = storagePath.resolve("$STOPS_DIR/sweden.zip").joinToString("/")
+    val timetableBlobPaths = cliConfig.timetableProviders.associateWith { provider ->
+        storagePath.resolve("$TIMETABLE_DIR/$provider.zip").joinToString("/")
+    }
 
     UbellurisService(
         fetcher = GcsFileFetcher(
             storage = storage,
             inputBucketName = gcsConfig.inputBucketName,
-            stopPlaceBlobPath = storagePath.resolve("stops/sweden.zip").joinToString("/"),
-            timetableBlobPaths = cliConfig.timetableProviders.associateWith { provider ->
-                storagePath.resolve("timetable/$provider.zip").joinToString("/")
-            }
+            stopPlaceBlobPath = stopPlaceBlobPath,
+            timetableBlobPaths = timetableBlobPaths
         ),
-        timetableProcessor = TimetableNetexProcessor(cliConfig),
+        timetableProcessor = TimetableFilterService(cliConfig),
         stopPlaceProcessor = StopPlaceFilterService(
             cliConfig = cliConfig,
             blacklistFilePath = blacklistFilePath

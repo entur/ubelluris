@@ -3,14 +3,14 @@ package org.entur.ror.ubelluris
 import org.entur.ror.ubelluris.file.FileFetchResult
 import org.entur.ror.ubelluris.file.FileFetcher
 import org.entur.ror.ubelluris.filter.StopPlaceFilterService
-import org.entur.ror.ubelluris.filter.TimetableNetexProcessor
-import org.entur.ror.ubelluris.publish.FilePublisher
+import org.entur.ror.ubelluris.filter.TimetableFilterService
+import org.entur.ror.ubelluris.file.FilePublisher
 import org.slf4j.LoggerFactory
 import java.nio.file.Path
 
 class UbellurisService(
     private val fetcher: FileFetcher,
-    private val timetableProcessor: TimetableNetexProcessor,
+    private val timetableProcessor: TimetableFilterService,
     private val stopPlaceProcessor: StopPlaceFilterService,
     private val publisher: FilePublisher
 ) {
