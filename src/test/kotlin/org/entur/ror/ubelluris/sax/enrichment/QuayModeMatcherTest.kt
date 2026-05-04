@@ -1,6 +1,7 @@
 package org.entur.ror.ubelluris.sax.enrichment
 
 import org.assertj.core.api.Assertions
+import org.assertj.core.api.Assertions.assertThat
 import org.entur.ror.ubelluris.model.TransportMode
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.io.TempDir
@@ -75,14 +76,14 @@ class QuayModeMatcherTest {
 
         val result = quayModeMatcher.match(xmlFile, scheduledStopPointRefs)
 
-        Assertions.assertThat(result.quayToModes).hasSize(4)
-        Assertions.assertThat(result.quayToModes["SAM:Quay:50001"]).containsExactly(TransportMode.WATER)
-        Assertions.assertThat(result.quayToModes["SAM:Quay:50002"]).containsExactly(TransportMode.WATER)
-        Assertions.assertThat(result.quayToModes["SAM:Quay:60001"]).containsExactly(TransportMode.TRAM)
-        Assertions.assertThat(result.quayToModes["SAM:Quay:60002"]).containsExactly(TransportMode.BUS)
+        assertThat(result.quayToModes).hasSize(4)
+        assertThat(result.quayToModes["SAM:Quay:50001"]).containsExactly(TransportMode.WATER)
+        assertThat(result.quayToModes["SAM:Quay:50002"]).containsExactly(TransportMode.WATER)
+        assertThat(result.quayToModes["SAM:Quay:60001"]).containsExactly(TransportMode.TRAM)
+        assertThat(result.quayToModes["SAM:Quay:60002"]).containsExactly(TransportMode.BUS)
 
-        Assertions.assertThat(result.quayToStopPlace).hasSize(4)
-        Assertions.assertThat(result.quayToStopPlace)
+        assertThat(result.quayToStopPlace).hasSize(4)
+        assertThat(result.quayToStopPlace)
             .containsEntry("SAM:Quay:50001", "SAM:StopPlace:1000")
             .containsEntry("SAM:Quay:50002", "SAM:StopPlace:1000")
             .containsEntry("SAM:Quay:60001", "SAM:StopPlace:2000")
@@ -115,8 +116,8 @@ class QuayModeMatcherTest {
 
         val result = quayModeMatcher.match(xmlFile, scheduledStopPointRefs)
 
-        Assertions.assertThat(result.quayToModes).isEmpty()
-        Assertions.assertThat(result.quayToStopPlace).isEmpty()
+        assertThat(result.quayToModes).isEmpty()
+        assertThat(result.quayToStopPlace).isEmpty()
     }
 
     @Test
@@ -148,15 +149,15 @@ class QuayModeMatcherTest {
 
         val result = quayModeMatcher.match(xmlFile, scheduledStopPointRefs)
 
-        Assertions.assertThat(result.quayToModes).hasSize(1)
+        assertThat(result.quayToModes).hasSize(1)
 
-        Assertions.assertThat(result.quayToModes["SAM:Quay:50571"])
+        assertThat(result.quayToModes["SAM:Quay:50571"])
             .containsExactlyInAnyOrder(
                 TransportMode.TRAM,
                 TransportMode.BUS
             )
 
-        Assertions.assertThat(result.quayToStopPlace)
+        assertThat(result.quayToStopPlace)
             .hasSize(1)
             .containsEntry("SAM:Quay:50571", "SAM:StopPlace:1234")
     }
@@ -188,8 +189,8 @@ class QuayModeMatcherTest {
 
         val result = quayModeMatcher.match(xmlFile, scheduledStopPointRefs)
 
-        Assertions.assertThat(result.quayToModes).isEmpty()
-        Assertions.assertThat(result.quayToStopPlace).isEmpty()
+        assertThat(result.quayToModes).isEmpty()
+        assertThat(result.quayToStopPlace).isEmpty()
     }
 
     @Test
@@ -213,8 +214,8 @@ class QuayModeMatcherTest {
 
         val result = quayModeMatcher.match(xmlFile, scheduledStopPointRefs)
 
-        Assertions.assertThat(result.quayToModes).isEmpty()
-        Assertions.assertThat(result.quayToStopPlace).isEmpty()
+        assertThat(result.quayToModes).isEmpty()
+        assertThat(result.quayToStopPlace).isEmpty()
     }
 
 }

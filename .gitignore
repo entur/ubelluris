@@ -43,7 +43,9 @@ bin/
 ### Mac OS ###
 .DS_Store
 
+### Ai tools ###
+/.claude/settings.local.json
+
 ### Project Specific ###
 /downloads
 /results
-/.claude/settings.local.json
