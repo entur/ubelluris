@@ -1,6 +1,5 @@
 package org.entur.ror.ubelluris.sax.enrichment
 
-import org.assertj.core.api.Assertions
 import org.assertj.core.api.Assertions.assertThat
 import org.entur.ror.ubelluris.model.TransportMode
 import org.junit.jupiter.api.Test
