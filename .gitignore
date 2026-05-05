@@ -1,7 +1,12 @@
+### Maven ### TODO: remove with maven after the application have been running with gradle build for a while
 target/
 !.mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/
+
+### Gradle ###
+.gradle/
+build/
 
 ### IntelliJ IDEA ###
 .idea/
