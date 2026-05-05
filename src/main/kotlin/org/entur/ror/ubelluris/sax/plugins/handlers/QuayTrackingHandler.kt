@@ -8,13 +8,12 @@ import org.entur.ror.ubelluris.sax.plugins.data.QuayData
 import org.xml.sax.Attributes
 
 class QuayTrackingHandler(
-    val stopPlacePurgingRepository: StopPlacePurgingRepository
+    val stopPlacePurgingRepository: StopPlacePurgingRepository,
 ) : StopPlacePurgingDataCollector() {
-
     override fun startElement(
         context: StopPlacePurgingParsingContext,
         attributes: Attributes?,
-        currentEntity: Entity
+        currentEntity: Entity,
     ) {
         context.currentQuayId = currentEntity.id
         context.quayHasPublicCode = false
@@ -22,7 +21,7 @@ class QuayTrackingHandler(
 
     override fun endElement(
         context: StopPlacePurgingParsingContext,
-        currentEntity: Entity
+        currentEntity: Entity,
     ) {
         val quayId = context.currentQuayId
         val hasPublicCode = context.quayHasPublicCode
@@ -32,7 +31,7 @@ class QuayTrackingHandler(
             if (parentEntityId != null) {
                 stopPlacePurgingRepository.addQuayToStopPlace(
                     parentEntityId,
-                    QuayData(currentEntity.id, "")
+                    QuayData(currentEntity.id, ""),
                 )
             }
         }

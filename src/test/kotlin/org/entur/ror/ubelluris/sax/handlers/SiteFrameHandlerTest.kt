@@ -31,7 +31,7 @@ class SiteFrameHandlerTest {
                 eq(null),
                 eq(NetexTypes.SITE_FRAME),
                 eq(NetexTypes.SITE_FRAME),
-                capture()
+                capture(),
             )
 
             val rewrittenId = firstValue.getValue("id")

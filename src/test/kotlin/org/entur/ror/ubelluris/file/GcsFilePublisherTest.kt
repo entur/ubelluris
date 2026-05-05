@@ -7,19 +7,24 @@ import org.assertj.core.api.Assertions.assertThat
 import org.entur.ror.ubelluris.config.GcsConfig
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.io.TempDir
-import org.mockito.kotlin.*
+import org.mockito.Mockito.mock
+import org.mockito.Mockito.times
+import org.mockito.kotlin.any
+import org.mockito.kotlin.argumentCaptor
+import org.mockito.kotlin.verify
+import org.mockito.kotlin.whenever
 import java.io.InputStream
 import java.nio.file.Files
 import java.nio.file.Path
 
 class GcsFilePublisherTest {
-
-    private val config = GcsConfig(
-        "test-project",
-        "test-bucket",
-        "test-input-bucket",
-        true
-    )
+    private val config =
+        GcsConfig(
+            "test-project",
+            "test-bucket",
+            "test-input-bucket",
+            true,
+        )
 
     private val mockStorage: Storage = mock()
     private val mockBlob: Blob = mock()
@@ -47,7 +52,7 @@ class GcsFilePublisherTest {
                 </StopPlace>
               </stopPlaces>
             </PublicationDelivery>
-        """.trimIndent()
+            """.trimIndent(),
         )
 
         whenever(mockStorage.createFrom(any<BlobInfo>(), any<InputStream>())).thenReturn(mockBlob)
@@ -80,12 +85,13 @@ class GcsFilePublisherTest {
         Files.writeString(stopPlaceFile, "<StopPlaces/>")
 
         val providers = listOf("RUT", "ATB")
-        val timetablePaths = providers.associate { provider ->
-            val dir = tempDir.resolve("timetable").resolve(provider)
-            Files.createDirectories(dir)
-            Files.writeString(dir.resolve("${provider}_line_001.xml"), "<Line />")
-            provider to dir
-        }
+        val timetablePaths =
+            providers.associate { provider ->
+                val dir = tempDir.resolve("timetable").resolve(provider)
+                Files.createDirectories(dir)
+                Files.writeString(dir.resolve("${provider}_line_001.xml"), "<Line />")
+                provider to dir
+            }
 
         whenever(mockStorage.createFrom(any<BlobInfo>(), any<InputStream>())).thenReturn(mockBlob)
 

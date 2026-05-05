@@ -5,7 +5,10 @@ import org.entur.netex.tools.lib.output.XMLElementHandler
 import org.entur.ror.ubelluris.model.NetexTypes
 import org.xml.sax.Attributes
 
-class XmlnsHandler(val sourceCodespace: String, val targetCodespace: String) : XMLElementHandler {
+class XmlnsHandler(
+    val sourceCodespace: String,
+    val targetCodespace: String,
+) : XMLElementHandler {
     private val contentBuffer = StringBuilder()
 
     override fun startElement(
@@ -13,7 +16,7 @@ class XmlnsHandler(val sourceCodespace: String, val targetCodespace: String) : X
         localName: String?,
         qName: String?,
         attributes: Attributes?,
-        writer: DelegatingXMLElementWriter
+        writer: DelegatingXMLElementWriter,
     ) {
         contentBuffer.clear()
         writer.startElement(uri, NetexTypes.XML_NS, NetexTypes.XML_NS, attributes)
@@ -23,7 +26,7 @@ class XmlnsHandler(val sourceCodespace: String, val targetCodespace: String) : X
         ch: CharArray?,
         start: Int,
         length: Int,
-        writer: DelegatingXMLElementWriter
+        writer: DelegatingXMLElementWriter,
     ) {
         if (ch != null) {
             contentBuffer.append(ch, start, length)
@@ -34,7 +37,7 @@ class XmlnsHandler(val sourceCodespace: String, val targetCodespace: String) : X
         uri: String?,
         localName: String?,
         qName: String?,
-        writer: DelegatingXMLElementWriter
+        writer: DelegatingXMLElementWriter,
     ) {
         val transformedContent = contentBuffer.toString().replace(sourceCodespace, targetCodespace)
         val charArray = transformedContent.toCharArray()

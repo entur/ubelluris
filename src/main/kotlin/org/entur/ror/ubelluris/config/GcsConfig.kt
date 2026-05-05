@@ -4,7 +4,7 @@ data class GcsConfig(
     val projectId: String,
     val outputBucketName: String,
     val inputBucketName: String,
-    val gcsEnabled: Boolean
+    val gcsEnabled: Boolean,
 ) {
     companion object {
         fun fromEnvironment(): GcsConfig {
@@ -15,16 +15,19 @@ data class GcsConfig(
                     projectId = "",
                     outputBucketName = "",
                     inputBucketName = "",
-                    gcsEnabled = false
+                    gcsEnabled = false,
                 )
             }
 
-            val projectId = System.getenv("GCS_PROJECT_ID")
-                ?: throw IllegalStateException("GCS_PROJECT_ID environment variable not set")
-            val outputBucketName = System.getenv("GCS_BUCKET_NAME")
-                ?: throw IllegalStateException("GCS_BUCKET_NAME environment variable not set")
-            val inputBucketName = System.getenv("GCS_INPUT_BUCKET")
-                ?: throw IllegalStateException("GCS_INPUT_BUCKET environment variable not set")
+            val projectId =
+                System.getenv("GCS_PROJECT_ID")
+                    ?: throw IllegalStateException("GCS_PROJECT_ID environment variable not set")
+            val outputBucketName =
+                System.getenv("GCS_BUCKET_NAME")
+                    ?: throw IllegalStateException("GCS_BUCKET_NAME environment variable not set")
+            val inputBucketName =
+                System.getenv("GCS_INPUT_BUCKET")
+                    ?: throw IllegalStateException("GCS_INPUT_BUCKET environment variable not set")
 
             return GcsConfig(projectId, outputBucketName, inputBucketName, enabled)
         }

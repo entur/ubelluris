@@ -18,13 +18,15 @@ import java.nio.file.Path
  * Inserts TransportMode values into stops XML based on analysis
  */
 class TransportModeInserter(
-    private val stopPlaceSplitter: StopPlaceSplitter
+    private val stopPlaceSplitter: StopPlaceSplitter,
 ) {
-
     private val logger = LoggerFactory.getLogger(javaClass)
     private val saxBuilder = SAXBuilder()
 
-    fun insert(stopsXmlPath: Path, analyses: List<StopPlaceAnalysis>): Path {
+    fun insert(
+        stopsXmlPath: Path,
+        analyses: List<StopPlaceAnalysis>,
+    ): Path {
         logger.info("Inserting transport modes for ${analyses.size} StopPlaces")
 
         val document = saxBuilder.build(stopsXmlPath.toFile())
@@ -80,7 +82,7 @@ class TransportModeInserter(
     private fun updateStopPlaceMode(
         stopPlaceElement: Element,
         namespace: Namespace,
-        newMode: TransportMode
+        newMode: TransportMode,
     ) {
         val transportModeElement = stopPlaceElement.getChild("TransportMode", namespace)
         if (transportModeElement != null) {
@@ -98,7 +100,11 @@ class TransportModeInserter(
         }
     }
 
-    private fun cleanQuayPublicCode(stopPlaceElement: Element, namespace: Namespace, quayId: String) {
+    private fun cleanQuayPublicCode(
+        stopPlaceElement: Element,
+        namespace: Namespace,
+        quayId: String,
+    ) {
         val quaysContainer = stopPlaceElement.getChild("quays", namespace) ?: return
         val quays = quaysContainer.getChildren(NetexTypes.QUAY, namespace)
 

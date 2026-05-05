@@ -14,13 +14,13 @@ import java.time.ZoneId
 import java.time.ZoneOffset
 
 class ValidBetweenFromDateHandlerTest {
-
     private val zoneId = ZoneId.of(ZoneOffset.UTC.id)
     private val fixedTime = LocalDateTime.of(2020, 1, 1, 12, 0, 0)
-    private val clock = Clock.fixed(
-        fixedTime.atZone(zoneId).toInstant(),
-        zoneId
-    )
+    private val clock =
+        Clock.fixed(
+            fixedTime.atZone(zoneId).toInstant(),
+            zoneId,
+        )
 
     private val handler = ValidBetweenFromDateHandler(clock)
     private val writer = mock<DelegatingXMLElementWriter>()
@@ -44,6 +44,5 @@ class ValidBetweenFromDateHandlerTest {
         }
     }
 
-    private fun offsetString(): String =
-        zoneId.rules.getOffset(fixedTime.atZone(zoneId).toInstant()).id
+    private fun offsetString(): String = zoneId.rules.getOffset(fixedTime.atZone(zoneId).toInstant()).id
 }

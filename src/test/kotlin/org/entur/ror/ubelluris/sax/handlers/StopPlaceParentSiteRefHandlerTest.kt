@@ -30,7 +30,7 @@ class StopPlaceParentSiteRefHandlerTest {
                 eq(null),
                 eq(NetexTypes.PARENT_SITE_REF),
                 eq(NetexTypes.PARENT_SITE_REF),
-                capture()
+                capture(),
             )
 
             val rewrittenId = firstValue.getValue("ref")

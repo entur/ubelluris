@@ -10,7 +10,6 @@ import org.mockito.kotlin.verify
 import org.xml.sax.Attributes
 
 class PublicCodeFilterHandlerTest {
-
     private val illegalCodes = listOf("*", "-", "81", "82", "83")
     private val handler = PublicCodeFilterHandler(illegalCodes)
     private val writer = mock<DelegatingXMLElementWriter>()

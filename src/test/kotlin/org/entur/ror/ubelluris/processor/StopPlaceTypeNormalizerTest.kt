@@ -6,12 +6,14 @@ import org.junit.jupiter.api.io.TempDir
 import java.nio.file.Path
 
 class StopPlaceTypeNormalizerTest {
-
     private val processor = StopPlaceTypeNormalizer()
 
     @Test
-    fun shouldNormalizeTransportModeFromOtherToBus(@TempDir tempDir: Path) {
-        val inputXml = """
+    fun shouldNormalizeTransportModeFromOtherToBus(
+        @TempDir tempDir: Path,
+    ) {
+        val inputXml =
+            """
             <?xml version="1.0" encoding="UTF-8"?>
             <PublicationDelivery xmlns="http://www.netex.org.uk/netex">
                 <dataObjects>
@@ -25,7 +27,7 @@ class StopPlaceTypeNormalizerTest {
                     </SiteFrame>
                 </dataObjects>
             </PublicationDelivery>
-        """.trimIndent()
+            """.trimIndent()
 
         val xmlFile = tempDir.resolve("test.xml").toFile()
         xmlFile.writeText(inputXml)
@@ -37,8 +39,11 @@ class StopPlaceTypeNormalizerTest {
     }
 
     @Test
-    fun shouldNormalizeStopPlaceTypeFromOtherToOnstreetBus(@TempDir tempDir: Path) {
-        val inputXml = """
+    fun shouldNormalizeStopPlaceTypeFromOtherToOnstreetBus(
+        @TempDir tempDir: Path,
+    ) {
+        val inputXml =
+            """
             <?xml version="1.0" encoding="UTF-8"?>
             <PublicationDelivery xmlns="http://www.netex.org.uk/netex">
                 <dataObjects>
@@ -52,7 +57,7 @@ class StopPlaceTypeNormalizerTest {
                     </SiteFrame>
                 </dataObjects>
             </PublicationDelivery>
-        """.trimIndent()
+            """.trimIndent()
 
         val xmlFile = tempDir.resolve("test.xml").toFile()
         xmlFile.writeText(inputXml)
@@ -64,8 +69,11 @@ class StopPlaceTypeNormalizerTest {
     }
 
     @Test
-    fun shouldNormalizeStopPlaceTypeFromTramStationToOnstreetTram(@TempDir tempDir: Path) {
-        val inputXml = """
+    fun shouldNormalizeStopPlaceTypeFromTramStationToOnstreetTram(
+        @TempDir tempDir: Path,
+    ) {
+        val inputXml =
+            """
             <?xml version="1.0" encoding="UTF-8"?>
             <PublicationDelivery xmlns="http://www.netex.org.uk/netex">
                 <dataObjects>
@@ -79,7 +87,7 @@ class StopPlaceTypeNormalizerTest {
                     </SiteFrame>
                 </dataObjects>
             </PublicationDelivery>
-        """.trimIndent()
+            """.trimIndent()
 
         val xmlFile = tempDir.resolve("test.xml").toFile()
         xmlFile.writeText(inputXml)
@@ -91,8 +99,11 @@ class StopPlaceTypeNormalizerTest {
     }
 
     @Test
-    fun shouldNormalizeBusStationToOnstreetBusWhenLessThan6Quays(@TempDir tempDir: Path) {
-        val inputXml = """
+    fun shouldNormalizeBusStationToOnstreetBusWhenLessThan6Quays(
+        @TempDir tempDir: Path,
+    ) {
+        val inputXml =
+            """
             <?xml version="1.0" encoding="UTF-8"?>
             <PublicationDelivery xmlns="http://www.netex.org.uk/netex">
                 <dataObjects>
@@ -113,7 +124,7 @@ class StopPlaceTypeNormalizerTest {
                     </SiteFrame>
                 </dataObjects>
             </PublicationDelivery>
-        """.trimIndent()
+            """.trimIndent()
 
         val xmlFile = tempDir.resolve("test.xml").toFile()
         xmlFile.writeText(inputXml)
@@ -125,8 +136,11 @@ class StopPlaceTypeNormalizerTest {
     }
 
     @Test
-    fun shouldNormalizeOnstreetBusToBusStationWhen6OrMoreQuays(@TempDir tempDir: Path) {
-        val inputXml = """
+    fun shouldNormalizeOnstreetBusToBusStationWhen6OrMoreQuays(
+        @TempDir tempDir: Path,
+    ) {
+        val inputXml =
+            """
             <?xml version="1.0" encoding="UTF-8"?>
             <PublicationDelivery xmlns="http://www.netex.org.uk/netex">
                 <dataObjects>
@@ -148,7 +162,7 @@ class StopPlaceTypeNormalizerTest {
                     </SiteFrame>
                 </dataObjects>
             </PublicationDelivery>
-        """.trimIndent()
+            """.trimIndent()
 
         val xmlFile = tempDir.resolve("test.xml").toFile()
         xmlFile.writeText(inputXml)
@@ -160,8 +174,11 @@ class StopPlaceTypeNormalizerTest {
     }
 
     @Test
-    fun shouldKeepBusStationWhen6OrMoreQuays(@TempDir tempDir: Path) {
-        val inputXml = """
+    fun shouldKeepBusStationWhen6OrMoreQuays(
+        @TempDir tempDir: Path,
+    ) {
+        val inputXml =
+            """
             <?xml version="1.0" encoding="UTF-8"?>
             <PublicationDelivery xmlns="http://www.netex.org.uk/netex">
                 <dataObjects>
@@ -184,7 +201,7 @@ class StopPlaceTypeNormalizerTest {
                     </SiteFrame>
                 </dataObjects>
             </PublicationDelivery>
-        """.trimIndent()
+            """.trimIndent()
 
         val xmlFile = tempDir.resolve("test.xml").toFile()
         xmlFile.writeText(inputXml)
@@ -196,8 +213,11 @@ class StopPlaceTypeNormalizerTest {
     }
 
     @Test
-    fun shouldNotChangeQuayCountLogicForNonBusMode(@TempDir tempDir: Path) {
-        val inputXml = """
+    fun shouldNotChangeQuayCountLogicForNonBusMode(
+        @TempDir tempDir: Path,
+    ) {
+        val inputXml =
+            """
             <?xml version="1.0" encoding="UTF-8"?>
             <PublicationDelivery xmlns="http://www.netex.org.uk/netex">
                 <dataObjects>
@@ -215,7 +235,7 @@ class StopPlaceTypeNormalizerTest {
                     </SiteFrame>
                 </dataObjects>
             </PublicationDelivery>
-        """.trimIndent()
+            """.trimIndent()
 
         val xmlFile = tempDir.resolve("test.xml").toFile()
         xmlFile.writeText(inputXml)
@@ -227,8 +247,11 @@ class StopPlaceTypeNormalizerTest {
     }
 
     @Test
-    fun shouldHandleStopPlaceWithoutQuays(@TempDir tempDir: Path) {
-        val inputXml = """
+    fun shouldHandleStopPlaceWithoutQuays(
+        @TempDir tempDir: Path,
+    ) {
+        val inputXml =
+            """
             <?xml version="1.0" encoding="UTF-8"?>
             <PublicationDelivery xmlns="http://www.netex.org.uk/netex">
                 <dataObjects>
@@ -242,7 +265,7 @@ class StopPlaceTypeNormalizerTest {
                     </SiteFrame>
                 </dataObjects>
             </PublicationDelivery>
-        """.trimIndent()
+            """.trimIndent()
 
         val xmlFile = tempDir.resolve("test.xml").toFile()
         xmlFile.writeText(inputXml)
@@ -254,8 +277,11 @@ class StopPlaceTypeNormalizerTest {
     }
 
     @Test
-    fun shouldNormalizeStopPlaceTypeFromOtherToFerryStopForWaterMode(@TempDir tempDir: Path) {
-        val inputXml = """
+    fun shouldNormalizeStopPlaceTypeFromOtherToFerryStopForWaterMode(
+        @TempDir tempDir: Path,
+    ) {
+        val inputXml =
+            """
             <?xml version="1.0" encoding="UTF-8"?>
             <PublicationDelivery xmlns="http://www.netex.org.uk/netex">
                 <dataObjects>
@@ -269,7 +295,7 @@ class StopPlaceTypeNormalizerTest {
                     </SiteFrame>
                 </dataObjects>
             </PublicationDelivery>
-        """.trimIndent()
+            """.trimIndent()
 
         val xmlFile = tempDir.resolve("test.xml").toFile()
         xmlFile.writeText(inputXml)
@@ -282,8 +308,11 @@ class StopPlaceTypeNormalizerTest {
     }
 
     @Test
-    fun shouldNormalizeStopPlaceTypeFromOtherToOnstreetTramForTramMode(@TempDir tempDir: Path) {
-        val inputXml = """
+    fun shouldNormalizeStopPlaceTypeFromOtherToOnstreetTramForTramMode(
+        @TempDir tempDir: Path,
+    ) {
+        val inputXml =
+            """
             <?xml version="1.0" encoding="UTF-8"?>
             <PublicationDelivery xmlns="http://www.netex.org.uk/netex">
                 <dataObjects>
@@ -297,7 +326,7 @@ class StopPlaceTypeNormalizerTest {
                     </SiteFrame>
                 </dataObjects>
             </PublicationDelivery>
-        """.trimIndent()
+            """.trimIndent()
 
         val xmlFile = tempDir.resolve("test.xml").toFile()
         xmlFile.writeText(inputXml)
@@ -310,8 +339,11 @@ class StopPlaceTypeNormalizerTest {
     }
 
     @Test
-    fun shouldNormalizeStopPlaceTypeFromOtherToOnstreetBusForBusMode(@TempDir tempDir: Path) {
-        val inputXml = """
+    fun shouldNormalizeStopPlaceTypeFromOtherToOnstreetBusForBusMode(
+        @TempDir tempDir: Path,
+    ) {
+        val inputXml =
+            """
             <?xml version="1.0" encoding="UTF-8"?>
             <PublicationDelivery xmlns="http://www.netex.org.uk/netex">
                 <dataObjects>
@@ -325,7 +357,7 @@ class StopPlaceTypeNormalizerTest {
                     </SiteFrame>
                 </dataObjects>
             </PublicationDelivery>
-        """.trimIndent()
+            """.trimIndent()
 
         val xmlFile = tempDir.resolve("test.xml").toFile()
         xmlFile.writeText(inputXml)
@@ -338,8 +370,11 @@ class StopPlaceTypeNormalizerTest {
     }
 
     @Test
-    fun shouldNormalizeStopPlaceTypeFromOtherToOnstreetBusWhenNoTransportMode(@TempDir tempDir: Path) {
-        val inputXml = """
+    fun shouldNormalizeStopPlaceTypeFromOtherToOnstreetBusWhenNoTransportMode(
+        @TempDir tempDir: Path,
+    ) {
+        val inputXml =
+            """
             <?xml version="1.0" encoding="UTF-8"?>
             <PublicationDelivery xmlns="http://www.netex.org.uk/netex">
                 <dataObjects>
@@ -352,7 +387,7 @@ class StopPlaceTypeNormalizerTest {
                     </SiteFrame>
                 </dataObjects>
             </PublicationDelivery>
-        """.trimIndent()
+            """.trimIndent()
 
         val xmlFile = tempDir.resolve("test.xml").toFile()
         xmlFile.writeText(inputXml)

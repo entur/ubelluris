@@ -12,7 +12,6 @@ import org.xml.sax.Attributes
 import java.nio.file.Path
 
 class StopPlacePurgingPluginTest {
-
     @TempDir
     lateinit var tempDir: Path
 
@@ -21,7 +20,7 @@ class StopPlacePurgingPluginTest {
         blacklistFile.writeText(blacklistContent)
         return StopPlacePurgingPlugin(
             StopPlacePurgingRepository(),
-            blacklistFile.absolutePath
+            blacklistFile.absolutePath,
         )
     }
 
@@ -34,7 +33,7 @@ class StopPlacePurgingPluginTest {
         assertThat(supportedTypes).containsExactlyInAnyOrder(
             NetexTypes.PUBLIC_CODE,
             NetexTypes.QUAY,
-            NetexTypes.PARENT_SITE_REF
+            NetexTypes.PARENT_SITE_REF,
         )
     }
 
@@ -198,7 +197,7 @@ class StopPlacePurgingPluginTest {
         assertThat(plugin.stopPlacePurgingRepository.quaysPerStopPlace["stopPlaceId"])
             .containsExactlyInAnyOrder(
                 QuayData("quayId1", "A"),
-                QuayData("quayId2", "B")
+                QuayData("quayId2", "B"),
             )
     }
 }

@@ -10,21 +10,21 @@ import org.slf4j.LoggerFactory
 import java.io.File
 
 class KeyValueMigrationProcessor {
-
     private val logger = LoggerFactory.getLogger(javaClass)
 
-    private val ignoredStopPlaceKeys = setOf(
-        "trafikverket-name",
-        "stip.StopArea.DefaultInterchangeDurationSeconds",
-        "local-name",
-        "local-number",
-        "sellable",
-        "preliminary",
-        "stip.StopPoint.ExistsFromDate",
-        "stip.StopPoint.ExistsUpToDate",
-        "local-journeypatternpoint-gid",
-        "local-designation"
-    )
+    private val ignoredStopPlaceKeys =
+        setOf(
+            "trafikverket-name",
+            "stip.StopArea.DefaultInterchangeDurationSeconds",
+            "local-name",
+            "local-number",
+            "sellable",
+            "preliminary",
+            "stip.StopPoint.ExistsFromDate",
+            "stip.StopPoint.ExistsUpToDate",
+            "local-journeypatternpoint-gid",
+            "local-designation",
+        )
 
     private val ns = Namespace.getNamespace("http://www.netex.org.uk/netex")
 
@@ -43,9 +43,10 @@ class KeyValueMigrationProcessor {
     }
 
     private fun processStopPlaces(doc: Document) {
-        val stopPlaces = doc.rootElement.descendants
-            .filterIsInstance<Element>()
-            .filter { it.name == "StopPlace" }
+        val stopPlaces =
+            doc.rootElement.descendants
+                .filterIsInstance<Element>()
+                .filter { it.name == "StopPlace" }
 
         for (stopPlace in stopPlaces) {
             val keyList = stopPlace.getChild("keyList", ns) ?: continue
@@ -69,10 +70,11 @@ class KeyValueMigrationProcessor {
                     }
 
                     "local-gid" -> {
-                        val parts = value.split("|").map {
-                            val (prefix, rest) = it.split(":", limit = 2)
-                            "${padCodespace(prefix)}:$rest"
-                        }
+                        val parts =
+                            value.split("|").map {
+                                val (prefix, rest) = it.split(":", limit = 2)
+                                "${padCodespace(prefix)}:$rest"
+                            }
                         importedIds += parts
                         toRemove += kv
                     }
@@ -95,14 +97,14 @@ class KeyValueMigrationProcessor {
                 kv.addContent(Element("Value", ns).setText(importedIds.joinToString(",")))
                 keyList.addContent(kv)
             }
-
         }
     }
 
     private fun processQuays(doc: Document) {
-        val quays = doc.rootElement.descendants
-            .filterIsInstance<Element>()
-            .filter { it.name == "Quay" }
+        val quays =
+            doc.rootElement.descendants
+                .filterIsInstance<Element>()
+                .filter { it.name == "Quay" }
 
         val now = java.time.LocalDate.now()
 
@@ -133,17 +135,19 @@ class KeyValueMigrationProcessor {
                     }
 
                     "local-stoppoint-gid" -> {
-                        val parts = value.split("|").map {
-                            val (prefix, rest) = it.split(":", limit = 2)
-                            "${padCodespace(prefix)}:$rest"
-                        }
+                        val parts =
+                            value.split("|").map {
+                                val (prefix, rest) = it.split(":", limit = 2)
+                                "${padCodespace(prefix)}:$rest"
+                            }
                         importedIds += parts
                         toRemove += kv
                     }
 
                     "stip.StopPoint.ExistsFromDate",
                     "local-journeypatternpoint-gid",
-                    "local-designation" -> {
+                    "local-designation",
+                    -> {
                         toRemove += kv
                     }
                 }
@@ -170,13 +174,16 @@ class KeyValueMigrationProcessor {
         }
     }
 
-
-    private fun writeDocument(doc: Document, file: File) {
+    private fun writeDocument(
+        doc: Document,
+        file: File,
+    ) {
         val out = XMLOutputter()
         out.format = Format.getPrettyFormat().setEncoding("UTF-8")
         file.outputStream().use { out.output(doc, it) }
     }
 
     private fun padCodespace(s: String): String = s.padStart(3, '0')
+
     private fun stripCodespace(s: String): String = s.substringAfter(":")
 }

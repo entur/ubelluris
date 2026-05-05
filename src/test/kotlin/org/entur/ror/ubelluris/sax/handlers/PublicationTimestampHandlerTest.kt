@@ -14,12 +14,12 @@ import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 
 class PublicationTimestampHandlerTest {
-
     private val fixedTime = LocalDateTime.of(2020, 1, 1, 12, 0, 0)
-    private val clock = Clock.fixed(
-        fixedTime.atZone(ZoneId.systemDefault()).toInstant(),
-        ZoneId.systemDefault()
-    )
+    private val clock =
+        Clock.fixed(
+            fixedTime.atZone(ZoneId.systemDefault()).toInstant(),
+            ZoneId.systemDefault(),
+        )
 
     private val handler = PublicationTimestampHandler(clock)
     private val writer = mock<DelegatingXMLElementWriter>()
@@ -44,5 +44,4 @@ class PublicationTimestampHandlerTest {
             assertThat(transformedContent).isEqualTo(expectedString)
         }
     }
-
 }

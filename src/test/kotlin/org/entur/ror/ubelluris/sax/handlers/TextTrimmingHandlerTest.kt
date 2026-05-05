@@ -10,7 +10,6 @@ import org.mockito.kotlin.verify
 import org.xml.sax.Attributes
 
 class TextTrimmingHandlerTest {
-
     private val handler = TextTrimmingHandler()
     private val writer = mock<DelegatingXMLElementWriter>()
 

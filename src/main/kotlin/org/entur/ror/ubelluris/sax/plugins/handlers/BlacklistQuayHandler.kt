@@ -9,25 +9,28 @@ import java.io.File
 
 class BlacklistQuayHandler(
     val stopPlacePurgingRepository: StopPlacePurgingRepository,
-    private val blacklistFile: File
+    private val blacklistFile: File,
 ) : StopPlacePurgingDataCollector() {
-
     private val blacklistedQuayIds: Set<String> by lazy {
         loadBlacklistFile()
     }
 
-    private fun loadBlacklistFile(): Set<String> {
-        return if (blacklistFile.exists()) {
-            blacklistFile.readLines()
+    private fun loadBlacklistFile(): Set<String> =
+        if (blacklistFile.exists()) {
+            blacklistFile
+                .readLines()
                 .map { it.trim() }
                 .filter { it.isNotEmpty() }
                 .toSet()
         } else {
             emptySet()
         }
-    }
 
-    override fun startElement(context: StopPlacePurgingParsingContext, attributes: Attributes?, currentEntity: Entity) {
+    override fun startElement(
+        context: StopPlacePurgingParsingContext,
+        attributes: Attributes?,
+        currentEntity: Entity,
+    ) {
         val idValue = attributes?.getValue("id")
         if (idValue != null && idValue in blacklistedQuayIds) {
             stopPlacePurgingRepository.addEntityId(currentEntity.id)

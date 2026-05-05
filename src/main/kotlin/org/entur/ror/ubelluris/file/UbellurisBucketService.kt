@@ -8,17 +8,19 @@ import java.nio.file.Path
 class UbellurisBucketService(
     private val config: GcsConfig,
     private val storageProvider: () -> Storage = {
-        StorageOptions.newBuilder()
+        StorageOptions
+            .newBuilder()
             .setProjectId(config.projectId)
             .build()
             .service
-    }
+    },
 ) {
-    fun createStorage(): Storage {
-        return storageProvider()
-    }
+    fun createStorage(): Storage = storageProvider()
 
-    fun createPublisher(storagePath: Path, localCachePath: Path): FilePublisher {
+    fun createPublisher(
+        storagePath: Path,
+        localCachePath: Path,
+    ): FilePublisher {
         if (config.gcsEnabled) {
             val storage = createStorage()
             return GcsFilePublisher(config, storage, storagePath)

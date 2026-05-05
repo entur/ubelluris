@@ -6,10 +6,12 @@ import java.nio.file.StandardCopyOption
 
 class LocalFilePublisher(
     private val storagePath: Path,
-    private val resultsDir: Path
+    private val resultsDir: Path,
 ) : FilePublisher {
-
-    override fun publish(stopPlacePath: Path, timetablePaths: Map<String, Path>): Path {
+    override fun publish(
+        stopPlacePath: Path,
+        timetablePaths: Map<String, Path>,
+    ): Path {
         val stopsDir = resultsDir.resolve(FilePublisher.Companion.STOPS_DIR)
         Files.createDirectories(stopsDir)
         Files.move(stopPlacePath, stopsDir.resolve(stopPlacePath.fileName), StandardCopyOption.REPLACE_EXISTING)

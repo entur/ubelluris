@@ -17,9 +17,8 @@ class GcsFileFetcher(
     private val inputBucketName: String,
     private val stopPlaceBlobPath: String,
     private val timetableBlobPaths: Map<String, String>,
-    private val downloadDir: Path = Path.of("downloads")
+    private val downloadDir: Path = Path.of("downloads"),
 ) : FileFetcher {
-
     private val logger = LoggerFactory.getLogger(javaClass)
     private val targetStopPlaceFile = "sweden_stop_places.xml"
 
@@ -27,23 +26,26 @@ class GcsFileFetcher(
         Files.createDirectories(downloadDir)
         downloadMissingBlobs()
 
-        val stopPlacePath = extractXmlFromZip(
-            zipPath = downloadDir.resolve(stopPlaceBlobPath),
-            outputPath = downloadDir.resolve(stopPlaceBlobPath).resolveSibling(targetStopPlaceFile)
-        )
+        val stopPlacePath =
+            extractXmlFromZip(
+                zipPath = downloadDir.resolve(stopPlaceBlobPath),
+                outputPath = downloadDir.resolve(stopPlaceBlobPath).resolveSibling(targetStopPlaceFile),
+            )
 
-        val timetablePaths = timetableBlobPaths.mapValues { (provider, blobPath) ->
-            extractTimetableZip(provider, downloadDir.resolve(blobPath))
-        }
+        val timetablePaths =
+            timetableBlobPaths.mapValues { (provider, blobPath) ->
+                extractTimetableZip(provider, downloadDir.resolve(blobPath))
+            }
 
         return FileFetchResult(stopPlacePath, timetablePaths)
     }
 
     private fun downloadMissingBlobs() {
         val allBlobPaths = listOf(stopPlaceBlobPath) + timetableBlobPaths.values
-        val missingBlobs = allBlobPaths
-            .filter { !Files.exists(downloadDir.resolve(it)) }
-            .map { BlobInfo.newBuilder(BlobId.of(inputBucketName, it)).build() }
+        val missingBlobs =
+            allBlobPaths
+                .filter { !Files.exists(downloadDir.resolve(it)) }
+                .map { BlobInfo.newBuilder(BlobId.of(inputBucketName, it)).build() }
 
         if (missingBlobs.isEmpty()) {
             logger.info("All blobs already cached locally, skipping download")
@@ -52,17 +54,21 @@ class GcsFileFetcher(
 
         logger.info("Downloading ${missingBlobs.size} blob(s) in parallel from $inputBucketName")
 
-        val downloadConfig = ParallelDownloadConfig.newBuilder()
-            .setBucketName(inputBucketName)
-            .setDownloadDirectory(downloadDir)
-            .build()
+        val downloadConfig =
+            ParallelDownloadConfig
+                .newBuilder()
+                .setBucketName(inputBucketName)
+                .setDownloadDirectory(downloadDir)
+                .build()
 
-        TransferManagerConfig.newBuilder()
+        TransferManagerConfig
+            .newBuilder()
             .setStorageOptions(storage.options)
             .build()
             .service
             .use { transferManager ->
-                transferManager.downloadBlobs(missingBlobs, downloadConfig)
+                transferManager
+                    .downloadBlobs(missingBlobs, downloadConfig)
                     .downloadResults
                     .filter { it.status != TransferStatus.SUCCESS }
                     .forEach { result ->
@@ -73,7 +79,10 @@ class GcsFileFetcher(
         logger.info("Download complete")
     }
 
-    private fun extractXmlFromZip(zipPath: Path, outputPath: Path): Path {
+    private fun extractXmlFromZip(
+        zipPath: Path,
+        outputPath: Path,
+    ): Path {
         if (Files.exists(outputPath)) {
             logger.info("Found existing download for $outputPath")
             return outputPath
@@ -89,7 +98,7 @@ class GcsFileFetcher(
                         outputPath,
                         zip.readBytes(),
                         StandardOpenOption.CREATE,
-                        StandardOpenOption.TRUNCATE_EXISTING
+                        StandardOpenOption.TRUNCATE_EXISTING,
                     )
                     logger.info("Extracted and saved to: $outputPath")
                     return outputPath
@@ -100,7 +109,10 @@ class GcsFileFetcher(
         error("No XML file found in ZIP: $zipPath")
     }
 
-    private fun extractTimetableZip(provider: String, zipPath: Path): Path {
+    private fun extractTimetableZip(
+        provider: String,
+        zipPath: Path,
+    ): Path {
         val extractDir = zipPath.resolveSibling(provider)
         if (Files.exists(extractDir)) {
             logger.info("Using cached timetable dir: $extractDir")

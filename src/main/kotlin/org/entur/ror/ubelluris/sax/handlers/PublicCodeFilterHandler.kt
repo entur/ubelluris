@@ -5,15 +5,14 @@ import org.entur.netex.tools.lib.output.XMLElementHandler
 import org.xml.sax.Attributes
 
 class PublicCodeFilterHandler(
-    private val illegalPublicCodes: List<String>
+    private val illegalPublicCodes: List<String>,
 ) : XMLElementHandler {
-
     override fun startElement(
         uri: String?,
         localName: String?,
         qName: String?,
         attributes: Attributes?,
-        writer: DelegatingXMLElementWriter
+        writer: DelegatingXMLElementWriter,
     ) {
         writer.startElement(uri, localName, qName, attributes)
     }
@@ -22,7 +21,7 @@ class PublicCodeFilterHandler(
         ch: CharArray?,
         start: Int,
         length: Int,
-        writer: DelegatingXMLElementWriter
+        writer: DelegatingXMLElementWriter,
     ) {
         if (ch == null) {
             writer.characters(ch, start, length)
@@ -43,7 +42,7 @@ class PublicCodeFilterHandler(
         uri: String?,
         localName: String?,
         qName: String?,
-        writer: DelegatingXMLElementWriter
+        writer: DelegatingXMLElementWriter,
     ) {
         writer.endElement(uri, localName, qName)
     }

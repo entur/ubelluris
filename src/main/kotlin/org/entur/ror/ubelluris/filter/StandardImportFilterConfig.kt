@@ -23,17 +23,19 @@ import org.entur.ror.ubelluris.sax.selectors.refs.StopPlacePurgingRefSelector
 
 class StandardImportFilterConfig(
     private val cliConfig: CliConfig,
-    private val blacklistFilePath: String
+    private val blacklistFilePath: String,
 ) : FilterProfileConfiguration {
-    val stopPlacePurgingRepository = StopPlacePurgingRepository(
-        illegalPublicCodes = cliConfig.illegalPublicCodes
-    )
+    val stopPlacePurgingRepository =
+        StopPlacePurgingRepository(
+            illegalPublicCodes = cliConfig.illegalPublicCodes,
+        )
 
     override fun build(): FilterConfig {
-        val attributeReplacer = AttributeReplacer(
-            cliConfig.sourceCodespace,
-            cliConfig.targetCodespace
-        )
+        val attributeReplacer =
+            AttributeReplacer(
+                cliConfig.sourceCodespace,
+                cliConfig.targetCodespace,
+            )
         val parentStopPlaceAttributeSkipHandler = ParentStopPlaceAttributeSkipHandler(stopPlacePurgingRepository)
 
         return FilterConfigBuilder()
@@ -47,54 +49,61 @@ class StandardImportFilterConfig(
                     "/PublicationDelivery/dataObjects/SiteFrame/stopPlaces/StopPlace/quays/Quay/Name",
                     "/PublicationDelivery/dataObjects/SiteFrame/stopPlaces/StopPlace/quays/Quay/ShortName",
                     "/PublicationDelivery/dataObjects/SiteFrame/stopPlaces/StopPlace/tariffZones",
-                    "/PublicationDelivery/dataObjects/SiteFrame/stopPlaces/StopPlace/ValidBetween/ToDate"
-                )
-            )
-            .withCustomElementHandlers(
+                    "/PublicationDelivery/dataObjects/SiteFrame/stopPlaces/StopPlace/ValidBetween/ToDate",
+                ),
+            ).withCustomElementHandlers(
                 mapOf(
                     "/PublicationDelivery/PublicationTimestamp" to PublicationTimestampHandler(),
                     "/PublicationDelivery/dataObjects/SiteFrame" to SiteFrameHandler(attributeReplacer),
                     "/PublicationDelivery/dataObjects/SiteFrame/ValidBetween/FromDate" to ValidBetweenFromDateHandler(),
-                    "/PublicationDelivery/dataObjects/SiteFrame/stopPlaces/StopPlace/ValidBetween/FromDate" to ValidBetweenFromDateHandler(),
-                    "/PublicationDelivery/dataObjects/SiteFrame/codespaces/Codespace" to CodespaceIdHandler(
-                        attributeReplacer
-                    ),
-                    "/PublicationDelivery/dataObjects/SiteFrame/codespaces/Codespace/Xmlns" to XmlnsHandler(
-                        cliConfig.sourceCodespace,
-                        cliConfig.targetCodespace
-                    ),
+                    "/PublicationDelivery/dataObjects/SiteFrame/stopPlaces/StopPlace/ValidBetween/FromDate"
+                        to ValidBetweenFromDateHandler(),
+                    "/PublicationDelivery/dataObjects/SiteFrame/codespaces/Codespace" to
+                        CodespaceIdHandler(
+                            attributeReplacer,
+                        ),
+                    "/PublicationDelivery/dataObjects/SiteFrame/codespaces/Codespace/Xmlns" to
+                        XmlnsHandler(
+                            cliConfig.sourceCodespace,
+                            cliConfig.targetCodespace,
+                        ),
                     "/PublicationDelivery/dataObjects/SiteFrame/codespaces/Codespace/XmlnsUrl" to XmlnsUrlHandler(),
-                    "/PublicationDelivery/dataObjects/SiteFrame/stopPlaces/StopPlace" to StopPlaceIdHandler(
-                        attributeReplacer,
-                        parentStopPlaceAttributeSkipHandler
-                    ),
+                    "/PublicationDelivery/dataObjects/SiteFrame/stopPlaces/StopPlace" to
+                        StopPlaceIdHandler(
+                            attributeReplacer,
+                            parentStopPlaceAttributeSkipHandler,
+                        ),
                     "/PublicationDelivery/dataObjects/SiteFrame/stopPlaces/StopPlace/Name" to TextTrimmingHandler(),
-                    "/PublicationDelivery/dataObjects/SiteFrame/stopPlaces/StopPlace/ParentSiteRef" to StopPlaceParentSiteRefHandler(
-                        attributeReplacer
-                    ),
-                    "/PublicationDelivery/dataObjects/SiteFrame/stopPlaces/StopPlace/quays/Quay" to StopPlaceQuayHandler(
-                        attributeReplacer
-                    ),
-                    "/PublicationDelivery/dataObjects/SiteFrame/stopPlaces/StopPlace/quays/Quay/PublicCode" to PublicCodeFilterHandler(
-                        cliConfig.illegalPublicCodes
-                    ),
-                    "/PublicationDelivery/dataObjects/SiteFrame/stopPlaces/StopPlace/quays/Quay/PrivateCode" to TextTrimmingHandler(),
-                    "/PublicationDelivery/dataObjects/SiteFrame/stopPlaces/StopPlace/TransportMode" to parentStopPlaceAttributeSkipHandler,
-                    "/PublicationDelivery/dataObjects/SiteFrame/stopPlaces/StopPlace/StopPlaceType" to parentStopPlaceAttributeSkipHandler,
-                    "/PublicationDelivery/dataObjects/SiteFrame/stopPlaces/StopPlace/Weighting" to parentStopPlaceAttributeSkipHandler
-                )
-            )
-            .withPlugins(
+                    "/PublicationDelivery/dataObjects/SiteFrame/stopPlaces/StopPlace/ParentSiteRef" to
+                        StopPlaceParentSiteRefHandler(
+                            attributeReplacer,
+                        ),
+                    "/PublicationDelivery/dataObjects/SiteFrame/stopPlaces/StopPlace/quays/Quay" to
+                        StopPlaceQuayHandler(
+                            attributeReplacer,
+                        ),
+                    "/PublicationDelivery/dataObjects/SiteFrame/stopPlaces/StopPlace/quays/Quay/PublicCode" to
+                        PublicCodeFilterHandler(
+                            cliConfig.illegalPublicCodes,
+                        ),
+                    "/PublicationDelivery/dataObjects/SiteFrame/stopPlaces/StopPlace/quays/Quay/PrivateCode"
+                        to TextTrimmingHandler(),
+                    "/PublicationDelivery/dataObjects/SiteFrame/stopPlaces/StopPlace/TransportMode"
+                        to parentStopPlaceAttributeSkipHandler,
+                    "/PublicationDelivery/dataObjects/SiteFrame/stopPlaces/StopPlace/StopPlaceType"
+                        to parentStopPlaceAttributeSkipHandler,
+                    "/PublicationDelivery/dataObjects/SiteFrame/stopPlaces/StopPlace/Weighting"
+                        to parentStopPlaceAttributeSkipHandler,
+                ),
+            ).withPlugins(
                 listOf(
-                    StopPlacePurgingPlugin(stopPlacePurgingRepository, blacklistFilePath)
-                )
-            )
-            .withEntitySelectors(
+                    StopPlacePurgingPlugin(stopPlacePurgingRepository, blacklistFilePath),
+                ),
+            ).withEntitySelectors(
                 listOf(
-                    StopPlacePurgingEntitySelector(stopPlacePurgingRepository)
-                )
-            )
-            .withRefSelectors(listOf(StopPlacePurgingRefSelector()))
+                    StopPlacePurgingEntitySelector(stopPlacePurgingRepository),
+                ),
+            ).withRefSelectors(listOf(StopPlacePurgingRefSelector()))
             .withRemovePrivateData(true)
             .withPreserveComments(false)
             .withUseSelfClosingTagsWhereApplicable(true)
@@ -110,8 +119,7 @@ class StandardImportFilterConfig(
                     "Notice",
                     "DestinationDisplay",
                     "ServiceLink",
-                )
-            )
-            .build()
+                ),
+            ).build()
     }
 }

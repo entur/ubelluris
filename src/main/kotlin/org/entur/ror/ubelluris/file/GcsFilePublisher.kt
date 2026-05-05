@@ -11,12 +11,14 @@ import java.nio.file.Path
 class GcsFilePublisher(
     private val config: GcsConfig,
     private val storage: Storage,
-    private val storagePath: Path
+    private val storagePath: Path,
 ) : FilePublisher {
-
     private val logger = LoggerFactory.getLogger(javaClass)
 
-    override fun publish(stopPlacePath: Path, timetablePaths: Map<String, Path>): Path {
+    override fun publish(
+        stopPlacePath: Path,
+        timetablePaths: Map<String, Path>,
+    ): Path {
         val stopBlobName = storagePath.resolve(FilePublisher.Companion.STOPS_DIR).resolve(stopPlacePath.fileName)
         val stopBlobInfo = BlobInfo.newBuilder(BlobId.of(config.outputBucketName, stopBlobName.joinToString("/"))).build()
 

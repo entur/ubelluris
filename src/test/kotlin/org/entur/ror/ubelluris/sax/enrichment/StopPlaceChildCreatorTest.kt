@@ -9,13 +9,13 @@ import org.junit.jupiter.api.Test
 import java.io.StringReader
 
 class StopPlaceChildCreatorTest {
-
     private val stopPlaceChildCreator = StopPlaceChildCreator()
     private val namespace = Namespace.getNamespace("http://www.netex.org.uk/netex")
 
     @Test
     fun shouldCreateChildStopPlaceWithAllElements() {
-        val xml = """
+        val xml =
+            """
             <StopPlace xmlns="http://www.netex.org.uk/netex" id="SAM:StopPlace:1000" version="1">
               <keyList>
                 <KeyValue>
@@ -39,20 +39,21 @@ class StopPlaceChildCreatorTest {
                 </Quay>
               </quays>
             </StopPlace>
-        """.trimIndent()
+            """.trimIndent()
 
         val originalStopPlace = SAXBuilder().build(StringReader(xml)).rootElement
         val childId = "SAM:StopPlace:1000_tram"
         val parentRef = "SAM:StopPlace:1000_parent"
 
-        val child = stopPlaceChildCreator.createChildStopPlace(
-            originalStopPlace = originalStopPlace,
-            childId = childId,
-            mode = TransportMode.TRAM,
-            quayIds = listOf("SAM:Quay:50001"),
-            namespace = namespace,
-            parentRef = parentRef
-        )
+        val child =
+            stopPlaceChildCreator.createChildStopPlace(
+                originalStopPlace = originalStopPlace,
+                childId = childId,
+                mode = TransportMode.TRAM,
+                quayIds = listOf("SAM:Quay:50001"),
+                namespace = namespace,
+                parentRef = parentRef,
+            )
 
         assertThat(child.getAttributeValue("id")).isEqualTo(childId)
         assertThat(child.getAttributeValue("version")).isEqualTo("1")
@@ -76,43 +77,47 @@ class StopPlaceChildCreatorTest {
 
     @Test
     fun shouldSetTransportModeCorrectlyForDifferentModes() {
-        val xml = """
+        val xml =
+            """
             <StopPlace xmlns="http://www.netex.org.uk/netex" id="SAM:StopPlace:1000" version="1">
               <Name>Test Station</Name>
               <quays>
                 <Quay id="SAM:Quay:50001"/>
               </quays>
             </StopPlace>
-        """.trimIndent()
+            """.trimIndent()
 
         val originalStopPlace = SAXBuilder().build(StringReader(xml)).rootElement
 
-        val busChild = stopPlaceChildCreator.createChildStopPlace(
-            originalStopPlace = originalStopPlace,
-            childId = "SAM:StopPlace:1000_bus",
-            mode = TransportMode.BUS,
-            quayIds = listOf("SAM:Quay:50001"),
-            namespace = namespace,
-            parentRef = "SAM:StopPlace:1000_parent"
-        )
+        val busChild =
+            stopPlaceChildCreator.createChildStopPlace(
+                originalStopPlace = originalStopPlace,
+                childId = "SAM:StopPlace:1000_bus",
+                mode = TransportMode.BUS,
+                quayIds = listOf("SAM:Quay:50001"),
+                namespace = namespace,
+                parentRef = "SAM:StopPlace:1000_parent",
+            )
 
-        val tramChild = stopPlaceChildCreator.createChildStopPlace(
-            originalStopPlace = originalStopPlace,
-            childId = "SAM:StopPlace:1000_tram",
-            mode = TransportMode.TRAM,
-            quayIds = listOf("SAM:Quay:50001"),
-            namespace = namespace,
-            parentRef = "SAM:StopPlace:1000_parent"
-        )
+        val tramChild =
+            stopPlaceChildCreator.createChildStopPlace(
+                originalStopPlace = originalStopPlace,
+                childId = "SAM:StopPlace:1000_tram",
+                mode = TransportMode.TRAM,
+                quayIds = listOf("SAM:Quay:50001"),
+                namespace = namespace,
+                parentRef = "SAM:StopPlace:1000_parent",
+            )
 
-        val waterChild = stopPlaceChildCreator.createChildStopPlace(
-            originalStopPlace = originalStopPlace,
-            childId = "SAM:StopPlace:1000_water",
-            mode = TransportMode.WATER,
-            quayIds = listOf("SAM:Quay:50001"),
-            namespace = namespace,
-            parentRef = "SAM:StopPlace:1000_parent"
-        )
+        val waterChild =
+            stopPlaceChildCreator.createChildStopPlace(
+                originalStopPlace = originalStopPlace,
+                childId = "SAM:StopPlace:1000_water",
+                mode = TransportMode.WATER,
+                quayIds = listOf("SAM:Quay:50001"),
+                namespace = namespace,
+                parentRef = "SAM:StopPlace:1000_parent",
+            )
 
         assertThat(busChild.getChildText("TransportMode", namespace)).isEqualTo("bus")
         assertThat(tramChild.getChildText("TransportMode", namespace)).isEqualTo("tram")
@@ -121,50 +126,54 @@ class StopPlaceChildCreatorTest {
 
     @Test
     fun shouldOverrideExistingTransportMode() {
-        val xml = """
+        val xml =
+            """
             <StopPlace xmlns="http://www.netex.org.uk/netex" id="SAM:StopPlace:1000" version="1">
               <TransportMode>bus</TransportMode>
               <quays>
                 <Quay id="SAM:Quay:50001"/>
               </quays>
             </StopPlace>
-        """.trimIndent()
+            """.trimIndent()
 
         val originalStopPlace = SAXBuilder().build(StringReader(xml)).rootElement
 
-        val child = stopPlaceChildCreator.createChildStopPlace(
-            originalStopPlace = originalStopPlace,
-            childId = "SAM:StopPlace:1000_tram",
-            mode = TransportMode.TRAM,
-            quayIds = listOf("SAM:Quay:50001"),
-            namespace = namespace,
-            parentRef = "SAM:StopPlace:1000_parent"
-        )
+        val child =
+            stopPlaceChildCreator.createChildStopPlace(
+                originalStopPlace = originalStopPlace,
+                childId = "SAM:StopPlace:1000_tram",
+                mode = TransportMode.TRAM,
+                quayIds = listOf("SAM:Quay:50001"),
+                namespace = namespace,
+                parentRef = "SAM:StopPlace:1000_parent",
+            )
 
         assertThat(child.getChildText("TransportMode", namespace)).isEqualTo("tram")
     }
 
     @Test
     fun shouldAddTransportModeWhenNotPresent() {
-        val xml = """
+        val xml =
+            """
             <StopPlace xmlns="http://www.netex.org.uk/netex" id="SAM:StopPlace:1000" version="1">
               <Name>Test Station</Name>
               <quays>
                 <Quay id="SAM:Quay:50001"/>
               </quays>
             </StopPlace>
-        """.trimIndent()
+            """.trimIndent()
 
         val originalStopPlace = SAXBuilder().build(StringReader(xml)).rootElement
 
-        val child = stopPlaceChildCreator.createChildStopPlace(
-            originalStopPlace = originalStopPlace,
-            childId = "SAM:StopPlace:1000_tram",
-            mode = TransportMode.TRAM,
-            quayIds = listOf("SAM:Quay:50001"),
-            namespace = namespace,
-            parentRef = "SAM:StopPlace:1000_parent"
-        )
+        val child =
+            stopPlaceChildCreator.createChildStopPlace(
+                originalStopPlace = originalStopPlace,
+                childId = "SAM:StopPlace:1000_tram",
+                mode = TransportMode.TRAM,
+                quayIds = listOf("SAM:Quay:50001"),
+                namespace = namespace,
+                parentRef = "SAM:StopPlace:1000_parent",
+            )
 
         val transportMode = child.getChild("TransportMode", namespace)
         assertThat(transportMode).isNotNull
@@ -173,25 +182,27 @@ class StopPlaceChildCreatorTest {
 
     @Test
     fun shouldSetParentSiteRefCorrectly() {
-        val xml = """
+        val xml =
+            """
             <StopPlace xmlns="http://www.netex.org.uk/netex" id="SAM:StopPlace:1000" version="1">
               <quays>
                 <Quay id="SAM:Quay:50001"/>
               </quays>
             </StopPlace>
-        """.trimIndent()
+            """.trimIndent()
 
         val originalStopPlace = SAXBuilder().build(StringReader(xml)).rootElement
         val parentRef = "SAM:StopPlace:1000_parent"
 
-        val child = stopPlaceChildCreator.createChildStopPlace(
-            originalStopPlace = originalStopPlace,
-            childId = "SAM:StopPlace:1000_tram",
-            mode = TransportMode.TRAM,
-            quayIds = listOf("SAM:Quay:50001"),
-            namespace = namespace,
-            parentRef = parentRef
-        )
+        val child =
+            stopPlaceChildCreator.createChildStopPlace(
+                originalStopPlace = originalStopPlace,
+                childId = "SAM:StopPlace:1000_tram",
+                mode = TransportMode.TRAM,
+                quayIds = listOf("SAM:Quay:50001"),
+                namespace = namespace,
+                parentRef = parentRef,
+            )
 
         val parentSiteRef = child.getChild("ParentSiteRef", namespace)
         assertThat(parentSiteRef).isNotNull
@@ -201,26 +212,28 @@ class StopPlaceChildCreatorTest {
 
     @Test
     fun shouldOverrideExistingParentSiteRef() {
-        val xml = """
+        val xml =
+            """
             <StopPlace xmlns="http://www.netex.org.uk/netex" id="SAM:StopPlace:1000" version="1">
               <ParentSiteRef ref="SAM:StopPlace:OLD_PARENT" version="1"/>
               <quays>
                 <Quay id="SAM:Quay:50001"/>
               </quays>
             </StopPlace>
-        """.trimIndent()
+            """.trimIndent()
 
         val originalStopPlace = SAXBuilder().build(StringReader(xml)).rootElement
         val newParentRef = "SAM:StopPlace:1000_parent"
 
-        val child = stopPlaceChildCreator.createChildStopPlace(
-            originalStopPlace = originalStopPlace,
-            childId = "SAM:StopPlace:1000_tram",
-            mode = TransportMode.TRAM,
-            quayIds = listOf("SAM:Quay:50001"),
-            namespace = namespace,
-            parentRef = newParentRef
-        )
+        val child =
+            stopPlaceChildCreator.createChildStopPlace(
+                originalStopPlace = originalStopPlace,
+                childId = "SAM:StopPlace:1000_tram",
+                mode = TransportMode.TRAM,
+                quayIds = listOf("SAM:Quay:50001"),
+                namespace = namespace,
+                parentRef = newParentRef,
+            )
 
         val parentSiteRef = child.getChild("ParentSiteRef", namespace)
         assertThat(parentSiteRef!!.getAttributeValue("ref")).isEqualTo(newParentRef)
@@ -228,7 +241,8 @@ class StopPlaceChildCreatorTest {
 
     @Test
     fun shouldFilterQuaysCorrectly() {
-        val xml = """
+        val xml =
+            """
             <StopPlace xmlns="http://www.netex.org.uk/netex" id="SAM:StopPlace:1000" version="1">
               <quays>
                 <Quay id="SAM:Quay:50001">
@@ -242,18 +256,19 @@ class StopPlaceChildCreatorTest {
                 </Quay>
               </quays>
             </StopPlace>
-        """.trimIndent()
+            """.trimIndent()
 
         val originalStopPlace = SAXBuilder().build(StringReader(xml)).rootElement
 
-        val child = stopPlaceChildCreator.createChildStopPlace(
-            originalStopPlace = originalStopPlace,
-            childId = "SAM:StopPlace:1000_tram",
-            mode = TransportMode.TRAM,
-            quayIds = listOf("SAM:Quay:50001", "SAM:Quay:50003"),
-            namespace = namespace,
-            parentRef = "SAM:StopPlace:1000_parent"
-        )
+        val child =
+            stopPlaceChildCreator.createChildStopPlace(
+                originalStopPlace = originalStopPlace,
+                childId = "SAM:StopPlace:1000_tram",
+                mode = TransportMode.TRAM,
+                quayIds = listOf("SAM:Quay:50001", "SAM:Quay:50003"),
+                namespace = namespace,
+                parentRef = "SAM:StopPlace:1000_parent",
+            )
 
         val quays = child.getChild("quays", namespace)!!.getChildren("Quay", namespace)
         assertThat(quays)
@@ -264,7 +279,8 @@ class StopPlaceChildCreatorTest {
 
     @Test
     fun shouldClearPublicCodeAsterisk() {
-        val xml = """
+        val xml =
+            """
             <StopPlace xmlns="http://www.netex.org.uk/netex" id="SAM:StopPlace:1000" version="1">
               <quays>
                 <Quay id="SAM:Quay:50001">
@@ -275,18 +291,19 @@ class StopPlaceChildCreatorTest {
                 </Quay>
               </quays>
             </StopPlace>
-        """.trimIndent()
+            """.trimIndent()
 
         val originalStopPlace = SAXBuilder().build(StringReader(xml)).rootElement
 
-        val child = stopPlaceChildCreator.createChildStopPlace(
-            originalStopPlace = originalStopPlace,
-            childId = "SAM:StopPlace:1000_tram",
-            mode = TransportMode.TRAM,
-            quayIds = listOf("SAM:Quay:50001", "SAM:Quay:50002"),
-            namespace = namespace,
-            parentRef = "SAM:StopPlace:1000_parent"
-        )
+        val child =
+            stopPlaceChildCreator.createChildStopPlace(
+                originalStopPlace = originalStopPlace,
+                childId = "SAM:StopPlace:1000_tram",
+                mode = TransportMode.TRAM,
+                quayIds = listOf("SAM:Quay:50001", "SAM:Quay:50002"),
+                namespace = namespace,
+                parentRef = "SAM:StopPlace:1000_parent",
+            )
 
         val quays = child.getChild("quays", namespace)!!.getChildren("Quay", namespace)
         val quay1 = quays.find { it.getAttributeValue("id") == "SAM:Quay:50001" }
@@ -298,22 +315,24 @@ class StopPlaceChildCreatorTest {
 
     @Test
     fun shouldHandleStopPlaceWithNoQuays() {
-        val xml = """
+        val xml =
+            """
             <StopPlace xmlns="http://www.netex.org.uk/netex" id="SAM:StopPlace:1000" version="1">
               <Name>Test Station</Name>
             </StopPlace>
-        """.trimIndent()
+            """.trimIndent()
 
         val originalStopPlace = SAXBuilder().build(StringReader(xml)).rootElement
 
-        val child = stopPlaceChildCreator.createChildStopPlace(
-            originalStopPlace = originalStopPlace,
-            childId = "SAM:StopPlace:1000_tram",
-            mode = TransportMode.TRAM,
-            quayIds = listOf(),
-            namespace = namespace,
-            parentRef = "SAM:StopPlace:1000_parent"
-        )
+        val child =
+            stopPlaceChildCreator.createChildStopPlace(
+                originalStopPlace = originalStopPlace,
+                childId = "SAM:StopPlace:1000_tram",
+                mode = TransportMode.TRAM,
+                quayIds = listOf(),
+                namespace = namespace,
+                parentRef = "SAM:StopPlace:1000_parent",
+            )
 
         assertThat(child.getAttributeValue("id")).isEqualTo("SAM:StopPlace:1000_tram")
         assertThat(child.getChildText("TransportMode", namespace)).isEqualTo("tram")
@@ -322,24 +341,26 @@ class StopPlaceChildCreatorTest {
 
     @Test
     fun shouldHandleEmptyQuaysContainer() {
-        val xml = """
+        val xml =
+            """
             <StopPlace xmlns="http://www.netex.org.uk/netex" id="SAM:StopPlace:1000" version="1">
               <Name>Test Station</Name>
               <quays>
               </quays>
             </StopPlace>
-        """.trimIndent()
+            """.trimIndent()
 
         val originalStopPlace = SAXBuilder().build(StringReader(xml)).rootElement
 
-        val child = stopPlaceChildCreator.createChildStopPlace(
-            originalStopPlace = originalStopPlace,
-            childId = "SAM:StopPlace:1000_tram",
-            mode = TransportMode.TRAM,
-            quayIds = listOf(),
-            namespace = namespace,
-            parentRef = "SAM:StopPlace:1000_parent"
-        )
+        val child =
+            stopPlaceChildCreator.createChildStopPlace(
+                originalStopPlace = originalStopPlace,
+                childId = "SAM:StopPlace:1000_tram",
+                mode = TransportMode.TRAM,
+                quayIds = listOf(),
+                namespace = namespace,
+                parentRef = "SAM:StopPlace:1000_parent",
+            )
 
         val quays = child.getChild("quays", namespace)
         assertThat(quays).isNotNull
@@ -348,7 +369,8 @@ class StopPlaceChildCreatorTest {
 
     @Test
     fun shouldPreserveOtherStopPlaceElements() {
-        val xml = """
+        val xml =
+            """
             <StopPlace xmlns="http://www.netex.org.uk/netex" id="SAM:StopPlace:1000" version="2">
               <keyList>
                 <KeyValue>
@@ -368,18 +390,19 @@ class StopPlaceChildCreatorTest {
                 <Quay id="SAM:Quay:50001"/>
               </quays>
             </StopPlace>
-        """.trimIndent()
+            """.trimIndent()
 
         val originalStopPlace = SAXBuilder().build(StringReader(xml)).rootElement
 
-        val child = stopPlaceChildCreator.createChildStopPlace(
-            originalStopPlace = originalStopPlace,
-            childId = "SAM:StopPlace:1000_tram",
-            mode = TransportMode.TRAM,
-            quayIds = listOf("SAM:Quay:50001"),
-            namespace = namespace,
-            parentRef = "SAM:StopPlace:1000_parent"
-        )
+        val child =
+            stopPlaceChildCreator.createChildStopPlace(
+                originalStopPlace = originalStopPlace,
+                childId = "SAM:StopPlace:1000_tram",
+                mode = TransportMode.TRAM,
+                quayIds = listOf("SAM:Quay:50001"),
+                namespace = namespace,
+                parentRef = "SAM:StopPlace:1000_parent",
+            )
 
         assertThat(child.getChildText("Name", namespace)).isEqualTo("Test Station")
         assertThat(child.getChildText("Description", namespace)).isEqualTo("A test description")
@@ -393,7 +416,8 @@ class StopPlaceChildCreatorTest {
 
     @Test
     fun shouldSetStopPlaceTypeBasedOnTransportMode() {
-        val xml = """
+        val xml =
+            """
             <StopPlace xmlns="http://www.netex.org.uk/netex" id="SAM:StopPlace:1000" version="1">
               <TransportMode>bus</TransportMode>
               <StopPlaceType>onstreetBus</StopPlaceType>
@@ -401,36 +425,39 @@ class StopPlaceChildCreatorTest {
                 <Quay id="SAM:Quay:50001"/>
               </quays>
             </StopPlace>
-        """.trimIndent()
+            """.trimIndent()
 
         val originalStopPlace = SAXBuilder().build(StringReader(xml)).rootElement
 
-        val tramChild = stopPlaceChildCreator.createChildStopPlace(
-            originalStopPlace = originalStopPlace,
-            childId = "SAM:StopPlace:1000_tram",
-            mode = TransportMode.TRAM,
-            quayIds = listOf("SAM:Quay:50001"),
-            namespace = namespace,
-            parentRef = "SAM:StopPlace:1000_parent"
-        )
+        val tramChild =
+            stopPlaceChildCreator.createChildStopPlace(
+                originalStopPlace = originalStopPlace,
+                childId = "SAM:StopPlace:1000_tram",
+                mode = TransportMode.TRAM,
+                quayIds = listOf("SAM:Quay:50001"),
+                namespace = namespace,
+                parentRef = "SAM:StopPlace:1000_parent",
+            )
 
-        val waterChild = stopPlaceChildCreator.createChildStopPlace(
-            originalStopPlace = originalStopPlace,
-            childId = "SAM:StopPlace:1000_water",
-            mode = TransportMode.WATER,
-            quayIds = listOf("SAM:Quay:50001"),
-            namespace = namespace,
-            parentRef = "SAM:StopPlace:1000_parent"
-        )
+        val waterChild =
+            stopPlaceChildCreator.createChildStopPlace(
+                originalStopPlace = originalStopPlace,
+                childId = "SAM:StopPlace:1000_water",
+                mode = TransportMode.WATER,
+                quayIds = listOf("SAM:Quay:50001"),
+                namespace = namespace,
+                parentRef = "SAM:StopPlace:1000_parent",
+            )
 
-        val busChild = stopPlaceChildCreator.createChildStopPlace(
-            originalStopPlace = originalStopPlace,
-            childId = "SAM:StopPlace:1000_bus",
-            mode = TransportMode.BUS,
-            quayIds = listOf("SAM:Quay:50001"),
-            namespace = namespace,
-            parentRef = "SAM:StopPlace:1000_parent"
-        )
+        val busChild =
+            stopPlaceChildCreator.createChildStopPlace(
+                originalStopPlace = originalStopPlace,
+                childId = "SAM:StopPlace:1000_bus",
+                mode = TransportMode.BUS,
+                quayIds = listOf("SAM:Quay:50001"),
+                namespace = namespace,
+                parentRef = "SAM:StopPlace:1000_parent",
+            )
 
         assertThat(tramChild.getChildText("StopPlaceType", namespace)).isEqualTo("onstreetTram")
         assertThat(waterChild.getChildText("StopPlaceType", namespace)).isEqualTo("ferryStop")
@@ -439,7 +466,8 @@ class StopPlaceChildCreatorTest {
 
     @Test
     fun shouldNotModifyOriginalStopPlace() {
-        val xml = """
+        val xml =
+            """
             <StopPlace xmlns="http://www.netex.org.uk/netex" id="SAM:StopPlace:1000" version="1">
               <Name>Original Name</Name>
               <quays>
@@ -447,27 +475,33 @@ class StopPlaceChildCreatorTest {
                 <Quay id="SAM:Quay:50002"/>
               </quays>
             </StopPlace>
-        """.trimIndent()
+            """.trimIndent()
 
         val originalStopPlace = SAXBuilder().build(StringReader(xml)).rootElement
-        val originalQuayCount = originalStopPlace.getChild("quays", namespace)!!
-            .getChildren("Quay", namespace).size
+        val originalQuayCount =
+            originalStopPlace
+                .getChild("quays", namespace)!!
+                .getChildren("Quay", namespace)
+                .size
 
-        val child = stopPlaceChildCreator.createChildStopPlace(
-            originalStopPlace = originalStopPlace,
-            childId = "SAM:StopPlace:1000_tram",
-            mode = TransportMode.TRAM,
-            quayIds = listOf("SAM:Quay:50001"),
-            namespace = namespace,
-            parentRef = "SAM:StopPlace:1000_parent"
-        )
+        val child =
+            stopPlaceChildCreator.createChildStopPlace(
+                originalStopPlace = originalStopPlace,
+                childId = "SAM:StopPlace:1000_tram",
+                mode = TransportMode.TRAM,
+                quayIds = listOf("SAM:Quay:50001"),
+                namespace = namespace,
+                parentRef = "SAM:StopPlace:1000_parent",
+            )
 
         assertThat(originalStopPlace.getAttributeValue("id")).isEqualTo("SAM:StopPlace:1000")
         assertThat(originalStopPlace.getChild("TransportMode", namespace)).isNull()
         assertThat(originalStopPlace.getChild("ParentSiteRef", namespace)).isNull()
 
-        val originalQuays = originalStopPlace.getChild("quays", namespace)!!
-            .getChildren("Quay", namespace)
+        val originalQuays =
+            originalStopPlace
+                .getChild("quays", namespace)!!
+                .getChildren("Quay", namespace)
         assertThat(originalQuays).hasSize(originalQuayCount)
 
         assertThat(child.getAttributeValue("id")).isEqualTo("SAM:StopPlace:1000_tram")

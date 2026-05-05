@@ -8,13 +8,13 @@ import org.junit.jupiter.api.Test
 import java.io.StringReader
 
 class StopPlaceParentCreatorTest {
-
     private val stopPlaceParentCreator = StopPlaceParentCreator()
     private val namespace = Namespace.getNamespace("http://www.netex.org.uk/netex")
 
     @Test
     fun shouldCreateParentStopPlaceWithAllElements() {
-        val xml = """
+        val xml =
+            """
             <StopPlace xmlns="http://www.netex.org.uk/netex" id="SAM:StopPlace:1000" version="1">
               <keyList>
                 <KeyValue>
@@ -34,7 +34,7 @@ class StopPlaceParentCreatorTest {
                 </Location>
               </Centroid>
             </StopPlace>
-        """.trimIndent()
+            """.trimIndent()
 
         val originalStopPlace = SAXBuilder().build(StringReader(xml)).rootElement
         val parentId = "SAM:StopPlace:1000_parent"
@@ -71,7 +71,8 @@ class StopPlaceParentCreatorTest {
 
     @Test
     fun shouldCreateParentStopPlaceWithOnlyOwnerKeyValue() {
-        val xml = """
+        val xml =
+            """
             <StopPlace xmlns="http://www.netex.org.uk/netex" id="SAM:StopPlace:1000" version="1">
               <keyList>
                 <KeyValue>
@@ -85,7 +86,7 @@ class StopPlaceParentCreatorTest {
               </keyList>
               <Name>Test Station</Name>
             </StopPlace>
-        """.trimIndent()
+            """.trimIndent()
 
         val originalStopPlace = SAXBuilder().build(StringReader(xml)).rootElement
         val parentId = "SAM:StopPlace:1000_parent"
@@ -108,7 +109,8 @@ class StopPlaceParentCreatorTest {
 
     @Test
     fun shouldCreateParentStopPlaceWithOnlyDataFromKeyValue() {
-        val xml = """
+        val xml =
+            """
             <StopPlace xmlns="http://www.netex.org.uk/netex" id="SAM:StopPlace:1000" version="1">
               <keyList>
                 <KeyValue>
@@ -118,7 +120,7 @@ class StopPlaceParentCreatorTest {
               </keyList>
               <Name>Test Station</Name>
             </StopPlace>
-        """.trimIndent()
+            """.trimIndent()
 
         val originalStopPlace = SAXBuilder().build(StringReader(xml)).rootElement
         val parentId = "SAM:StopPlace:1000_parent"
@@ -138,7 +140,8 @@ class StopPlaceParentCreatorTest {
 
     @Test
     fun shouldCreateParentStopPlaceWithoutKeyList() {
-        val xml = """
+        val xml =
+            """
             <StopPlace xmlns="http://www.netex.org.uk/netex" id="SAM:StopPlace:1000" version="1">
               <Name>Test Station</Name>
               <Centroid>
@@ -148,7 +151,7 @@ class StopPlaceParentCreatorTest {
                 </Location>
               </Centroid>
             </StopPlace>
-        """.trimIndent()
+            """.trimIndent()
 
         val originalStopPlace = SAXBuilder().build(StringReader(xml)).rootElement
         val parentId = "SAM:StopPlace:1000_parent"
@@ -168,7 +171,8 @@ class StopPlaceParentCreatorTest {
 
     @Test
     fun shouldCreateParentStopPlaceWithoutName() {
-        val xml = """
+        val xml =
+            """
             <StopPlace xmlns="http://www.netex.org.uk/netex" id="SAM:StopPlace:1000" version="1">
               <keyList>
                 <KeyValue>
@@ -183,7 +187,7 @@ class StopPlaceParentCreatorTest {
                 </Location>
               </Centroid>
             </StopPlace>
-        """.trimIndent()
+            """.trimIndent()
 
         val originalStopPlace = SAXBuilder().build(StringReader(xml)).rootElement
         val parentId = "SAM:StopPlace:1000_parent"
@@ -197,7 +201,8 @@ class StopPlaceParentCreatorTest {
 
     @Test
     fun shouldCreateParentStopPlaceWithoutCentroid() {
-        val xml = """
+        val xml =
+            """
             <StopPlace xmlns="http://www.netex.org.uk/netex" id="SAM:StopPlace:1000" version="1">
               <keyList>
                 <KeyValue>
@@ -207,7 +212,7 @@ class StopPlaceParentCreatorTest {
               </keyList>
               <Name>Test Station</Name>
             </StopPlace>
-        """.trimIndent()
+            """.trimIndent()
 
         val originalStopPlace = SAXBuilder().build(StringReader(xml)).rootElement
         val parentId = "SAM:StopPlace:1000_parent"
@@ -221,10 +226,11 @@ class StopPlaceParentCreatorTest {
 
     @Test
     fun shouldCreateMinimalParentStopPlace() {
-        val xml = """
+        val xml =
+            """
             <StopPlace xmlns="http://www.netex.org.uk/netex" id="SAM:StopPlace:1000" version="1">
             </StopPlace>
-        """.trimIndent()
+            """.trimIndent()
 
         val originalStopPlace = SAXBuilder().build(StringReader(xml)).rootElement
         val parentId = "SAM:StopPlace:1000_parent"
@@ -244,7 +250,8 @@ class StopPlaceParentCreatorTest {
 
     @Test
     fun shouldCloneElementsNotModifyOriginals() {
-        val xml = """
+        val xml =
+            """
             <StopPlace xmlns="http://www.netex.org.uk/netex" id="SAM:StopPlace:1000" version="1">
               <Name>Test Station</Name>
               <Centroid>
@@ -254,7 +261,7 @@ class StopPlaceParentCreatorTest {
                 </Location>
               </Centroid>
             </StopPlace>
-        """.trimIndent()
+            """.trimIndent()
 
         val originalStopPlace = SAXBuilder().build(StringReader(xml)).rootElement
         val parentId = "SAM:StopPlace:1000_parent"

@@ -17,7 +17,6 @@ class XmlnsUrlHandlerTest {
 
     private val writer = mock<DelegatingXMLElementWriter>()
 
-
     @Test
     fun testXmlnsUrlHandler() {
         val attrs: Attributes = mock()
@@ -34,5 +33,4 @@ class XmlnsUrlHandlerTest {
             assertThat(transformedContent).isEqualTo("http://www.foo.com")
         }
     }
-
 }

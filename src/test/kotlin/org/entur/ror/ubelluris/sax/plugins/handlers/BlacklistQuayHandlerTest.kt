@@ -23,14 +23,13 @@ class BlacklistQuayHandlerTest {
 
     @Test
     fun shouldAddEntityIdWhenQuayIdIsInBlacklist() {
-
         val blacklistFile = tempDir.resolve("blacklist.txt").toFile()
         blacklistFile.writeText(
             """
             SE:050:Quay:47296
             SE:050:Quay:47297
             SE:050:Quay:47298
-            """.trimIndent()
+            """.trimIndent(),
         )
 
         val handler = BlacklistQuayHandler(stopPlacePurgingRepository, blacklistFile)
@@ -51,7 +50,7 @@ class BlacklistQuayHandlerTest {
             """
             SE:050:Quay:47296
             SE:050:Quay:47297
-            """.trimIndent()
+            """.trimIndent(),
         )
 
         val handler = BlacklistQuayHandler(stopPlacePurgingRepository, blacklistFile)
@@ -135,7 +134,7 @@ class BlacklistQuayHandlerTest {
 
             SE:050:Quay:47297
 
-            """.trimIndent()
+            """.trimIndent(),
         )
 
         val handler = BlacklistQuayHandler(stopPlacePurgingRepository, blacklistFile)
@@ -153,5 +152,4 @@ class BlacklistQuayHandlerTest {
 
         assertThat(stopPlacePurgingRepository.entityIds).containsOnly("entityId1", "entityId2")
     }
-
 }
