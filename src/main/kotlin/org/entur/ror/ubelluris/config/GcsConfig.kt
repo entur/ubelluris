@@ -4,18 +4,21 @@ data class GcsConfig(
     val projectId: String,
     val outputBucketName: String,
     val inputBucketName: String,
-    val gcsEnabled: Boolean,
+    val uploadEnabled: Boolean,
+    val downloadEnabled: Boolean,
 ) {
     companion object {
         fun fromEnvironment(): GcsConfig {
-            val enabled = System.getenv("GCS_UPLOAD_ENABLED")?.toBoolean() ?: false
+            val uploadEnabled = System.getenv("GCS_UPLOAD_ENABLED")?.toBoolean() ?: false
+            val downloadEnabled = System.getenv("GCS_DOWNLOAD_ENABLED")?.toBoolean() ?: true
 
-            if (!enabled) {
+            if (!uploadEnabled && !downloadEnabled) {
                 return GcsConfig(
                     projectId = "",
                     outputBucketName = "",
                     inputBucketName = "",
-                    gcsEnabled = false,
+                    uploadEnabled = false,
+                    downloadEnabled = false,
                 )
             }
 
@@ -23,13 +26,21 @@ data class GcsConfig(
                 System.getenv("GCS_PROJECT_ID")
                     ?: throw IllegalStateException("GCS_PROJECT_ID environment variable not set")
             val outputBucketName =
-                System.getenv("GCS_BUCKET_NAME")
-                    ?: throw IllegalStateException("GCS_BUCKET_NAME environment variable not set")
+                if (uploadEnabled) {
+                    System.getenv("GCS_OUTPUT_BUCKET")
+                        ?: throw IllegalStateException("GCS_OUTPUT_BUCKET environment variable not set")
+                } else {
+                    ""
+                }
             val inputBucketName =
-                System.getenv("GCS_INPUT_BUCKET")
-                    ?: throw IllegalStateException("GCS_INPUT_BUCKET environment variable not set")
+                if (downloadEnabled) {
+                    System.getenv("GCS_INPUT_BUCKET")
+                        ?: throw IllegalStateException("GCS_INPUT_BUCKET environment variable not set")
+                } else {
+                    ""
+                }
 
-            return GcsConfig(projectId, outputBucketName, inputBucketName, enabled)
+            return GcsConfig(projectId, outputBucketName, inputBucketName, uploadEnabled, downloadEnabled)
         }
     }
 }
