@@ -43,8 +43,9 @@ bin/
 ### Mac OS ###
 .DS_Store
 
+### Ai tools ###
+/.claude/settings.local.json
+
 ### Project Specific ###
 /downloads
-/transport-mode-helpers
-/processing
 /results

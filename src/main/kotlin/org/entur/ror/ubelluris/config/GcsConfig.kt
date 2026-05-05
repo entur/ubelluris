@@ -2,7 +2,7 @@ package org.entur.ror.ubelluris.config
 
 data class GcsConfig(
     val projectId: String,
-    val bucketName: String,
+    val outputBucketName: String,
     val inputBucketName: String,
     val gcsEnabled: Boolean
 ) {
@@ -13,7 +13,7 @@ data class GcsConfig(
             if (!enabled) {
                 return GcsConfig(
                     projectId = "",
-                    bucketName = "",
+                    outputBucketName = "",
                     inputBucketName = "",
                     gcsEnabled = false
                 )
@@ -21,12 +21,12 @@ data class GcsConfig(
 
             val projectId = System.getenv("GCS_PROJECT_ID")
                 ?: throw IllegalStateException("GCS_PROJECT_ID environment variable not set")
-            val bucketName = System.getenv("GCS_BUCKET_NAME")
+            val outputBucketName = System.getenv("GCS_BUCKET_NAME")
                 ?: throw IllegalStateException("GCS_BUCKET_NAME environment variable not set")
             val inputBucketName = System.getenv("GCS_INPUT_BUCKET")
                 ?: throw IllegalStateException("GCS_INPUT_BUCKET environment variable not set")
 
-            return GcsConfig(projectId, bucketName, inputBucketName, enabled)
+            return GcsConfig(projectId, outputBucketName, inputBucketName, enabled)
         }
     }
 }

@@ -3,9 +3,6 @@ package org.entur.ror.ubelluris.file
 import com.google.cloud.storage.Storage
 import com.google.cloud.storage.StorageOptions
 import org.entur.ror.ubelluris.config.GcsConfig
-import org.entur.ror.ubelluris.publish.FilePublisher
-import org.entur.ror.ubelluris.publish.GcsFilePublisher
-import org.entur.ror.ubelluris.publish.LocalFilePublisher
 import java.nio.file.Path
 
 class UbellurisBucketService(
@@ -21,12 +18,12 @@ class UbellurisBucketService(
         return storageProvider()
     }
 
-    fun createPublisher(storagePath: Path): FilePublisher {
+    fun createPublisher(storagePath: Path, localCachePath: Path): FilePublisher {
         if (config.gcsEnabled) {
             val storage = createStorage()
             return GcsFilePublisher(config, storage, storagePath)
         }
 
-        return LocalFilePublisher(storagePath)
+        return LocalFilePublisher(storagePath, localCachePath)
     }
 }

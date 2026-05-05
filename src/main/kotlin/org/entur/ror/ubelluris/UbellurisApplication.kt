@@ -2,12 +2,12 @@ package org.entur.ror.ubelluris
 
 import org.entur.ror.ubelluris.config.GcsConfig
 import org.entur.ror.ubelluris.config.JsonConfig
+import org.entur.ror.ubelluris.file.FilePublisher.Companion.STOPS_DIR
+import org.entur.ror.ubelluris.file.FilePublisher.Companion.TIMETABLE_DIR
 import org.entur.ror.ubelluris.file.GcsFileFetcher
 import org.entur.ror.ubelluris.file.UbellurisBucketService
-import org.entur.ror.ubelluris.filter.FilterService
-import org.entur.ror.ubelluris.timetable.TimetableProcessor
-import org.entur.ror.ubelluris.timetable.config.TimetableConfig
-import org.entur.ror.ubelluris.timetable.fetch.GcsTimetableFetcher
+import org.entur.ror.ubelluris.filter.StopPlaceFilterService
+import org.entur.ror.ubelluris.filter.TimetableFilterService
 import java.io.File
 import java.time.LocalDate
 import kotlin.io.path.Path
@@ -33,25 +33,25 @@ fun main(args: Array<String>) {
     val storage = bucketService.createStorage()
 
     val today = LocalDate.now()
-    val stopPlaceStoragePath = Path("${today.year}", "%02d".format(today.monthValue), "%02d".format(today.dayOfMonth), "stops")
-
-    val timetableConfig = TimetableConfig(
-        providers = cliConfig.timetableProviders,
-        modeFilter = cliConfig.transportModes.toSet(),
-        blacklist = emptyMap()
-    )
-
-    val timetableFetcher = GcsTimetableFetcher(timetableConfig, storage, gcsConfig.inputBucketName)
-    val timetableProcessor = TimetableProcessor(timetableFetcher, timetableConfig)
+    val storagePath = Path("${today.year}", "%02d".format(today.monthValue), "%02d".format(today.dayOfMonth))
+    val stopPlaceBlobPath = storagePath.resolve("$STOPS_DIR/sweden.zip").joinToString("/")
+    val timetableBlobPaths = cliConfig.timetableProviders.associateWith { provider ->
+        storagePath.resolve("$TIMETABLE_DIR/$provider.zip").joinToString("/")
+    }
 
     UbellurisService(
-        fetcher = GcsFileFetcher(storage, gcsConfig.inputBucketName, stopPlaceStoragePath),
-        processor = FilterService(
+        fetcher = GcsFileFetcher(
+            storage = storage,
+            inputBucketName = gcsConfig.inputBucketName,
+            stopPlaceBlobPath = stopPlaceBlobPath,
+            timetableBlobPaths = timetableBlobPaths
+        ),
+        timetableProcessor = TimetableFilterService(cliConfig),
+        stopPlaceProcessor = StopPlaceFilterService(
             cliConfig = cliConfig,
-            timetableProcessor = timetableProcessor,
             blacklistFilePath = blacklistFilePath
         ),
-        publisher = bucketService.createPublisher(stopPlaceStoragePath)
+        publisher = bucketService.createPublisher(storagePath, Path(cliConfig.resultsDir))
     ).run()
 }
 

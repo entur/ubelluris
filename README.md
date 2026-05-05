@@ -3,7 +3,7 @@
 Ubelluris performs a transformation and filtering job on NeTEx PublicationDelivery datasets.
 
 ## How it works
-Ubelluris fetches stop place and timetable data from a GCS (Google Cloud Storage) input bucket, and subsequently processes it to produce a filtered .xml file.
+Ubelluris fetches stop place and timetable data from a GCS (Google Cloud Storage) input bucket, and subsequently processes it to produce filtered .xml files.
 
 ## Running Ubelluris locally
 A minimal local setup requires access to a GCS input bucket containing stop place and timetable data.
