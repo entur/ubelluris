@@ -33,7 +33,7 @@ class LocalFilePublisherTest {
 
         val result = publisher.publish(stopPlaceFile, timetablePaths)
 
-        val expectedFilePlacement = result.resolve(FilePublisher.STOPS_DIR).resolve(stopPlaceFile.fileName)
+        val expectedFilePlacement = result.resolve(storagePath).resolve(FilePublisher.STOPS_DIR).resolve(stopPlaceFile.fileName)
         assertThat(expectedFilePlacement).hasContent("<StopPlaces/>")
 
         val timetableDir = result.resolve(storagePath).resolve("timetable")

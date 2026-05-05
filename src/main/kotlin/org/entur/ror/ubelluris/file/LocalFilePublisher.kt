@@ -12,7 +12,7 @@ class LocalFilePublisher(
         stopPlacePath: Path,
         timetablePaths: Map<String, Path>,
     ): Path {
-        val stopsDir = resultsDir.resolve(FilePublisher.Companion.STOPS_DIR)
+        val stopsDir = resultsDir.resolve(storagePath).resolve(FilePublisher.Companion.STOPS_DIR)
         Files.createDirectories(stopsDir)
         Files.move(stopPlacePath, stopsDir.resolve(stopPlacePath.fileName), StandardCopyOption.REPLACE_EXISTING)
 
