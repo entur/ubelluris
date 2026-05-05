@@ -53,13 +53,15 @@ Ubelluris fetches input data from and can publish results to Google Cloud Storag
 
 | Variable | Required | Description |
 |----------|----------|-------------|
-| `GCS_PROJECT_ID` | Yes | GCP project ID |
-| `GCS_INPUT_BUCKET` | Yes | Source GCS bucket containing stop place and timetable data |
+| `GCS_PROJECT_ID` | When GCS enabled | GCP project ID |
+| `GCS_INPUT_BUCKET` | When download enabled | Source GCS bucket containing stop place and timetable data |
+| `GCS_DOWNLOAD_ENABLED` | No | Set to `false` to skip GCS download and use local cache (default: `true`) |
 | `GCS_UPLOAD_ENABLED` | No | Set to `true` to enable GCS publishing (default: `false`) |
-| `GCS_BUCKET_NAME` | When upload enabled | Target GCS bucket for publishing results |
+| `GCS_OUTPUT_BUCKET` | When upload enabled | Target GCS bucket for publishing results |
 
 ### Behavior
 
-- Input data (stops and timetables) is always fetched from the `GCS_INPUT_BUCKET`
-- **Upload enabled**: Result files are uploaded to the specified `GCS_BUCKET_NAME`
+- **Download enabled** (default): Input data is fetched from `GCS_INPUT_BUCKET`; already-cached files are skipped
+- **Download disabled**: Local cache in `downloads/` is used directly, requires unzipped files; no GCS connection needed for input
+- **Upload enabled**: Result files are uploaded to the specified `GCS_OUTPUT_BUCKET`
 - **Upload disabled** (default): Result files are saved locally to a `results/` directory

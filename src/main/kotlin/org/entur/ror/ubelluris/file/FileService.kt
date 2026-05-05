@@ -5,7 +5,7 @@ import com.google.cloud.storage.StorageOptions
 import org.entur.ror.ubelluris.config.GcsConfig
 import java.nio.file.Path
 
-class UbellurisBucketService(
+class FileService(
     private val config: GcsConfig,
     private val storageProvider: () -> Storage = {
         StorageOptions
@@ -17,11 +17,28 @@ class UbellurisBucketService(
 ) {
     fun createStorage(): Storage = storageProvider()
 
+    fun createFetcher(
+        stopPlaceBlobPath: String,
+        timetableBlobPaths: Map<String, String>,
+    ): FileFetcher {
+        if (config.downloadEnabled) {
+            val storage = createStorage()
+            return GcsFileFetcher(
+                storage = storage,
+                config = config,
+                stopPlaceBlobPath = stopPlaceBlobPath,
+                timetableBlobPaths = timetableBlobPaths,
+            )
+        }
+
+        return LocalFileFetcher(stopPlaceBlobPath, timetableBlobPaths)
+    }
+
     fun createPublisher(
         storagePath: Path,
         localCachePath: Path,
     ): FilePublisher {
-        if (config.gcsEnabled) {
+        if (config.uploadEnabled) {
             val storage = createStorage()
             return GcsFilePublisher(config, storage, storagePath)
         }

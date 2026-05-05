@@ -2,6 +2,7 @@ package org.entur.ror.ubelluris.file
 
 import com.google.cloud.storage.Storage
 import org.assertj.core.api.Assertions.assertThat
+import org.entur.ror.ubelluris.config.GcsConfig
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.io.TempDir
 import org.mockito.kotlin.mock
@@ -16,6 +17,14 @@ class GcsFileFetcherTest {
     lateinit var tempDir: Path
 
     private val storage: Storage = mock()
+    private val config =
+        GcsConfig(
+            projectId = "",
+            outputBucketName = "",
+            inputBucketName = "test-bucket",
+            uploadEnabled = false,
+            downloadEnabled = true,
+        )
 
     @Test
     fun shouldExtractStopPlaceXmlFromZip() {
@@ -27,7 +36,7 @@ class GcsFileFetcherTest {
         val fetcher =
             GcsFileFetcher(
                 storage = storage,
-                inputBucketName = "test-bucket",
+                config = config,
                 stopPlaceBlobPath = stopPlaceBlobPath,
                 timetableBlobPaths = emptyMap(),
                 downloadDir = tempDir,
@@ -61,7 +70,7 @@ class GcsFileFetcherTest {
         val fetcher =
             GcsFileFetcher(
                 storage = storage,
-                inputBucketName = "test-bucket",
+                config = config,
                 stopPlaceBlobPath = stopPlaceBlobPath,
                 timetableBlobPaths =
                     mapOf(
@@ -96,7 +105,7 @@ class GcsFileFetcherTest {
         val fetcher =
             GcsFileFetcher(
                 storage = storage,
-                inputBucketName = "test-bucket",
+                config = config,
                 stopPlaceBlobPath = stopPlaceBlobPath,
                 timetableBlobPaths = emptyMap(),
                 downloadDir = tempDir,

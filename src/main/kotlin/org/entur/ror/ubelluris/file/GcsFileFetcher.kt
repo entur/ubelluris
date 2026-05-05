@@ -6,17 +6,22 @@ import com.google.cloud.storage.Storage
 import com.google.cloud.storage.transfermanager.ParallelDownloadConfig
 import com.google.cloud.storage.transfermanager.TransferManagerConfig
 import com.google.cloud.storage.transfermanager.TransferStatus
+import org.entur.ror.ubelluris.config.GcsConfig
 import org.slf4j.LoggerFactory
 import java.nio.file.Files
 import java.nio.file.Path
 
 class GcsFileFetcher(
     private val storage: Storage,
-    private val inputBucketName: String,
+    private val config: GcsConfig,
     private val stopPlaceBlobPath: String,
     private val timetableBlobPaths: Map<String, String>,
-    private val downloadDir: Path = Path.of("downloads"),
+    private val downloadDir: Path = DEFAULT_DOWNLOAD_DIR,
 ) : FileFetcher {
+    companion object {
+        val DEFAULT_DOWNLOAD_DIR: Path = Path.of("downloads")
+    }
+
     private val logger = LoggerFactory.getLogger(javaClass)
     private val targetStopPlaceFile = "sweden_stop_places.xml"
 
@@ -56,19 +61,19 @@ class GcsFileFetcher(
         val missingBlobs =
             allBlobPaths
                 .filter { !Files.exists(downloadDir.resolve(it)) }
-                .map { BlobInfo.newBuilder(BlobId.of(inputBucketName, it)).build() }
+                .map { BlobInfo.newBuilder(BlobId.of(config.inputBucketName, it)).build() }
 
         if (missingBlobs.isEmpty()) {
             logger.info("All blobs already cached locally, skipping download")
             return
         }
 
-        logger.info("Downloading ${missingBlobs.size} blob(s) in parallel from $inputBucketName")
+        logger.info("Downloading ${missingBlobs.size} blob(s) in parallel from ${config.inputBucketName}")
 
         val downloadConfig =
             ParallelDownloadConfig
                 .newBuilder()
-                .setBucketName(inputBucketName)
+                .setBucketName(config.inputBucketName)
                 .setDownloadDirectory(downloadDir)
                 .build()
 

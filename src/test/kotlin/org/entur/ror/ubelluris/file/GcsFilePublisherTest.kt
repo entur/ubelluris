@@ -24,6 +24,7 @@ class GcsFilePublisherTest {
             "test-bucket",
             "test-input-bucket",
             true,
+            true,
         )
 
     private val mockStorage: Storage = mock()

@@ -4,8 +4,7 @@ import org.entur.ror.ubelluris.config.GcsConfig
 import org.entur.ror.ubelluris.config.JsonConfig
 import org.entur.ror.ubelluris.file.FilePublisher.Companion.STOPS_DIR
 import org.entur.ror.ubelluris.file.FilePublisher.Companion.TIMETABLE_DIR
-import org.entur.ror.ubelluris.file.GcsFileFetcher
-import org.entur.ror.ubelluris.file.UbellurisBucketService
+import org.entur.ror.ubelluris.file.FileService
 import org.entur.ror.ubelluris.filter.StopPlaceFilterService
 import org.entur.ror.ubelluris.filter.TimetableFilterService
 import java.io.File
@@ -29,8 +28,7 @@ fun main(args: Array<String>) {
     val blacklistFilePath = args.getOrElse(1) { "" }
 
     val gcsConfig = GcsConfig.fromEnvironment()
-    val bucketService = UbellurisBucketService(gcsConfig)
-    val storage = bucketService.createStorage()
+    val fileService = FileService(gcsConfig)
 
     val today = LocalDate.now()
     val storagePath = Path("${today.year}", "%02d".format(today.monthValue), "%02d".format(today.dayOfMonth))
@@ -41,20 +39,14 @@ fun main(args: Array<String>) {
         }
 
     UbellurisService(
-        fetcher =
-            GcsFileFetcher(
-                storage = storage,
-                inputBucketName = gcsConfig.inputBucketName,
-                stopPlaceBlobPath = stopPlaceBlobPath,
-                timetableBlobPaths = timetableBlobPaths,
-            ),
+        fetcher = fileService.createFetcher(stopPlaceBlobPath, timetableBlobPaths),
         timetableProcessor = TimetableFilterService(cliConfig),
         stopPlaceProcessor =
             StopPlaceFilterService(
                 cliConfig = cliConfig,
                 blacklistFilePath = blacklistFilePath,
             ),
-        publisher = bucketService.createPublisher(storagePath, Path(cliConfig.resultsDir)),
+        publisher = fileService.createPublisher(storagePath, Path(cliConfig.resultsDir)),
     ).run()
 }
 
