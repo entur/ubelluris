@@ -9,8 +9,6 @@ import com.google.cloud.storage.transfermanager.TransferStatus
 import org.slf4j.LoggerFactory
 import java.nio.file.Files
 import java.nio.file.Path
-import java.nio.file.StandardOpenOption
-import java.util.zip.ZipInputStream
 
 class GcsFileFetcher(
     private val storage: Storage,
@@ -26,15 +24,28 @@ class GcsFileFetcher(
         Files.createDirectories(downloadDir)
         downloadMissingBlobs()
 
+        val stopOutputPath = downloadDir.resolve(stopPlaceBlobPath).resolveSibling(targetStopPlaceFile)
         val stopPlacePath =
-            extractXmlFromZip(
-                zipPath = downloadDir.resolve(stopPlaceBlobPath),
-                outputPath = downloadDir.resolve(stopPlaceBlobPath).resolveSibling(targetStopPlaceFile),
-            )
+            if (Files.exists(stopOutputPath)) {
+                logger.info("Found existing download for $stopOutputPath")
+                stopOutputPath
+            } else {
+                logger.info("Extracting XML from ${downloadDir.resolve(stopPlaceBlobPath)}")
+                extractXmlFromZip(downloadDir.resolve(stopPlaceBlobPath), stopOutputPath)
+            }
 
         val timetablePaths =
             timetableBlobPaths.mapValues { (provider, blobPath) ->
-                extractTimetableZip(provider, downloadDir.resolve(blobPath))
+                val zipPath = downloadDir.resolve(blobPath)
+                val extractDir = zipPath.resolveSibling(provider)
+                if (Files.exists(extractDir)) {
+                    logger.info("Using cached timetable dir: $extractDir")
+                    extractDir
+                } else {
+                    Files.createDirectories(extractDir)
+                    logger.info("Extracting timetable zip for $provider from $zipPath")
+                    extractZipToDirectory(zipPath, extractDir)
+                }
             }
 
         return FileFetchResult(stopPlacePath, timetablePaths)
@@ -77,62 +88,5 @@ class GcsFileFetcher(
             }
 
         logger.info("Download complete")
-    }
-
-    private fun extractXmlFromZip(
-        zipPath: Path,
-        outputPath: Path,
-    ): Path {
-        if (Files.exists(outputPath)) {
-            logger.info("Found existing download for $outputPath")
-            return outputPath
-        }
-
-        logger.info("Extracting XML from $zipPath")
-        ZipInputStream(Files.newInputStream(zipPath)).use { zip ->
-            var entry = zip.nextEntry
-            while (entry != null) {
-                if (!entry.isDirectory && entry.name.endsWith(".xml")) {
-                    Files.createDirectories(outputPath.parent)
-                    Files.write(
-                        outputPath,
-                        zip.readBytes(),
-                        StandardOpenOption.CREATE,
-                        StandardOpenOption.TRUNCATE_EXISTING,
-                    )
-                    logger.info("Extracted and saved to: $outputPath")
-                    return outputPath
-                }
-                entry = zip.nextEntry
-            }
-        }
-        error("No XML file found in ZIP: $zipPath")
-    }
-
-    private fun extractTimetableZip(
-        provider: String,
-        zipPath: Path,
-    ): Path {
-        val extractDir = zipPath.resolveSibling(provider)
-        if (Files.exists(extractDir)) {
-            logger.info("Using cached timetable dir: $extractDir")
-            return extractDir
-        }
-
-        Files.createDirectories(extractDir)
-        logger.info("Extracting timetable zip for $provider from $zipPath")
-
-        ZipInputStream(Files.newInputStream(zipPath)).use { zip ->
-            var entry = zip.nextEntry
-            while (entry != null) {
-                if (!entry.isDirectory && entry.name.endsWith(".xml")) {
-                    val outputFile = extractDir.resolve(Path.of(entry.name).fileName)
-                    Files.write(outputFile, zip.readBytes(), StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING)
-                }
-                entry = zip.nextEntry
-            }
-        }
-
-        return extractDir
     }
 }

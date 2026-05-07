@@ -19,7 +19,7 @@ class GcsFilePublisher(
         stopPlacePath: Path,
         timetablePaths: Map<String, Path>,
     ): Path {
-        val stopBlobName = storagePath.resolve(FilePublisher.Companion.STOPS_DIR).resolve(stopPlacePath.fileName)
+        val stopBlobName = storagePath.resolve(FilePublisher.STOPS_DIR).resolve(stopPlacePath.fileName)
         val stopBlobInfo = BlobInfo.newBuilder(BlobId.of(config.outputBucketName, stopBlobName.joinToString("/"))).build()
 
         logger.info("Uploading stop place file: ${stopPlacePath.fileName}")
@@ -30,9 +30,10 @@ class GcsFilePublisher(
             val zipFile = Files.createTempFile(provider, ".zip")
             try {
                 zipDirectory(timetablePath, zipFile)
-                val timetableBlobName = storagePath
-                    .resolve(FilePublisher.Companion.TIMETABLE_DIR)
-                    .resolve("$provider.zip")
+                val timetableBlobName =
+                    storagePath
+                        .resolve(FilePublisher.TIMETABLE_DIR)
+                        .resolve("$provider.zip")
                 val timetableBlobInfo = BlobInfo.newBuilder(BlobId.of(config.outputBucketName, timetableBlobName.joinToString("/"))).build()
                 Files.newInputStream(zipFile).use { storage.createFrom(timetableBlobInfo, it) }
             } finally {
