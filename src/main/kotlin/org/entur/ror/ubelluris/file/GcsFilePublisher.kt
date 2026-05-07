@@ -22,14 +22,21 @@ class GcsFilePublisher(
         val stopBlobName = storagePath.resolve(FilePublisher.Companion.STOPS_DIR).resolve(stopPlacePath.fileName)
         val stopBlobInfo = BlobInfo.newBuilder(BlobId.of(config.outputBucketName, stopBlobName.joinToString("/"))).build()
 
-        logger.info("Uploading stop place file to Ubelluris bucket")
+        logger.info("Uploading stop place file: ${stopPlacePath.fileName}")
         Files.newInputStream(stopPlacePath).use { storage.createFrom(stopBlobInfo, it) }
 
         timetablePaths.forEach { (provider, timetablePath) ->
-            Files.walk(timetablePath).filter(Files::isRegularFile).forEach { file ->
-                val timetableBlobName = storagePath.resolve(FilePublisher.Companion.TIMETABLE_DIR).resolve(provider).resolve(file.fileName)
+            logger.info("Uploading timetable zip for provider: $provider")
+            val zipFile = Files.createTempFile(provider, ".zip")
+            try {
+                zipDirectory(timetablePath, zipFile)
+                val timetableBlobName = storagePath
+                    .resolve(FilePublisher.Companion.TIMETABLE_DIR)
+                    .resolve("$provider.zip")
                 val timetableBlobInfo = BlobInfo.newBuilder(BlobId.of(config.outputBucketName, timetableBlobName.joinToString("/"))).build()
-                Files.newInputStream(file).use { storage.createFrom(timetableBlobInfo, it) }
+                Files.newInputStream(zipFile).use { storage.createFrom(timetableBlobInfo, it) }
+            } finally {
+                Files.deleteIfExists(zipFile)
             }
         }
 
