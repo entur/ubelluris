@@ -1,9 +1,9 @@
 plugins {
-    kotlin("jvm") version "2.2.20"
-    kotlin("plugin.serialization") version "2.2.20"
+    alias(libs.plugins.kotlin.jvm)
+    alias(libs.plugins.kotlin.serialization)
     application
-    id("com.gradleup.shadow") version "9.4.1"
-    id("org.jlleitschuh.gradle.ktlint") version "14.0.1"
+    alias(libs.plugins.shadow)
+    alias(libs.plugins.ktlint)
 }
 
 group = "org.entur.ror"
@@ -18,21 +18,21 @@ repositories {
 }
 
 dependencies {
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.8.1")
-    implementation("org.entur.ror:netex-pipeline:0.0.46")
-    implementation("org.entur.ror:netex-tools-lib:0.0.46")
-    implementation("org.slf4j:slf4j-api:2.0.17")
-    implementation("ch.qos.logback:logback-classic:1.5.21")
-    implementation("net.logstash.logback:logstash-logback-encoder:8.1")
-    implementation("com.google.cloud:google-cloud-storage:2.54.0")
-    implementation("org.jdom:jdom2:2.0.6.1")
-    implementation("com.fasterxml.jackson.core:jackson-databind:2.18.2")
+    implementation(libs.kotlinx.serialization.json)
+    implementation(libs.entur.netex.pipeline)
+    implementation(libs.entur.netex.tools.lib)
+    implementation(libs.slf4j.api)
+    implementation(libs.logback.classic)
+    implementation(libs.logstash.logback.encoder)
+    implementation(libs.google.cloud.storage)
+    implementation(libs.jdom2)
+    implementation(libs.jackson.databind)
     testImplementation(kotlin("test"))
-    testImplementation("org.junit.jupiter:junit-jupiter:5.10.2")
-    testImplementation("org.assertj:assertj-core:3.27.7")
-    testImplementation("org.mockito:mockito-core:5.12.0")
-    testImplementation("org.mockito:mockito-inline:5.2.0")
-    testImplementation("org.mockito.kotlin:mockito-kotlin:5.3.1")
+    testImplementation(libs.junit.jupiter)
+    testImplementation(libs.assertj.core)
+    testImplementation(libs.mockito.core)
+    testImplementation(libs.mockito.inline)
+    testImplementation(libs.mockito.kotlin)
 }
 
 tasks.test {
