@@ -1,5 +1,6 @@
 package org.entur.ror.ubelluris.file
 
+import org.slf4j.LoggerFactory
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.StandardCopyOption
@@ -8,15 +9,19 @@ class LocalFilePublisher(
     private val storagePath: Path,
     private val resultsDir: Path,
 ) : FilePublisher {
+    private val logger = LoggerFactory.getLogger(javaClass)
+
     override fun publish(
         stopPlacePath: Path,
         timetablePaths: Map<String, Path>,
     ): Path {
+        logger.info("Publishing stop place file: ${stopPlacePath.fileName}")
         val stopsDir = resultsDir.resolve(storagePath).resolve(FilePublisher.Companion.STOPS_DIR)
         Files.createDirectories(stopsDir)
         Files.move(stopPlacePath, stopsDir.resolve(stopPlacePath.fileName), StandardCopyOption.REPLACE_EXISTING)
 
         timetablePaths.forEach { (provider, timetablePath) ->
+            logger.info("Publishing timetable for provider: $provider")
             val providerOutDir = resultsDir.resolve(storagePath).resolve(FilePublisher.Companion.TIMETABLE_DIR).resolve(provider)
             Files.createDirectories(providerOutDir)
             Files.walk(timetablePath).filter(Files::isRegularFile).forEach { file ->

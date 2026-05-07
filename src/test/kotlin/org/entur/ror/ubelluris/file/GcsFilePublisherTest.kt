@@ -103,7 +103,7 @@ class GcsFilePublisherTest {
         val blobNames = blobInfoCaptor.allValues.map { it.name }
         assertThat(blobNames).contains("2026/01/01/stops/stops.xml")
         providers.forEach { provider ->
-            assertThat(blobNames).contains("2026/01/01/timetable/$provider/${provider}_line_001.xml")
+            assertThat(blobNames).contains("2026/01/01/timetable/$provider.zip")
         }
     }
 }
