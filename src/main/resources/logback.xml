@@ -19,6 +19,7 @@
                         }
                     </pattern>
                 </pattern>
+                <mdc/>
             </providers>
         </encoder>
     </appender>
