@@ -10,6 +10,7 @@ import org.jdom2.Namespace
 import org.jdom2.filter.Filters
 import org.jdom2.input.SAXBuilder
 import org.slf4j.LoggerFactory
+import org.slf4j.MDC
 import java.nio.file.Path
 
 /**
@@ -36,55 +37,57 @@ class StopPlaceAnalyzer {
         stopPlaces.forEach { stopPlaceElement ->
             val stopPlaceId = stopPlaceElement.getAttributeValue("id") ?: return@forEach
 
-            val quayIds =
-                quayModeMapping.quayToStopPlace
-                    .filterValues { it == stopPlaceId }
-                    .keys
+            MDC.putCloseable("stopPlaceId", stopPlaceId).use {
+                val quayIds =
+                    quayModeMapping.quayToStopPlace
+                        .filterValues { it == stopPlaceId }
+                        .keys
 
-            if (quayIds.isEmpty()) {
-                return@forEach
+                if (quayIds.isEmpty()) {
+                    return@use
+                }
+
+                val quayModes =
+                    quayIds
+                        .associateWith { quayId ->
+                            val modes = quayModeMapping.quayToModes[quayId] ?: return@associateWith null
+                            if (modes.size > 1) {
+                                logger.warn(
+                                    "Quay $quayId is associated with several transportModes, using first mode (${modes.first()}) of $modes",
+                                )
+                            }
+                            modes.first()
+                        }.filterValues { it != null }
+                        .mapValues { it.value!! }
+
+                val totalQuays = countQuays(stopPlaceElement, namespace)
+
+                val scenario = determineScenario(totalQuays, quayModes)
+
+                val existingMode =
+                    stopPlaceElement
+                        .getChildText(NetexTypes.TRANSPORT_MODE, namespace)
+                        ?.let { TransportMode.fromNetexValue(it) }
+                val existingType = stopPlaceElement.getChildText(NetexTypes.STOP_PLACE_TYPE, namespace)
+
+                val parentSiteRef = stopPlaceElement.getChild(NetexTypes.PARENT_SITE_REF, namespace)
+                val parentRef = parentSiteRef?.getAttributeValue("ref")
+                val hasParent = parentRef != null
+
+                val analysis =
+                    StopPlaceAnalysis(
+                        stopPlaceId = stopPlaceId,
+                        scenario = scenario,
+                        quayModes = quayModes,
+                        existingMode = existingMode,
+                        existingType = existingType,
+                        hasParent = hasParent,
+                        parentRef = parentRef,
+                    )
+
+                analyses.add(analysis)
+                logger.info("Analyzed StopPlace $stopPlaceId: scenario=$scenario, quays=${quayModes.size}/$totalQuays")
             }
-
-            val quayModes =
-                quayIds
-                    .associateWith { quayId ->
-                        val modes = quayModeMapping.quayToModes[quayId] ?: return@associateWith null
-                        if (modes.size > 1) {
-                            logger.warn(
-                                "Quay $quayId is associated with several transportModes, using first mode (${modes.first()}) of $modes",
-                            )
-                        }
-                        modes.first()
-                    }.filterValues { it != null }
-                    .mapValues { it.value!! }
-
-            val totalQuays = countQuays(stopPlaceElement, namespace)
-
-            val scenario = determineScenario(totalQuays, quayModes)
-
-            val existingMode =
-                stopPlaceElement
-                    .getChildText(NetexTypes.TRANSPORT_MODE, namespace)
-                    ?.let { TransportMode.fromNetexValue(it) }
-            val existingType = stopPlaceElement.getChildText(NetexTypes.STOP_PLACE_TYPE, namespace)
-
-            val parentSiteRef = stopPlaceElement.getChild(NetexTypes.PARENT_SITE_REF, namespace)
-            val parentRef = parentSiteRef?.getAttributeValue("ref")
-            val hasParent = parentRef != null
-
-            val analysis =
-                StopPlaceAnalysis(
-                    stopPlaceId = stopPlaceId,
-                    scenario = scenario,
-                    quayModes = quayModes,
-                    existingMode = existingMode,
-                    existingType = existingType,
-                    hasParent = hasParent,
-                    parentRef = parentRef,
-                )
-
-            analyses.add(analysis)
-            logger.info("Analyzed StopPlace $stopPlaceId: scenario=$scenario, quays=${quayModes.size}/$totalQuays")
         }
 
         logger.info("Analyzed ${analyses.size} StopPlaces")

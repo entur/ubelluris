@@ -4,6 +4,7 @@ import org.entur.netex.tools.pipeline.app.FilterNetexApp
 import org.entur.ror.ubelluris.config.CliConfig
 import org.entur.ror.ubelluris.model.TimetableData
 import org.slf4j.LoggerFactory
+import org.slf4j.MDC
 import java.io.File
 import java.nio.file.Files
 import java.nio.file.Path
@@ -25,23 +26,24 @@ class TimetableFilterService(
     private fun filterProvider(
         provider: String,
         rawData: File,
-    ): TimetableData {
-        logger.info("Filtering timetables for provider: $provider  from: $rawData")
+    ): TimetableData =
+        MDC.putCloseable("provider", provider).use {
+            logger.info("Filtering timetables for provider: $provider  from: $rawData")
 
-        val resultsDir = Path(cliConfig.resultsDir).resolve(provider)
-        Files.createDirectories(resultsDir)
+            val resultsDir = Path(cliConfig.resultsDir).resolve(provider)
+            Files.createDirectories(resultsDir)
 
-        val filterConfig = TimetableFilterConfig(cliConfig)
-        FilterNetexApp(
-            filterConfig = filterConfig.build(),
-            input = rawData,
-            target = resultsDir.toFile(),
-        ).run()
+            val filterConfig = TimetableFilterConfig(cliConfig)
+            FilterNetexApp(
+                filterConfig = filterConfig.build(),
+                input = rawData,
+                target = resultsDir.toFile(),
+            ).run()
 
-        val quayModes = filterConfig.plugin.getCollectedData()
+            val quayModes = filterConfig.plugin.getCollectedData()
 
-        logger.info("Done processing provider $provider, ${quayModes.size} quay mode mappings")
+            logger.info("Done processing provider $provider, ${quayModes.size} quay mode mappings")
 
-        return TimetableData(provider, resultsDir, quayModes)
-    }
+            TimetableData(provider, resultsDir, quayModes)
+        }
 }
