@@ -1,10 +1,13 @@
 package org.entur.ror.ubelluris.sax.enrichment
 
+import net.logstash.logback.argument.StructuredArguments.kv
 import org.entur.ror.ubelluris.model.NetexTypes
 import org.entur.ror.ubelluris.model.QuayModeMapping
 import org.entur.ror.ubelluris.model.Scenario
 import org.entur.ror.ubelluris.model.StopPlaceAnalysis
 import org.entur.ror.ubelluris.model.TransportMode
+import org.entur.ror.ubelluris.utils.LogKeys.QUAY_ID
+import org.entur.ror.ubelluris.utils.LogKeys.STOP_PLACE_ID
 import org.jdom2.Element
 import org.jdom2.Namespace
 import org.jdom2.filter.Filters
@@ -37,7 +40,7 @@ class StopPlaceAnalyzer {
         stopPlaces.forEach { stopPlaceElement ->
             val stopPlaceId = stopPlaceElement.getAttributeValue("id") ?: return@forEach
 
-            MDC.putCloseable("stopPlaceId", stopPlaceId).use {
+            MDC.putCloseable(STOP_PLACE_ID, stopPlaceId).use {
                 val quayIds =
                     quayModeMapping.quayToStopPlace
                         .filterValues { it == stopPlaceId }
@@ -53,7 +56,10 @@ class StopPlaceAnalyzer {
                             val modes = quayModeMapping.quayToModes[quayId] ?: return@associateWith null
                             if (modes.size > 1) {
                                 logger.warn(
-                                    "Quay $quayId is associated with several transportModes, using first mode (${modes.first()}) of $modes",
+                                    "Quay {} is associated with several transportModes, using first mode ({}) of {}",
+                                    kv(QUAY_ID, quayId),
+                                    modes.first(),
+                                    modes,
                                 )
                             }
                             modes.first()
@@ -86,7 +92,13 @@ class StopPlaceAnalyzer {
                     )
 
                 analyses.add(analysis)
-                logger.info("Analyzed StopPlace $stopPlaceId: scenario=$scenario, quays=${quayModes.size}/$totalQuays")
+                logger.info(
+                    "Analyzed StopPlace {}: scenario={}, quays={}/{}",
+                    kv(STOP_PLACE_ID, stopPlaceId),
+                    scenario,
+                    quayModes.size,
+                    totalQuays,
+                )
             }
         }
 

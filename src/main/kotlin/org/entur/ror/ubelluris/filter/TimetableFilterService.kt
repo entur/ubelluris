@@ -1,8 +1,10 @@
 package org.entur.ror.ubelluris.filter
 
+import net.logstash.logback.argument.StructuredArguments.kv
 import org.entur.netex.tools.pipeline.app.FilterNetexApp
 import org.entur.ror.ubelluris.config.CliConfig
 import org.entur.ror.ubelluris.model.TimetableData
+import org.entur.ror.ubelluris.utils.LogKeys.PROVIDER
 import org.slf4j.LoggerFactory
 import org.slf4j.MDC
 import java.io.File
@@ -27,8 +29,8 @@ class TimetableFilterService(
         provider: String,
         rawData: File,
     ): TimetableData =
-        MDC.putCloseable("provider", provider).use {
-            logger.info("Filtering timetables for provider: $provider  from: $rawData")
+        MDC.putCloseable(PROVIDER, provider).use {
+            logger.info("Filtering timetables for provider: {} from: {}", kv(PROVIDER, provider), rawData)
 
             val resultsDir = Path(cliConfig.resultsDir).resolve(provider)
             Files.createDirectories(resultsDir)
@@ -42,7 +44,7 @@ class TimetableFilterService(
 
             val quayModes = filterConfig.plugin.getCollectedData()
 
-            logger.info("Done processing provider $provider, ${quayModes.size} quay mode mappings")
+            logger.info("Done processing {}, {} quay mode mappings", kv(PROVIDER, provider), quayModes.size)
 
             TimetableData(provider, resultsDir, quayModes)
         }
