@@ -6,7 +6,9 @@ import com.google.cloud.storage.Storage
 import com.google.cloud.storage.transfermanager.ParallelDownloadConfig
 import com.google.cloud.storage.transfermanager.TransferManagerConfig
 import com.google.cloud.storage.transfermanager.TransferStatus
+import net.logstash.logback.argument.StructuredArguments.kv
 import org.entur.ror.ubelluris.config.GcsConfig
+import org.entur.ror.ubelluris.utils.LogKeys.PROVIDER
 import org.slf4j.LoggerFactory
 import java.nio.file.Files
 import java.nio.file.Path
@@ -48,7 +50,7 @@ class GcsFileFetcher(
                     extractDir
                 } else {
                     Files.createDirectories(extractDir)
-                    logger.info("Extracting timetable zip for $provider from $zipPath")
+                    logger.info("Extracting timetable zip for {} from {}", kv(PROVIDER, provider), zipPath)
                     extractZipToDirectory(zipPath, extractDir)
                 }
             }

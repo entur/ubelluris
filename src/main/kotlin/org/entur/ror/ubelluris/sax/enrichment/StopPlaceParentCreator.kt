@@ -1,6 +1,8 @@
 package org.entur.ror.ubelluris.sax.enrichment
 
+import net.logstash.logback.argument.StructuredArguments.kv
 import org.entur.ror.ubelluris.model.NetexTypes
+import org.entur.ror.ubelluris.utils.LogKeys.STOP_PLACE_ID
 import org.jdom2.Element
 import org.jdom2.Namespace
 import org.slf4j.LoggerFactory
@@ -48,7 +50,7 @@ class StopPlaceParentCreator {
             parent.addContent(centroid.clone())
         }
 
-        logger.info("Created parent StopPlace $parentId")
+        logger.info("Created parent StopPlace {}", kv(STOP_PLACE_ID, parentId))
         return parent
     }
 }

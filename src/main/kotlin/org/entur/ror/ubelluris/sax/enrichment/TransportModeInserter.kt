@@ -1,9 +1,12 @@
 package org.entur.ror.ubelluris.sax.enrichment
 
+import net.logstash.logback.argument.StructuredArguments.kv
 import org.entur.ror.ubelluris.model.NetexTypes
 import org.entur.ror.ubelluris.model.Scenario
 import org.entur.ror.ubelluris.model.StopPlaceAnalysis
 import org.entur.ror.ubelluris.model.TransportMode
+import org.entur.ror.ubelluris.utils.LogKeys.QUAY_ID
+import org.entur.ror.ubelluris.utils.LogKeys.STOP_PLACE_ID
 import org.jdom2.Element
 import org.jdom2.Namespace
 import org.jdom2.filter.Filters
@@ -52,7 +55,7 @@ class TransportModeInserter(
                 val newMode = analysis.quayModes.values.first()
                 updateStopPlaceMode(stopPlaceElement, namespace, newMode)
                 cleanQuayPublicCode(stopPlaceElement, namespace, analysis.quayModes.keys.first())
-                logger.info("Updated SINGLE_QUAY: $stopPlaceId to $newMode")
+                logger.info("Updated SINGLE_QUAY: {} to {}", kv(STOP_PLACE_ID, stopPlaceId), newMode)
             }
 
             uniformMode.find { it.stopPlaceId == stopPlaceId }?.let { analysis ->
@@ -61,7 +64,7 @@ class TransportModeInserter(
                 analysis.quayModes.keys.forEach { quayId ->
                     cleanQuayPublicCode(stopPlaceElement, namespace, quayId)
                 }
-                logger.info("Updated UNIFORM_MODE: $stopPlaceId to $newMode")
+                logger.info("Updated UNIFORM_MODE: {} to {}", kv(STOP_PLACE_ID, stopPlaceId), newMode)
             }
         }
 
@@ -112,7 +115,7 @@ class TransportModeInserter(
             val publicCodeElement = quayElement.getChild(NetexTypes.PUBLIC_CODE, namespace)
             if (publicCodeElement != null && publicCodeElement.text == "*") {
                 publicCodeElement.text = ""
-                logger.info("Cleaned PublicCode for Quay: $quayId")
+                logger.info("Cleaned PublicCode for Quay: {}", kv(QUAY_ID, quayId))
             }
         }
     }
