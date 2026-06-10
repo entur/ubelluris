@@ -45,18 +45,6 @@ class StopPlacePurgingEntitySelectorTest {
     @Test
     fun shouldRemoveStopPlaceWithSingleQuayWithIllegalPublicCode() {
         val stopPlace = defaultEntity(id = "stopPlace1", type = NetexTypes.STOP_PLACE)
-        repository.addQuayToStopPlace("stopPlace1", QuayData("quay1", "*"))
-
-        setupEntities(mapOf(NetexTypes.STOP_PLACE to mapOf("stopPlace1" to stopPlace)))
-
-        val result = selector.selectEntities(context)
-
-        assertThat(result.selection[NetexTypes.STOP_PLACE]).isEmpty()
-    }
-
-    @Test
-    fun shouldRemoveStopPlaceWithSingleQuayWithDashPublicCode() {
-        val stopPlace = defaultEntity(id = "stopPlace1", type = NetexTypes.STOP_PLACE)
         repository.addQuayToStopPlace("stopPlace1", QuayData("quay1", "-"))
 
         setupEntities(mapOf(NetexTypes.STOP_PLACE to mapOf("stopPlace1" to stopPlace)))
@@ -192,7 +180,7 @@ class StopPlacePurgingEntitySelectorTest {
     @Test
     fun shouldKeepStopPlaceWithMultipleQuaysEvenWhenOneHasIllegalPublicCode() {
         val stopPlace = defaultEntity(id = "stopPlace1", type = NetexTypes.STOP_PLACE)
-        repository.addQuayToStopPlace("stopPlace1", QuayData("quay1", "*"))
+        repository.addQuayToStopPlace("stopPlace1", QuayData("quay1", "-"))
         repository.addQuayToStopPlace("stopPlace1", QuayData("quay2", "A"))
 
         setupEntities(mapOf(NetexTypes.STOP_PLACE to mapOf("stopPlace1" to stopPlace)))

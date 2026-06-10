@@ -12,7 +12,8 @@ class JsonConfigTest {
             {
               "sourceCodespace": "SE:050",
               "targetCodespace": "SAM",
-              "illegalPublicCodes": ["*", "-"]
+              "illegalPublicCodes": ["-"]
+              "filterPublicCodes": ["*"]
             }
             """.trimIndent()
 
@@ -22,7 +23,8 @@ class JsonConfigTest {
         assertThat(config.targetCodespace).isEqualTo("SAM")
         assertThat(config.timetableProviders).containsExactly("vt", "halland", "skane")
         assertThat(config.transportModes).containsExactly(TransportMode.TRAM, TransportMode.WATER)
-        assertThat(config.illegalPublicCodes).containsExactly("*", "-")
+        assertThat(config.illegalPublicCodes).containsExactly("-")
+        assertThat(config.filterPublicCodes).containsExactly("*")
     }
 
     @Test

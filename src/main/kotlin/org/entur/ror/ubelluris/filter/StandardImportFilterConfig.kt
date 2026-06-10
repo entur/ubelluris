@@ -84,7 +84,7 @@ class StandardImportFilterConfig(
                         ),
                     "/PublicationDelivery/dataObjects/SiteFrame/stopPlaces/StopPlace/quays/Quay/PublicCode" to
                         PublicCodeFilterHandler(
-                            cliConfig.illegalPublicCodes,
+                            cliConfig.illegalPublicCodes + cliConfig.filterPublicCodes,
                         ),
                     "/PublicationDelivery/dataObjects/SiteFrame/stopPlaces/StopPlace/quays/Quay/PrivateCode"
                         to TextTrimmingHandler(),

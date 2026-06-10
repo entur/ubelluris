@@ -4,14 +4,17 @@
   "timetableProviders": [
     "vt",
     "halland",
-    "skane"
+    "skane",
+    "sj"
   ],
   "transportModes": [
     "tram",
     "water"
   ],
   "illegalPublicCodes": [
-    "*",
     "-"
+  ],
+  "filterPublicCodes": [
+    "*"
   ]
 }

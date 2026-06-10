@@ -34,6 +34,8 @@ class CliConfigTest {
         assertThat(config.transportModes)
             .containsExactly(TransportMode.TRAM, TransportMode.WATER)
         assertThat(config.illegalPublicCodes)
-            .containsExactly("*", "-")
+            .containsExactly("-")
+        assertThat(config.filterPublicCodes)
+            .containsExactly("*")
     }
 }
