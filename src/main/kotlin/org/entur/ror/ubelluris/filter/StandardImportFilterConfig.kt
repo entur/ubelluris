@@ -101,7 +101,7 @@ class StandardImportFilterConfig(
                 ),
             ).withEntitySelectors(
                 listOf(
-                    StopPlacePurgingEntitySelector(stopPlacePurgingRepository),
+                    StopPlacePurgingEntitySelector(stopPlacePurgingRepository, cliConfig.dropMultiModal),
                 ),
             ).withRefSelectors(listOf(StopPlacePurgingRefSelector()))
             .withRemovePrivateData(true)
