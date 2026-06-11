@@ -1,8 +1,10 @@
 package org.entur.ror.ubelluris.sax.enrichment
 
+import net.logstash.logback.argument.StructuredArguments.kv
 import org.entur.ror.ubelluris.model.NetexTypes
 import org.entur.ror.ubelluris.model.StopPlaceAnalysis
 import org.entur.ror.ubelluris.model.TransportMode
+import org.entur.ror.ubelluris.utils.LogKeys.STOP_PLACE_ID
 import org.jdom2.Document
 import org.jdom2.Element
 import org.jdom2.Namespace
@@ -35,12 +37,12 @@ class StopPlaceSplitter {
         mixedModeAnalyses.forEach { analysis ->
             val stopPlaceElement = findStopPlaceById(stopPlacesContainer, namespace, analysis.stopPlaceId)
             if (stopPlaceElement == null) {
-                logger.error("Could not find StopPlace: ${analysis.stopPlaceId}")
+                logger.error("Could not find StopPlace: {}", kv(STOP_PLACE_ID, analysis.stopPlaceId))
                 return@forEach
             }
 
             val childStopPlaces = performSplit(stopPlaceElement, namespace, analysis)
-            logger.info("Split StopPlace ${analysis.stopPlaceId} into ${childStopPlaces.size} children")
+            logger.info("Split StopPlace {} into {} children", kv(STOP_PLACE_ID, analysis.stopPlaceId), childStopPlaces.size)
         }
 
         logger.info("Split complete for ${mixedModeAnalyses.size} StopPlaces")

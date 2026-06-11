@@ -16,5 +16,6 @@
   ],
   "filterPublicCodes": [
     "*"
-  ]
+  ],
+  "dropParentStops": true
 }

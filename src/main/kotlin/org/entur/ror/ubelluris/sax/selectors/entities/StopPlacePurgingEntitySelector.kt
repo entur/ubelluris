@@ -1,15 +1,21 @@
 package org.entur.ror.ubelluris.sax.selectors.entities
 
+import net.logstash.logback.argument.StructuredArguments.kv
 import org.entur.netex.tools.lib.model.Entity
 import org.entur.netex.tools.lib.selections.EntitySelection
 import org.entur.netex.tools.lib.selectors.entities.EntitySelector
 import org.entur.netex.tools.lib.selectors.entities.EntitySelectorContext
 import org.entur.ror.ubelluris.model.NetexTypes
 import org.entur.ror.ubelluris.sax.plugins.StopPlacePurgingRepository
+import org.entur.ror.ubelluris.utils.LogKeys.STOP_PLACE_ID
+import org.slf4j.LoggerFactory
 
 class StopPlacePurgingEntitySelector(
     val stopPlacePurgingRepository: StopPlacePurgingRepository,
+    val dropParentStops: Boolean,
 ) : EntitySelector {
+    private val logger = LoggerFactory.getLogger(javaClass)
+
     override fun selectEntities(context: EntitySelectorContext): EntitySelection {
         val model = context.entityModel
         val activeEntitiesMap = mutableMapOf<String, MutableMap<String, Entity>>()
@@ -39,15 +45,33 @@ class StopPlacePurgingEntitySelector(
                                 val singleQuay = remainingQuays.first()
                                 if (singleQuay.publicCode in stopPlacePurgingRepository.illegalPublicCodes) {
                                     stopPlacesToRemove.add(entity.key)
+                                    logger.debug(
+                                        "Removing stop place {} with single quay with illegal public code {}",
+                                        kv(STOP_PLACE_ID, entity.key),
+                                        singleQuay.publicCode,
+                                    )
                                     return@filter false
                                 }
                             }
 
                             // Remove stop places with no quays
                             if (remainingQuays.isEmpty()) {
+                                if (dropParentStops) {
+                                    logger.debug(
+                                        "Removing stop place {} that is a parent because dropParentStops is toggled on",
+                                        kv(STOP_PLACE_ID, entity.key),
+                                    )
+                                    stopPlacesToRemove.add(entity.key)
+                                    return@filter false
+                                }
+
                                 // Child stop place with no quays
                                 if (stopPlacePurgingRepository.isChildStopPlace(entity.key)) {
                                     stopPlacesToRemove.add(entity.key)
+                                    logger.debug(
+                                        "Removing stop place {} that is a child with no quays",
+                                        kv(STOP_PLACE_ID, entity.key),
+                                    )
                                     return@filter false
                                 }
 
@@ -55,6 +79,7 @@ class StopPlacePurgingEntitySelector(
                                 val isParent = stopPlacePurgingRepository.parentSiteRefsPerStopPlace.containsKey(entity.key)
                                 if (!isParent) {
                                     stopPlacesToRemove.add(entity.key)
+                                    logger.debug("Removing stop place {} with no quays", kv(STOP_PLACE_ID, entity.key))
                                     return@filter false
                                 }
                             }
@@ -92,6 +117,8 @@ class StopPlacePurgingEntitySelector(
                 }
             activeEntitiesMap[NetexTypes.STOP_PLACE] = finalStopPlaces.toMutableMap()
         }
+
+        logger.info("Purged ${stopPlacesToRemove.size} stop places: ${stopPlacesToRemove.joinToString()}")
 
         return EntitySelection(activeEntitiesMap, model)
     }

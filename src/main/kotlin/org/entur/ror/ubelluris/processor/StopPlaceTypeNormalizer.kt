@@ -1,5 +1,7 @@
 package org.entur.ror.ubelluris.processor
 
+import net.logstash.logback.argument.StructuredArguments.kv
+import org.entur.ror.ubelluris.utils.LogKeys.STOP_PLACE_ID
 import org.jdom2.Document
 import org.jdom2.Element
 import org.jdom2.Namespace
@@ -41,7 +43,10 @@ class StopPlaceTypeNormalizer {
 
         if (transportMode != null && transportMode.text?.trim() == "other") {
             transportMode.text = "bus"
-            logger.debug("Normalized TransportMode 'other' -> 'bus' for ${stopPlace.getAttributeValue("id")}")
+            logger.debug(
+                "Normalized TransportMode 'other' -> 'bus' for {}",
+                kv(STOP_PLACE_ID, stopPlace.getAttributeValue("id")),
+            )
         }
     }
 
@@ -65,18 +70,20 @@ class StopPlaceTypeNormalizer {
                 }
             stopPlaceType.text = normalizedType
             logger.debug(
-                "Normalized StopPlaceType 'other' -> '$normalizedType' (TransportMode='$transportModeValue') for ${
-                    stopPlace.getAttributeValue(
-                        "id",
-                    )
-                }",
+                "Normalized StopPlaceType 'other' -> '{}' (TransportMode='{}') for {}",
+                normalizedType,
+                transportModeValue,
+                kv(STOP_PLACE_ID, stopPlace.getAttributeValue("id")),
             )
             return
         }
 
         if (currentType == "tramStation") {
             stopPlaceType.text = "onstreetTram"
-            logger.debug("Normalized StopPlaceType 'tramStation' -> 'onstreetTram' for ${stopPlace.getAttributeValue("id")}")
+            logger.debug(
+                "Normalized StopPlaceType 'tramStation' -> 'onstreetTram' for {}",
+                kv(STOP_PLACE_ID, stopPlace.getAttributeValue("id")),
+            )
             return
         }
 
@@ -87,20 +94,16 @@ class StopPlaceTypeNormalizer {
             if (quayCount < 6 && currentType == "busStation") {
                 stopPlaceType.text = "onstreetBus"
                 logger.debug(
-                    "Normalized StopPlaceType 'busStation' -> 'onstreetBus' ($quayCount quays) for ${
-                        stopPlace.getAttributeValue(
-                            "id",
-                        )
-                    }",
+                    "Normalized StopPlaceType 'busStation' -> 'onstreetBus' ({} quays) for {}",
+                    quayCount,
+                    kv(STOP_PLACE_ID, stopPlace.getAttributeValue("id")),
                 )
             } else if (quayCount >= 6 && currentType == "onstreetBus") {
                 stopPlaceType.text = "busStation"
                 logger.debug(
-                    "Normalized StopPlaceType 'onstreetBus' -> 'busStation' ($quayCount quays) for ${
-                        stopPlace.getAttributeValue(
-                            "id",
-                        )
-                    }",
+                    "Normalized StopPlaceType 'onstreetBus' -> 'busStation' ({} quays) for {}",
+                    quayCount,
+                    kv(STOP_PLACE_ID, stopPlace.getAttributeValue("id")),
                 )
             }
         }

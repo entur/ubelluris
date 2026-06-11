@@ -1,8 +1,10 @@
 package org.entur.ror.ubelluris.sax.enrichment
 
+import net.logstash.logback.argument.StructuredArguments.kv
 import org.entur.ror.ubelluris.model.NetexTypes
 import org.entur.ror.ubelluris.model.QuayModeMapping
 import org.entur.ror.ubelluris.model.TransportMode
+import org.entur.ror.ubelluris.utils.LogKeys.QUAY_ID
 import org.jdom2.filter.Filters
 import org.jdom2.input.SAXBuilder
 import org.slf4j.LoggerFactory
@@ -71,7 +73,7 @@ class QuayModeMatcher {
                             if (matchedModes.isNotEmpty()) {
                                 quayToModes.getOrPut(quayId) { mutableSetOf() }.addAll(matchedModes)
                                 quayToStopPlace[quayId] = stopPlaceId
-                                logger.info("Matched quay $quayId to modes: $matchedModes")
+                                logger.info("Matched quay {} to modes: {}", kv(QUAY_ID, quayId), matchedModes)
                             }
                         }
                     }

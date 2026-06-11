@@ -12,4 +12,5 @@ data class CliConfig(
     val illegalPublicCodes: List<String> = listOf("-"),
     val filterPublicCodes: List<String> = listOf("*"),
     val resultsDir: String = "results",
+    val dropParentStops: Boolean = false,
 )

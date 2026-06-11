@@ -1,15 +1,19 @@
 package org.entur.ror.ubelluris.sax.enrichment
 
+import net.logstash.logback.argument.StructuredArguments.kv
 import org.entur.ror.ubelluris.model.NetexTypes
 import org.entur.ror.ubelluris.model.QuayModeMapping
 import org.entur.ror.ubelluris.model.Scenario
 import org.entur.ror.ubelluris.model.StopPlaceAnalysis
 import org.entur.ror.ubelluris.model.TransportMode
+import org.entur.ror.ubelluris.utils.LogKeys.QUAY_ID
+import org.entur.ror.ubelluris.utils.LogKeys.STOP_PLACE_ID
 import org.jdom2.Element
 import org.jdom2.Namespace
 import org.jdom2.filter.Filters
 import org.jdom2.input.SAXBuilder
 import org.slf4j.LoggerFactory
+import org.slf4j.MDC
 import java.nio.file.Path
 
 /**
@@ -36,55 +40,66 @@ class StopPlaceAnalyzer {
         stopPlaces.forEach { stopPlaceElement ->
             val stopPlaceId = stopPlaceElement.getAttributeValue("id") ?: return@forEach
 
-            val quayIds =
-                quayModeMapping.quayToStopPlace
-                    .filterValues { it == stopPlaceId }
-                    .keys
+            MDC.putCloseable(STOP_PLACE_ID, stopPlaceId).use {
+                val quayIds =
+                    quayModeMapping.quayToStopPlace
+                        .filterValues { it == stopPlaceId }
+                        .keys
 
-            if (quayIds.isEmpty()) {
-                return@forEach
-            }
+                if (quayIds.isEmpty()) {
+                    return@use
+                }
 
-            val quayModes =
-                quayIds
-                    .associateWith { quayId ->
-                        val modes = quayModeMapping.quayToModes[quayId] ?: return@associateWith null
-                        if (modes.size > 1) {
-                            logger.warn(
-                                "Quay $quayId is associated with several transportModes, using first mode (${modes.first()}) of $modes",
-                            )
-                        }
-                        modes.first()
-                    }.filterValues { it != null }
-                    .mapValues { it.value!! }
+                val quayModes =
+                    quayIds
+                        .associateWith { quayId ->
+                            val modes = quayModeMapping.quayToModes[quayId] ?: return@associateWith null
+                            if (modes.size > 1) {
+                                logger.warn(
+                                    "Quay {} is associated with several transportModes, using first mode ({}) of {}",
+                                    kv(QUAY_ID, quayId),
+                                    modes.first(),
+                                    modes,
+                                )
+                            }
+                            modes.first()
+                        }.filterValues { it != null }
+                        .mapValues { it.value!! }
 
-            val totalQuays = countQuays(stopPlaceElement, namespace)
+                val totalQuays = countQuays(stopPlaceElement, namespace)
 
-            val scenario = determineScenario(totalQuays, quayModes)
+                val scenario = determineScenario(totalQuays, quayModes)
 
-            val existingMode =
-                stopPlaceElement
-                    .getChildText(NetexTypes.TRANSPORT_MODE, namespace)
-                    ?.let { TransportMode.fromNetexValue(it) }
-            val existingType = stopPlaceElement.getChildText(NetexTypes.STOP_PLACE_TYPE, namespace)
+                val existingMode =
+                    stopPlaceElement
+                        .getChildText(NetexTypes.TRANSPORT_MODE, namespace)
+                        ?.let { TransportMode.fromNetexValue(it) }
+                val existingType = stopPlaceElement.getChildText(NetexTypes.STOP_PLACE_TYPE, namespace)
 
-            val parentSiteRef = stopPlaceElement.getChild(NetexTypes.PARENT_SITE_REF, namespace)
-            val parentRef = parentSiteRef?.getAttributeValue("ref")
-            val hasParent = parentRef != null
+                val parentSiteRef = stopPlaceElement.getChild(NetexTypes.PARENT_SITE_REF, namespace)
+                val parentRef = parentSiteRef?.getAttributeValue("ref")
+                val hasParent = parentRef != null
 
-            val analysis =
-                StopPlaceAnalysis(
-                    stopPlaceId = stopPlaceId,
-                    scenario = scenario,
-                    quayModes = quayModes,
-                    existingMode = existingMode,
-                    existingType = existingType,
-                    hasParent = hasParent,
-                    parentRef = parentRef,
+                val analysis =
+                    StopPlaceAnalysis(
+                        stopPlaceId = stopPlaceId,
+                        scenario = scenario,
+                        quayModes = quayModes,
+                        existingMode = existingMode,
+                        existingType = existingType,
+                        hasParent = hasParent,
+                        parentRef = parentRef,
+                    )
+
+                analyses.add(analysis)
+                logger.info(
+                    "Analyzed StopPlace {}: scenario={}, quays={}/{}",
+                    kv(STOP_PLACE_ID, stopPlaceId),
+                    scenario,
+                    quayModes.size,
+                    totalQuays,
                 )
-
-            analyses.add(analysis)
-            logger.info("Analyzed StopPlace $stopPlaceId: scenario=$scenario, quays=${quayModes.size}/$totalQuays")
+            }
         }
 
         logger.info("Analyzed ${analyses.size} StopPlaces")
