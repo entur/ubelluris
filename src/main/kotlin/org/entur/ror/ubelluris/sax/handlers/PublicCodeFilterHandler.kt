@@ -5,7 +5,7 @@ import org.entur.netex.tools.lib.output.XMLElementHandler
 import org.xml.sax.Attributes
 
 class PublicCodeFilterHandler(
-    private val illegalPublicCodes: List<String>,
+    private val filterPublicCodes: List<String>,
 ) : XMLElementHandler {
     override fun startElement(
         uri: String?,
@@ -30,7 +30,7 @@ class PublicCodeFilterHandler(
 
         val text = String(ch, start, length).trim()
 
-        if (text in illegalPublicCodes) {
+        if (text in filterPublicCodes) {
             val empty = "".toCharArray()
             writer.characters(empty, 0, 0)
         } else {

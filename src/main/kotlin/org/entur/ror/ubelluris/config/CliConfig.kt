@@ -9,7 +9,8 @@ data class CliConfig(
     var targetCodespace: String,
     var timetableProviders: List<String> = listOf("vt", "halland", "skane"),
     var transportModes: List<TransportMode> = listOf(TransportMode.TRAM, TransportMode.WATER),
-    val illegalPublicCodes: List<String> = listOf("*", "-"),
+    val illegalPublicCodes: List<String> = listOf("-"),
+    val filterPublicCodes: List<String> = listOf("*"),
     val resultsDir: String = "results",
     val dropParentStops: Boolean = false,
 )
