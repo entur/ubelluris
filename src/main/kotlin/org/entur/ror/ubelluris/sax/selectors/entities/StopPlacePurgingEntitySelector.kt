@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory
 
 class StopPlacePurgingEntitySelector(
     val stopPlacePurgingRepository: StopPlacePurgingRepository,
+    val dropParentStops: Boolean,
 ) : EntitySelector {
     private val logger = LoggerFactory.getLogger(javaClass)
 
@@ -55,6 +56,15 @@ class StopPlacePurgingEntitySelector(
 
                             // Remove stop places with no quays
                             if (remainingQuays.isEmpty()) {
+                                if (dropParentStops) {
+                                    logger.debug(
+                                        "Removing stop place {} that is a parent because dropParentStops is toggled on",
+                                        kv(STOP_PLACE_ID, entity.key),
+                                    )
+                                    stopPlacesToRemove.add(entity.key)
+                                    return@filter false
+                                }
+
                                 // Child stop place with no quays
                                 if (stopPlacePurgingRepository.isChildStopPlace(entity.key)) {
                                     stopPlacesToRemove.add(entity.key)

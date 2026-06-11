@@ -14,7 +14,7 @@ import org.mockito.kotlin.whenever
 
 class StopPlacePurgingEntitySelectorTest {
     private val repository = StopPlacePurgingRepository()
-    private val selector = StopPlacePurgingEntitySelector(repository)
+    private val selector = StopPlacePurgingEntitySelector(repository, false)
 
     private val context = mock<EntitySelectorContext>()
     private val entityModel = mock<EntityModel>()
@@ -245,6 +245,66 @@ class StopPlacePurgingEntitySelectorTest {
 
         assertThat(result.selection[NetexTypes.QUAY]).isEmpty()
         assertThat(result.selection[NetexTypes.STOP_PLACE]).isEmpty()
+    }
+
+    @Test
+    fun shouldRemoveParentStopPlaceWithNoQuaysWhendropParentStopsIsTrue() {
+        val dropParentStopsSelector = StopPlacePurgingEntitySelector(repository, dropParentStops = true)
+        val parentStopPlace = defaultEntity(id = "parentStop", type = NetexTypes.STOP_PLACE)
+        val child1 = defaultEntity(id = "child1", type = NetexTypes.STOP_PLACE)
+        val child2 = defaultEntity(id = "child2", type = NetexTypes.STOP_PLACE)
+
+        repository.addChildStopToParent("parentStop", "child1")
+        repository.addChildStopToParent("parentStop", "child2")
+        repository.addQuayToStopPlace("child1", QuayData("quay1", "A"))
+        repository.addQuayToStopPlace("child2", QuayData("quay2", "B"))
+
+        setupEntities(
+            mapOf(
+                NetexTypes.STOP_PLACE to
+                    mapOf(
+                        "parentStop" to parentStopPlace,
+                        "child1" to child1,
+                        "child2" to child2,
+                    ),
+            ),
+        )
+
+        val result = dropParentStopsSelector.selectEntities(context)
+
+        assertThat(result.selection[NetexTypes.STOP_PLACE]).doesNotContainKey("parentStop")
+        assertThat(result.selection[NetexTypes.STOP_PLACE]).containsKey("child1")
+        assertThat(result.selection[NetexTypes.STOP_PLACE]).containsKey("child2")
+    }
+
+    @Test
+    fun shouldKeepParentStopPlaceWithNoQuaysWhendropParentStopsIsFalse() {
+        val keepMultiModalSelector = StopPlacePurgingEntitySelector(repository, dropParentStops = false)
+        val parentStopPlace = defaultEntity(id = "parentStop", type = NetexTypes.STOP_PLACE)
+        val child1 = defaultEntity(id = "child1", type = NetexTypes.STOP_PLACE)
+        val child2 = defaultEntity(id = "child2", type = NetexTypes.STOP_PLACE)
+
+        repository.addChildStopToParent("parentStop", "child1")
+        repository.addChildStopToParent("parentStop", "child2")
+        repository.addQuayToStopPlace("child1", QuayData("quay1", "A"))
+        repository.addQuayToStopPlace("child2", QuayData("quay2", "B"))
+
+        setupEntities(
+            mapOf(
+                NetexTypes.STOP_PLACE to
+                    mapOf(
+                        "parentStop" to parentStopPlace,
+                        "child1" to child1,
+                        "child2" to child2,
+                    ),
+            ),
+        )
+
+        val result = keepMultiModalSelector.selectEntities(context)
+
+        assertThat(result.selection[NetexTypes.STOP_PLACE]).containsKey("parentStop")
+        assertThat(result.selection[NetexTypes.STOP_PLACE]).containsKey("child1")
+        assertThat(result.selection[NetexTypes.STOP_PLACE]).containsKey("child2")
     }
 
     @Test
