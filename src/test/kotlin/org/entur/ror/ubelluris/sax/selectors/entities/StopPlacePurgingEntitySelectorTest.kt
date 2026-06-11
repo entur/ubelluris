@@ -248,8 +248,8 @@ class StopPlacePurgingEntitySelectorTest {
     }
 
     @Test
-    fun shouldRemoveParentStopPlaceWithNoQuaysWhenDropMultiModalIsTrue() {
-        val dropMultiModalSelector = StopPlacePurgingEntitySelector(repository, dropMultiModal = true)
+    fun shouldRemoveParentStopPlaceWithNoQuaysWhendropParentStopsIsTrue() {
+        val dropParentStopsSelector = StopPlacePurgingEntitySelector(repository, dropParentStops = true)
         val parentStopPlace = defaultEntity(id = "parentStop", type = NetexTypes.STOP_PLACE)
         val child1 = defaultEntity(id = "child1", type = NetexTypes.STOP_PLACE)
         val child2 = defaultEntity(id = "child2", type = NetexTypes.STOP_PLACE)
@@ -270,7 +270,7 @@ class StopPlacePurgingEntitySelectorTest {
             ),
         )
 
-        val result = dropMultiModalSelector.selectEntities(context)
+        val result = dropParentStopsSelector.selectEntities(context)
 
         assertThat(result.selection[NetexTypes.STOP_PLACE]).doesNotContainKey("parentStop")
         assertThat(result.selection[NetexTypes.STOP_PLACE]).containsKey("child1")
@@ -278,8 +278,8 @@ class StopPlacePurgingEntitySelectorTest {
     }
 
     @Test
-    fun shouldKeepParentStopPlaceWithNoQuaysWhenDropMultiModalIsFalse() {
-        val keepMultiModalSelector = StopPlacePurgingEntitySelector(repository, dropMultiModal = false)
+    fun shouldKeepParentStopPlaceWithNoQuaysWhendropParentStopsIsFalse() {
+        val keepMultiModalSelector = StopPlacePurgingEntitySelector(repository, dropParentStops = false)
         val parentStopPlace = defaultEntity(id = "parentStop", type = NetexTypes.STOP_PLACE)
         val child1 = defaultEntity(id = "child1", type = NetexTypes.STOP_PLACE)
         val child2 = defaultEntity(id = "child2", type = NetexTypes.STOP_PLACE)

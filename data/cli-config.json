@@ -14,5 +14,5 @@
     "*",
     "-"
   ],
-  "dropMultiModal": true
+  "dropParentStops": true
 }

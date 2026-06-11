@@ -12,7 +12,7 @@ import org.slf4j.LoggerFactory
 
 class StopPlacePurgingEntitySelector(
     val stopPlacePurgingRepository: StopPlacePurgingRepository,
-    val dropMultiModal: Boolean,
+    val dropParentStops: Boolean,
 ) : EntitySelector {
     private val logger = LoggerFactory.getLogger(javaClass)
 
@@ -56,7 +56,7 @@ class StopPlacePurgingEntitySelector(
 
                             // Remove stop places with no quays
                             if (remainingQuays.isEmpty()) {
-                                if (dropMultiModal) {
+                                if (dropParentStops) {
                                     // TODO: Add log statement of dropping multi-modal stop place, needs improved logging branch
                                     stopPlacesToRemove.add(entity.key)
                                     return@filter false
