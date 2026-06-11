@@ -57,7 +57,10 @@ class StopPlacePurgingEntitySelector(
                             // Remove stop places with no quays
                             if (remainingQuays.isEmpty()) {
                                 if (dropParentStops) {
-                                    // TODO: Add log statement of dropping multi-modal stop place, needs improved logging branch
+                                    logger.debug(
+                                        "Removing stop place {} that is a parent because dropParentStops is toggled on",
+                                        kv(STOP_PLACE_ID, entity.key),
+                                    )
                                     stopPlacesToRemove.add(entity.key)
                                     return@filter false
                                 }
