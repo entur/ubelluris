@@ -14,9 +14,7 @@ class TimetableFilterConfigTest {
     @TempDir
     lateinit var tempDir: Path
 
-    private fun runFilter(
-        resourceFileName: String,
-    ): String {
+    private fun runFilter(resourceFileName: String): String {
         val cliConfig =
             CliConfig(
                 sourceCodespace = "SE",
