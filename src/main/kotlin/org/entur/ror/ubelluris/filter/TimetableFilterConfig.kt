@@ -13,8 +13,11 @@ class TimetableFilterConfig(
 
     override fun build(): FilterConfig =
         FilterConfigBuilder()
-            .withSkipElements(listOf())
-            .withCustomElementHandlers(
+            .withSkipElements(
+                listOf(
+                    "/PublicationDelivery/dataObjects/SiteFrame/topographicPlaces/TopographicPlace/CountryRef",
+                ),
+            ).withCustomElementHandlers(
                 mapOf(
                     "/PublicationDelivery/PublicationTimestamp" to PublicationTimestampHandler(),
                 ),
