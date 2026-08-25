@@ -85,4 +85,77 @@ class TimetableFilterConfigTest {
         assertThat(result).contains("<Route")
         assertThat(result).contains("SE:001:Route:R-tram")
     }
+
+    @Test
+    fun shouldDeduplicateIdenticalServiceJourneyInterchanges() {
+        val cliConfig =
+            CliConfig(
+                sourceCodespace = "SE",
+                targetCodespace = "SE",
+                transportModes = listOf(TransportMode.TRAM),
+            )
+        val timetableFilterConfig = TimetableFilterConfig(cliConfig)
+        val filterConfig = timetableFilterConfig.build()
+
+        val inputDir = Files.createDirectories(tempDir.resolve("input")).toFile()
+        val outputDir = Files.createDirectories(tempDir.resolve("output")).toFile()
+
+        val inputBytes =
+            requireNotNull(javaClass.getResourceAsStream("/timetable/duplicate-service-journey-interchanges.xml")) {
+                "Test resource not found: /timetable/duplicate-service-journey-interchanges.xml"
+            }.readBytes()
+        File(inputDir, "duplicate-service-journey-interchanges.xml").writeBytes(inputBytes)
+
+        NetexProcessor(
+            filterConfig = filterConfig,
+        ).run(inputDir, outputDir)
+
+        // Check what the plugin collected
+        val collectedData = timetableFilterConfig.interchangeCollectorPlugin.getCollectedData()
+        val identicalDuplicates = timetableFilterConfig.interchangeCollectorPlugin.getIdenticalDuplicates()
+        val conflictingDuplicates = timetableFilterConfig.interchangeCollectorPlugin.getConflictingDuplicates()
+
+        // Debug output
+        println("Collected data: $collectedData")
+        println("Identical duplicates: $identicalDuplicates")
+        println("Conflicting duplicates: $conflictingDuplicates")
+
+        assertThat(identicalDuplicates).containsExactly(
+            "SE:013:ServiceJourneyInterchange:A_9022013003003001_130000000000001294_130000000000001168",
+        )
+        assertThat(conflictingDuplicates).containsExactly(
+            "SE:013:ServiceJourneyInterchange:A_9022013003003001_130000000000001294_130000000000001169",
+        )
+
+        val outputFile = outputDir.listFiles()?.firstOrNull()
+        requireNotNull(outputFile) { "No output file was created" }
+
+        val result = outputFile.readText()
+
+        // File contains:
+        // - 1 unique ServiceJourneyInterchange (A_...1272_...1168)
+        // - 2 identical duplicates of another (A_...1294_...1168)
+
+        // The unique interchange should be preserved
+        assertThat(result).contains("SE:013:ServiceJourneyInterchange:A_9022013003003001_130000000000001272_130000000000001168")
+
+        // The duplicate interchange ID should appear exactly once (first occurrence kept, second removed)
+        val duplicateId = "SE:013:ServiceJourneyInterchange:A_9022013003003001_130000000000001294_130000000000001168"
+        val count = result.split(duplicateId).size - 1
+        assertThat(count)
+            .withFailMessage(
+                "Expected duplicate ServiceJourneyInterchange to appear exactly once, but found %d occurrences",
+                count,
+            ).isEqualTo(1)
+
+        // Verify the total number of ServiceJourneyInterchange elements
+        val totalInterchanges = result.split("<ServiceJourneyInterchange").size - 1
+        assertThat(totalInterchanges)
+            .withFailMessage("Expected 2 ServiceJourneyInterchange elements (1 unique + 1 deduplicated), but found %d", totalInterchanges)
+            .isEqualTo(2)
+
+        // Verify the content of the kept duplicate is correct
+        assertThat(result).contains("<FromJourneyRef ref=\"SE:013:ServiceJourney:130000000000001294\"")
+        assertThat(result).contains("<ToJourneyRef ref=\"SE:013:ServiceJourney:130000000000001168\"")
+    }
 }

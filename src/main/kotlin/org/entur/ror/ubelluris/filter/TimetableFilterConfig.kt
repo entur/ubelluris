@@ -4,10 +4,10 @@ import org.entur.netex.tools.lib.config.FilterConfig
 import org.entur.netex.tools.lib.config.FilterConfigBuilder
 import org.entur.ror.ubelluris.config.CliConfig
 import org.entur.ror.ubelluris.sax.handlers.PublicationTimestampHandler
+import org.entur.ror.ubelluris.sax.handlers.ServiceJourneyInterchangeDeduplicationHandler
 import org.entur.ror.ubelluris.sax.plugins.LineOperatorEnricher
 import org.entur.ror.ubelluris.sax.plugins.ServiceJourneyInterchangeCollectorPlugin
 import org.entur.ror.ubelluris.sax.plugins.TransportModeToLocalScheduledStopPointMapper
-import org.entur.ror.ubelluris.sax.selectors.entities.ServiceJourneyInterchangeDeduplicationSelector
 
 class TimetableFilterConfig(
     private val cliConfig: CliConfig,
@@ -25,13 +25,11 @@ class TimetableFilterConfig(
             ).withCustomElementHandlers(
                 mapOf(
                     "/PublicationDelivery/PublicationTimestamp" to PublicationTimestampHandler(),
+                    "/PublicationDelivery/dataObjects/CompositeFrame/frames/TimetableFrame/journeyInterchanges/ServiceJourneyInterchange" to
+                        ServiceJourneyInterchangeDeduplicationHandler(interchangeCollectorPlugin),
                 ),
             ).withPlugins(listOf(plugin, interchangeCollectorPlugin, lineOperatorEnricher))
-            .withEntitySelectors(
-                listOf(
-                    ServiceJourneyInterchangeDeduplicationSelector(interchangeCollectorPlugin),
-                ),
-            ).withRemovePrivateData(false)
+            .withRemovePrivateData(false)
             .withPreserveComments(false)
             .withUseSelfClosingTagsWhereApplicable(true)
             .withPruneReferences(false)
