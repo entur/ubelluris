@@ -8,7 +8,7 @@ import org.xml.sax.Attributes
 
 /**
  * Custom element handler that deduplicates ServiceJourneyInterchange elements during XML writing.
- * 
+ *
  * - If identical duplicates exist for an ID, writes only the first occurrence
  * - If conflicting duplicates exist for an ID, skips writing all occurrences
  */
