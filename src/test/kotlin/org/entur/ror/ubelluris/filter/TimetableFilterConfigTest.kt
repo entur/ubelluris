@@ -110,15 +110,9 @@ class TimetableFilterConfigTest {
             filterConfig = filterConfig,
         ).run(inputDir, outputDir)
 
-        // Check what the plugin collected
-        val collectedData = timetableFilterConfig.interchangeCollectorPlugin.getCollectedData()
+        // Verify what the plugin collected during parsing
         val identicalDuplicates = timetableFilterConfig.interchangeCollectorPlugin.getIdenticalDuplicates()
         val conflictingDuplicates = timetableFilterConfig.interchangeCollectorPlugin.getConflictingDuplicates()
-
-        // Debug output
-        println("Collected data: $collectedData")
-        println("Identical duplicates: $identicalDuplicates")
-        println("Conflicting duplicates: $conflictingDuplicates")
 
         assertThat(identicalDuplicates).containsExactly(
             "SE:013:ServiceJourneyInterchange:A_9022013003003001_130000000000001294_130000000000001168",
@@ -130,32 +124,29 @@ class TimetableFilterConfigTest {
         val outputFile = outputDir.listFiles()?.firstOrNull()
         requireNotNull(outputFile) { "No output file was created" }
 
-        val result = outputFile.readText()
+        val actualOutput = outputFile.readText()
 
-        // File contains:
-        // - 1 unique ServiceJourneyInterchange (A_...1272_...1168)
-        // - 2 identical duplicates of another (A_...1294_...1168)
+        // Load expected output
+        val expectedOutput =
+            requireNotNull(javaClass.getResourceAsStream("/timetable/deduplicated-service-journey-interchanges.xml")) {
+                "Test resource not found: /timetable/deduplicated-service-journey-interchanges.xml"
+            }.bufferedReader().use { it.readText() }
 
-        // The unique interchange should be preserved
-        assertThat(result).contains("SE:013:ServiceJourneyInterchange:A_9022013003003001_130000000000001272_130000000000001168")
+        // Normalize both outputs for comparison (ignore whitespace differences and dynamic timestamp)
+        val normalizedActual = normalizeXml(actualOutput)
+        val normalizedExpected = normalizeXml(expectedOutput)
 
-        // The duplicate interchange ID should appear exactly once (first occurrence kept, second removed)
-        val duplicateId = "SE:013:ServiceJourneyInterchange:A_9022013003003001_130000000000001294_130000000000001168"
-        val count = result.split(duplicateId).size - 1
-        assertThat(count)
-            .withFailMessage(
-                "Expected duplicate ServiceJourneyInterchange to appear exactly once, but found %d occurrences",
-                count,
-            ).isEqualTo(1)
-
-        // Verify the total number of ServiceJourneyInterchange elements
-        val totalInterchanges = result.split("<ServiceJourneyInterchange").size - 1
-        assertThat(totalInterchanges)
-            .withFailMessage("Expected 2 ServiceJourneyInterchange elements (1 unique + 1 deduplicated), but found %d", totalInterchanges)
-            .isEqualTo(2)
-
-        // Verify the content of the kept duplicate is correct
-        assertThat(result).contains("<FromJourneyRef ref=\"SE:013:ServiceJourney:130000000000001294\"")
-        assertThat(result).contains("<ToJourneyRef ref=\"SE:013:ServiceJourney:130000000000001168\"")
+        assertThat(normalizedActual).isEqualTo(normalizedExpected)
     }
+
+    /**
+     * Normalize XML for comparison by:
+     * - Removing the PublicationTimestamp value (it's dynamic)
+     * - Removing all whitespace between tags (to ignore indentation differences)
+     */
+    private fun normalizeXml(xml: String): String =
+        xml
+            .replace(Regex("<PublicationTimestamp>.*?</PublicationTimestamp>"), "<PublicationTimestamp/>")
+            .replace(Regex(">\\s+<"), "><") // Remove whitespace between tags
+            .trim()
 }
