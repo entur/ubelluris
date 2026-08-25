@@ -22,4 +22,7 @@ object NetexTypes {
     const val LINE_REF = "LineRef"
     const val TRANSPORT_MODE = "TransportMode"
     const val SERVICE_JOURNEY_INTERCHANGE = "ServiceJourneyInterchange"
+    const val SERVICE_JOURNEY = "ServiceJourney"
+    const val OPERATOR = "Operator"
+    const val OPERATOR_REF = "OperatorRef"
 }

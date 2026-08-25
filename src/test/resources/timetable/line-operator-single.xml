@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<PublicationDelivery xmlns="http://www.netex.org.uk/netex" version="1.0">
+    <PublicationTimestamp>2026-08-24T10:00:00</PublicationTimestamp>
+    <ParticipantRef>TEST</ParticipantRef>
+    <dataObjects>
+        <CompositeFrame id="TEST:CompositeFrame:1" version="1">
+            <frames>
+                <ServiceFrame id="TEST:ServiceFrame:1" version="1">
+                    <lines>
+                        <Line id="TEST:Line:1" version="1">
+                            <Name>Test Line 1</Name>
+                            <TransportMode>bus</TransportMode>
+                        </Line>
+                        <Line id="TEST:Line:2" version="1">
+                            <Name>Test Line 2</Name>
+                            <TransportMode>bus</TransportMode>
+                        </Line>
+                    </lines>
+                </ServiceFrame>
+                <TimetableFrame id="TEST:TimetableFrame:1" version="1">
+                    <vehicleJourneys>
+                        <ServiceJourney id="TEST:ServiceJourney:1" version="1">
+                            <LineRef ref="TEST:Line:1"/>
+                            <OperatorRef ref="TEST:Operator:OP1"/>
+                        </ServiceJourney>
+                        <ServiceJourney id="TEST:ServiceJourney:2" version="1">
+                            <LineRef ref="TEST:Line:1"/>
+                            <OperatorRef ref="TEST:Operator:OP1"/>
+                        </ServiceJourney>
+                        <ServiceJourney id="TEST:ServiceJourney:3" version="1">
+                            <LineRef ref="TEST:Line:1"/>
+                            <OperatorRef ref="TEST:Operator:OP1"/>
+                        </ServiceJourney>
+                    </vehicleJourneys>
+                </TimetableFrame>
+            </frames>
+        </CompositeFrame>
+    </dataObjects>
+</PublicationDelivery>

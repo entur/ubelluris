@@ -4,6 +4,7 @@ import net.logstash.logback.argument.StructuredArguments.kv
 import org.entur.netex.tools.pipeline.app.FilterNetexApp
 import org.entur.ror.ubelluris.config.CliConfig
 import org.entur.ror.ubelluris.model.TimetableData
+import org.entur.ror.ubelluris.sax.enrichment.LineOperatorInserter
 import org.entur.ror.ubelluris.utils.LogKeys.PROVIDER
 import org.slf4j.LoggerFactory
 import org.slf4j.MDC
@@ -11,6 +12,7 @@ import java.io.File
 import java.nio.file.Files
 import java.nio.file.Path
 import kotlin.io.path.Path
+import kotlin.io.path.extension
 
 class TimetableFilterService(
     private val cliConfig: CliConfig,
@@ -41,6 +43,19 @@ class TimetableFilterService(
                 input = rawData,
                 target = resultsDir.toFile(),
             ).run()
+
+            // Post-process: enrich Lines with OperatorRef from ServiceJourneys
+            val lineOperatorInserter = LineOperatorInserter(filterConfig.lineOperatorEnricher)
+            Files
+                .walk(resultsDir)
+                .filter { it.extension == "xml" }
+                .forEach { xmlFile ->
+                    try {
+                        lineOperatorInserter.insert(xmlFile)
+                    } catch (e: Exception) {
+                        logger.warn("Failed to enrich operators for file: ${xmlFile.fileName}", e)
+                    }
+                }
 
             val quayModes = filterConfig.plugin.getCollectedData()
 
