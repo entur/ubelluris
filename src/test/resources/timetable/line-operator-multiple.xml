@@ -6,6 +6,16 @@
         <CompositeFrame id="TEST:CompositeFrame:1" version="1">
             <frames>
                 <ServiceFrame id="TEST:ServiceFrame:1" version="1">
+                    <routes>
+                        <Route id="TEST:Route:1" version="1">
+                            <Name>Route 1</Name>
+                            <LineRef ref="TEST:Line:1"/>
+                        </Route>
+                        <Route id="TEST:Route:2" version="1">
+                            <Name>Route 2</Name>
+                            <LineRef ref="TEST:Line:2"/>
+                        </Route>
+                    </routes>
                     <lines>
                         <Line id="TEST:Line:1" version="1">
                             <Name>Test Line 1</Name>
@@ -17,46 +27,54 @@
                             <OperatorRef ref="TEST:Operator:EXISTING"/>
                         </Line>
                     </lines>
+                    <journeyPatterns>
+                        <JourneyPattern id="TEST:JourneyPattern:1" version="1">
+                            <RouteRef ref="TEST:Route:1"/>
+                        </JourneyPattern>
+                        <JourneyPattern id="TEST:JourneyPattern:2" version="1">
+                            <RouteRef ref="TEST:Route:2"/>
+                        </JourneyPattern>
+                    </journeyPatterns>
                 </ServiceFrame>
                 <TimetableFrame id="TEST:TimetableFrame:1" version="1">
                     <vehicleJourneys>
                         <!-- Line 1: Multiple operators, OP1 should win (5 vs 3) -->
                         <ServiceJourney id="TEST:ServiceJourney:1" version="1">
-                            <LineRef ref="TEST:Line:1"/>
+                            <JourneyPatternRef ref="TEST:JourneyPattern:1"/>
                             <OperatorRef ref="TEST:Operator:OP1"/>
                         </ServiceJourney>
                         <ServiceJourney id="TEST:ServiceJourney:2" version="1">
-                            <LineRef ref="TEST:Line:1"/>
+                            <JourneyPatternRef ref="TEST:JourneyPattern:1"/>
                             <OperatorRef ref="TEST:Operator:OP1"/>
                         </ServiceJourney>
                         <ServiceJourney id="TEST:ServiceJourney:3" version="1">
-                            <LineRef ref="TEST:Line:1"/>
+                            <JourneyPatternRef ref="TEST:JourneyPattern:1"/>
                             <OperatorRef ref="TEST:Operator:OP1"/>
                         </ServiceJourney>
                         <ServiceJourney id="TEST:ServiceJourney:4" version="1">
-                            <LineRef ref="TEST:Line:1"/>
+                            <JourneyPatternRef ref="TEST:JourneyPattern:1"/>
                             <OperatorRef ref="TEST:Operator:OP2"/>
                         </ServiceJourney>
                         <ServiceJourney id="TEST:ServiceJourney:5" version="1">
-                            <LineRef ref="TEST:Line:1"/>
+                            <JourneyPatternRef ref="TEST:JourneyPattern:1"/>
                             <OperatorRef ref="TEST:Operator:OP2"/>
                         </ServiceJourney>
                         <ServiceJourney id="TEST:ServiceJourney:6" version="1">
-                            <LineRef ref="TEST:Line:1"/>
+                            <JourneyPatternRef ref="TEST:JourneyPattern:1"/>
                             <OperatorRef ref="TEST:Operator:OP1"/>
                         </ServiceJourney>
                         <ServiceJourney id="TEST:ServiceJourney:7" version="1">
-                            <LineRef ref="TEST:Line:1"/>
+                            <JourneyPatternRef ref="TEST:JourneyPattern:1"/>
                             <OperatorRef ref="TEST:Operator:OP1"/>
                         </ServiceJourney>
                         <ServiceJourney id="TEST:ServiceJourney:8" version="1">
-                            <LineRef ref="TEST:Line:1"/>
+                            <JourneyPatternRef ref="TEST:JourneyPattern:1"/>
                             <OperatorRef ref="TEST:Operator:OP2"/>
                         </ServiceJourney>
                         
                         <!-- Line 2: Already has operator, should not be modified -->
                         <ServiceJourney id="TEST:ServiceJourney:9" version="1">
-                            <LineRef ref="TEST:Line:2"/>
+                            <JourneyPatternRef ref="TEST:JourneyPattern:2"/>
                             <OperatorRef ref="TEST:Operator:OP3"/>
                         </ServiceJourney>
                     </vehicleJourneys>

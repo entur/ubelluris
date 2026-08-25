@@ -11,14 +11,20 @@ import java.io.File
  * Collects operator references from ServiceJourneys and maps them to their Lines.
  * This data can be used to enrich Lines that are missing OperatorRef by copying
  * the most common operator from their ServiceJourneys.
+ *
+ * Handles the standard NeTEx pattern:
+ * ServiceJourney → JourneyPatternRef → JourneyPattern → RouteRef → Route → LineRef
  */
 class LineOperatorEnricher : AbstractNetexPlugin() {
     private val log = LoggerFactory.getLogger(javaClass)
 
-    // Tracks the current ServiceJourney's LineRef and OperatorRef as we parse
-    private var currentServiceJourneyId: String? = null
-    private var currentLineRef: String? = null
+    // Tracks the current ServiceJourney's JourneyPatternRef and OperatorRef as we parse
+    private var currentJourneyPatternRef: String? = null
     private var currentOperatorRef: String? = null
+
+    // Mappings to resolve the reference chain
+    private val journeyPatternToRoute = mutableMapOf<String, String>()
+    private val routeToLine = mutableMapOf<String, String>()
 
     // Maps: Line ID -> Map<Operator ID, count>
     private val lineToOperatorCounts = mutableMapOf<String, MutableMap<String, Int>>()
@@ -29,9 +35,14 @@ class LineOperatorEnricher : AbstractNetexPlugin() {
 
     override fun getSupportedElementTypes() =
         setOf(
+            // ServiceJourney and its children
             NetexTypes.SERVICE_JOURNEY,
-            "${NetexTypes.SERVICE_JOURNEY}/${NetexTypes.LINE_REF}",
+            "${NetexTypes.SERVICE_JOURNEY}/${NetexTypes.JOURNEY_PATTERN_REF}",
             "${NetexTypes.SERVICE_JOURNEY}/${NetexTypes.OPERATOR_REF}",
+            // JourneyPattern → Route mapping
+            "${NetexTypes.JOURNEY_PATTERN}/${NetexTypes.ROUTE_REF}",
+            // Route → Line mapping
+            "${NetexTypes.ROUTE}/${NetexTypes.LINE_REF}",
         )
 
     override fun startElement(
@@ -42,15 +53,32 @@ class LineOperatorEnricher : AbstractNetexPlugin() {
         when (elementName) {
             NetexTypes.SERVICE_JOURNEY -> {
                 // Reset state for new ServiceJourney
-                currentServiceJourneyId = currentEntity?.id
-                currentLineRef = null
+                currentJourneyPatternRef = null
                 currentOperatorRef = null
             }
             NetexTypes.LINE_REF -> {
-                currentLineRef = attributes?.getValue("ref")
+                // Route → Line mapping
+                if (currentEntity?.type == NetexTypes.ROUTE) {
+                    val ref = attributes?.getValue("ref") ?: return
+                    val routeId = currentEntity.id
+                    routeToLine[routeId] = ref
+                }
+            }
+            NetexTypes.JOURNEY_PATTERN_REF -> {
+                // ServiceJourney → JourneyPatternRef
+                currentJourneyPatternRef = attributes?.getValue("ref")
+            }
+            NetexTypes.ROUTE_REF -> {
+                // JourneyPattern → RouteRef
+                val ref = attributes?.getValue("ref") ?: return
+                val journeyPatternId = currentEntity?.id ?: return
+                journeyPatternToRoute[journeyPatternId] = ref
             }
             NetexTypes.OPERATOR_REF -> {
-                currentOperatorRef = attributes?.getValue("ref")
+                // ServiceJourney → OperatorRef
+                if (currentEntity?.type == NetexTypes.SERVICE_JOURNEY) {
+                    currentOperatorRef = attributes?.getValue("ref")
+                }
             }
         }
     }
@@ -60,18 +88,23 @@ class LineOperatorEnricher : AbstractNetexPlugin() {
         currentEntity: Entity?,
     ) {
         if (elementName == NetexTypes.SERVICE_JOURNEY) {
-            // When we finish parsing a ServiceJourney, record the mapping
-            val lineRef = currentLineRef
+            // Resolve ServiceJourney → JourneyPattern → Route → Line
             val operatorRef = currentOperatorRef
+            val journeyPatternRef = currentJourneyPatternRef
 
-            if (lineRef != null && operatorRef != null) {
-                val operatorCounts = lineToOperatorCounts.getOrPut(lineRef) { mutableMapOf() }
-                operatorCounts[operatorRef] = operatorCounts.getOrDefault(operatorRef, 0) + 1
+            if (operatorRef != null && journeyPatternRef != null) {
+                val routeRef = journeyPatternToRoute[journeyPatternRef]
+                if (routeRef != null) {
+                    val lineRef = routeToLine[routeRef]
+                    if (lineRef != null) {
+                        val operatorCounts = lineToOperatorCounts.getOrPut(lineRef) { mutableMapOf() }
+                        operatorCounts[operatorRef] = operatorCounts.getOrDefault(operatorRef, 0) + 1
+                    }
+                }
             }
 
             // Clear state
-            currentServiceJourneyId = null
-            currentLineRef = null
+            currentJourneyPatternRef = null
             currentOperatorRef = null
         }
     }

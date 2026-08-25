@@ -121,14 +121,27 @@ class LineOperatorEnricherTest {
                 <dataObjects>
                     <CompositeFrame id="TEST:CompositeFrame:1" version="1">
                         <frames>
+                            <ServiceFrame id="TEST:ServiceFrame:1" version="1">
+                                <routes>
+                                    <Route id="TEST:Route:TIE" version="1">
+                                        <Name>Tie Route</Name>
+                                        <LineRef ref="TEST:Line:TIE"/>
+                                    </Route>
+                                </routes>
+                                <journeyPatterns>
+                                    <JourneyPattern id="TEST:JourneyPattern:TIE" version="1">
+                                        <RouteRef ref="TEST:Route:TIE"/>
+                                    </JourneyPattern>
+                                </journeyPatterns>
+                            </ServiceFrame>
                             <TimetableFrame id="TEST:TimetableFrame:1" version="1">
                                 <vehicleJourneys>
                                     <ServiceJourney id="TEST:ServiceJourney:1" version="1">
-                                        <LineRef ref="TEST:Line:TIE"/>
+                                        <JourneyPatternRef ref="TEST:JourneyPattern:TIE"/>
                                         <OperatorRef ref="TEST:Operator:OPZ"/>
                                     </ServiceJourney>
                                     <ServiceJourney id="TEST:ServiceJourney:2" version="1">
-                                        <LineRef ref="TEST:Line:TIE"/>
+                                        <JourneyPatternRef ref="TEST:JourneyPattern:TIE"/>
                                         <OperatorRef ref="TEST:Operator:OPA"/>
                                     </ServiceJourney>
                                 </vehicleJourneys>
