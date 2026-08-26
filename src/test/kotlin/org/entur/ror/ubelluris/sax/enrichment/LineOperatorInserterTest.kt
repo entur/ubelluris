@@ -159,4 +159,18 @@ class LineOperatorInserterTest {
         // Orphan line should not have OperatorRef inserted
         assertThat(lineHasOperatorRef(outputFile, "TEST:Line:ORPHAN")).isFalse()
     }
+
+    @Test
+    fun shouldInsertOperatorRefAtCorrectPositionInLineElement() {
+        val outputFile = processAndEnrich("line-operator-single.xml")
+
+        println(outputFile.readText())
+
+        val lineElement = findLineElement(outputFile, "TEST:Line:1")!!
+        val entityNames = lineElement.children.map { it.name }
+        val operatorRefIndex = entityNames.indexOf(NetexTypes.OPERATOR_REF)
+        val transportModeIndex = entityNames.indexOf("TransportMode")
+
+        assertThat(operatorRefIndex).isGreaterThan(transportModeIndex)
+    }
 }

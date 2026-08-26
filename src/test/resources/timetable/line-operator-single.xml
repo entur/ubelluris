@@ -16,6 +16,7 @@
                         <Line id="TEST:Line:1" version="1">
                             <Name>Test Line 1</Name>
                             <TransportMode>bus</TransportMode>
+                            <ContactDetails>1234</ContactDetails>
                         </Line>
                     </lines>
                     <journeyPatterns>

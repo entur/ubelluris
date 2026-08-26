@@ -86,28 +86,85 @@ class LineOperatorInserter(
         return timetableXmlPath
     }
 
-    /**
-     * Inserts an OperatorRef element into a Line element.
-     *
-     * The OperatorRef is inserted right after the Name element if present,
-     * or at the beginning of the Line element otherwise.
-     */
     private fun insertOperatorRef(
         lineElement: Element,
         namespace: Namespace,
         operatorRef: String,
     ) {
+        // AuthorityRef and OperatorRef are mutually exclusive; skip if AuthorityRef exists
+        if (lineElement.getChild("AuthorityRef", namespace) != null) {
+            log.debug("Line {} already has AuthorityRef, skipping OperatorRef insertion", lineElement.getAttributeValue("id"))
+            return
+        }
+
+        if (lineElement.getChild("OperatorRef", namespace) != null) {
+            log.debug("Line {} already has OperatorRef, skipping OperatorRef insertion", lineElement.getAttributeValue("id"))
+            return
+        }
+
         val operatorRefElement = Element(NetexTypes.OPERATOR_REF, namespace)
         operatorRefElement.setAttribute("ref", operatorRef)
 
-        // Try to insert after Name element for better structure
-        val nameElement = lineElement.getChild("Name", namespace)
-        if (nameElement != null) {
-            val index = lineElement.indexOf(nameElement)
-            lineElement.addContent(index + 1, operatorRefElement)
+        val entityOrder =
+            listOf(
+                "Name",
+                "ShortName",
+                "Description",
+                "TransportMode",
+                "TransportSubmode",
+                "Url",
+                "PublicCode",
+                "PrivateCode",
+                "ExternalLineRef",
+                "OperatorRef",
+                "additionalOperators",
+                "otherModes",
+                "OperationalContextRef",
+                "LineType",
+                "TypeOfLineRef",
+                "ExternalProductCategoryRef",
+                "TypeOfProductCategoryRef",
+                "TypeOfServiceRef",
+                "Monitored",
+                "routes",
+                "RepresentedByGroupRef",
+                "Presentation",
+                "AlternativePresentation",
+                "PrintedPresentation",
+                "PaymentMethods",
+                "typesOfPaymentMethod",
+                "PurchaseMoment",
+                "ContactDetails",
+                "AccessibilityAssessment",
+                "allowedDirections",
+                "noticeAssignments",
+                "documentLinks",
+            )
+
+        val operatorRefIndex = entityOrder.indexOf("OperatorRef")
+
+        val existingElements = lineElement.children
+
+        val referenceElement =
+            existingElements.firstOrNull {
+                entityOrder.indexOf(it.name) > operatorRefIndex
+            }
+
+        if (referenceElement != null) {
+            val insertIndex = lineElement.indexOf(referenceElement)
+            lineElement.addContent(insertIndex, operatorRefElement)
         } else {
-            // Otherwise insert at the beginning
-            lineElement.addContent(0, operatorRefElement)
+            lineElement.addContent(operatorRefElement)
         }
+
+        /*
+        val existingElements = lineElement.children.map { it.name }
+
+        val insertIndex = existingElements.indexOfFirst { entityOrder.indexOf(it) > operatorRefIndex }
+            .let { if (it == -1) existingElements.size else it }
+
+        lineElement.addContent(insertIndex, operatorRefElement)
+
+         */
     }
 }

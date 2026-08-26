@@ -57,7 +57,7 @@ class TimetableFilterService(
                     }
                 }
 
-            val quayModes = filterConfig.plugin.getCollectedData()
+            val quayModes = filterConfig.transportModeToLocalScheduledStopPointMapper.getCollectedData()
 
             logger.info("Done processing {}, {} quay mode mappings", kv(PROVIDER, provider), quayModes.size)
 

@@ -12,7 +12,7 @@ import org.entur.ror.ubelluris.sax.plugins.TransportModeToLocalScheduledStopPoin
 class TimetableFilterConfig(
     private val cliConfig: CliConfig,
 ) : FilterProfileConfiguration {
-    val plugin = TransportModeToLocalScheduledStopPointMapper(cliConfig.transportModes)
+    val transportModeToLocalScheduledStopPointMapper = TransportModeToLocalScheduledStopPointMapper(cliConfig.transportModes)
     val interchangeCollectorPlugin = ServiceJourneyInterchangeCollectorPlugin()
     val lineOperatorEnricher = LineOperatorEnricher()
 
@@ -66,12 +66,17 @@ class TimetableFilterConfig(
         }
 
         return FilterConfigBuilder()
-            .withSkipElements(
+            .withPlugins(
+                listOf(
+                    transportModeToLocalScheduledStopPointMapper,
+                    interchangeCollectorPlugin,
+                    lineOperatorEnricher,
+                ),
+            ).withSkipElements(
                 listOf(
                     "/PublicationDelivery/dataObjects/SiteFrame/topographicPlaces/TopographicPlace/CountryRef",
                 ),
             ).withCustomElementHandlers(handlerMap)
-            .withPlugins(listOf(plugin, interchangeCollectorPlugin, lineOperatorEnricher))
             .withRemovePrivateData(false)
             .withPreserveComments(false)
             .withUseSelfClosingTagsWhereApplicable(true)
