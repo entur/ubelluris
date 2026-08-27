@@ -12,9 +12,6 @@ import org.xml.sax.Attributes
  * This single handler instance is registered for the ServiceJourneyInterchange element and all its
  * child elements. When a duplicate is encountered, it sets skipDepth > 0, which causes all subsequent
  * SAX events (including child elements) to be skipped until the depth returns to 0.
- *
- * Since the same handler instance is used for all registered paths, the instance variables are
- * naturally shared across all SAX events.
  */
 class ServiceJourneyInterchangeDeduplicationHandler(
     private val collectorPlugin: ServiceJourneyInterchangeCollectorPlugin,

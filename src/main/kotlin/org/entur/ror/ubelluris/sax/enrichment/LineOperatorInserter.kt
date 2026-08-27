@@ -143,10 +143,8 @@ class LineOperatorInserter(
 
         val operatorRefIndex = entityOrder.indexOf("OperatorRef")
 
-        val existingElements = lineElement.children
-
         val referenceElement =
-            existingElements.firstOrNull {
+            lineElement.children.firstOrNull {
                 entityOrder.indexOf(it.name) > operatorRefIndex
             }
 
@@ -156,15 +154,5 @@ class LineOperatorInserter(
         } else {
             lineElement.addContent(operatorRefElement)
         }
-
-        /*
-        val existingElements = lineElement.children.map { it.name }
-
-        val insertIndex = existingElements.indexOfFirst { entityOrder.indexOf(it) > operatorRefIndex }
-            .let { if (it == -1) existingElements.size else it }
-
-        lineElement.addContent(insertIndex, operatorRefElement)
-
-         */
     }
 }

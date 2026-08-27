@@ -164,8 +164,6 @@ class LineOperatorInserterTest {
     fun shouldInsertOperatorRefAtCorrectPositionInLineElement() {
         val outputFile = processAndEnrich("line-operator-single.xml")
 
-        println(outputFile.readText())
-
         val lineElement = findLineElement(outputFile, "TEST:Line:1")!!
         val entityNames = lineElement.children.map { it.name }
         val operatorRefIndex = entityNames.indexOf(NetexTypes.OPERATOR_REF)
