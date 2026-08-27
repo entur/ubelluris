@@ -6,9 +6,11 @@ import org.entur.ror.ubelluris.config.CliConfig
 import org.entur.ror.ubelluris.sax.handlers.BookWhenFilterHandler
 import org.entur.ror.ubelluris.sax.handlers.PublicationTimestampHandler
 import org.entur.ror.ubelluris.sax.handlers.ServiceJourneyInterchangeDeduplicationHandler
+import org.entur.ror.ubelluris.sax.handlers.VersionRefNormalizerHandler
 import org.entur.ror.ubelluris.sax.plugins.LineOperatorEnricher
 import org.entur.ror.ubelluris.sax.plugins.ServiceJourneyInterchangeCollectorPlugin
 import org.entur.ror.ubelluris.sax.plugins.TransportModeToLocalScheduledStopPointMapper
+import org.entur.ror.ubelluris.sax.plugins.VersionRefNormalizerPlugin
 
 class TimetableFilterConfig(
     private val cliConfig: CliConfig,
@@ -16,6 +18,7 @@ class TimetableFilterConfig(
     val transportModeToLocalScheduledStopPointMapper = TransportModeToLocalScheduledStopPointMapper(cliConfig.transportModes)
     val interchangeCollectorPlugin = ServiceJourneyInterchangeCollectorPlugin()
     val lineOperatorEnricher = LineOperatorEnricher()
+    val versionRefNormalizerPlugin = VersionRefNormalizerPlugin()
 
     override fun build(): FilterConfig {
         val baseInterchangePath =
@@ -56,11 +59,16 @@ class TimetableFilterConfig(
                 "PrivateCode",
             )
 
+        val versionRefNormalizerHandler = VersionRefNormalizerHandler(versionRefNormalizerPlugin.registry)
+
         val handlerMap =
             mutableMapOf(
                 "/PublicationDelivery/PublicationTimestamp" to PublicationTimestampHandler(),
                 "/PublicationDelivery/dataObjects/CompositeFrame/frames/TimetableFrame/vehicleJourneys" +
                     "/ServiceJourney/FlexibleServiceProperties/BookWhen" to BookWhenFilterHandler(),
+                // remember to also update plugins supported element types
+                "/PublicationDelivery/dataObjects/CompositeFrame/frames/TimetableFrame/vehicleJourneys" +
+                    "/ServiceJourney/trainNumbers/TrainNumberRef" to versionRefNormalizerHandler,
                 baseInterchangePath to interchangeDeduplicationHandler,
             )
 
@@ -72,6 +80,7 @@ class TimetableFilterConfig(
         return FilterConfigBuilder()
             .withPlugins(
                 listOf(
+                    versionRefNormalizerPlugin,
                     transportModeToLocalScheduledStopPointMapper,
                     interchangeCollectorPlugin,
                     lineOperatorEnricher,
