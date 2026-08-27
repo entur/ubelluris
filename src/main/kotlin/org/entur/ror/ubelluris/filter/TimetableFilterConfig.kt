@@ -6,6 +6,7 @@ import org.entur.ror.ubelluris.config.CliConfig
 import org.entur.ror.ubelluris.sax.handlers.BookWhenFilterHandler
 import org.entur.ror.ubelluris.sax.handlers.PublicationTimestampHandler
 import org.entur.ror.ubelluris.sax.handlers.ServiceJourneyInterchangeDeduplicationHandler
+import org.entur.ror.ubelluris.sax.handlers.TimetabledPassingTimeIdHandler
 import org.entur.ror.ubelluris.sax.handlers.VersionRefNormalizerHandler
 import org.entur.ror.ubelluris.sax.plugins.LineOperatorEnricher
 import org.entur.ror.ubelluris.sax.plugins.ServiceJourneyInterchangeCollectorPlugin
@@ -60,6 +61,7 @@ class TimetableFilterConfig(
             )
 
         val versionRefNormalizerHandler = VersionRefNormalizerHandler(versionRefNormalizerPlugin.registry)
+        val timetabledPassingTimeIdHandler = TimetabledPassingTimeIdHandler()
 
         val handlerMap =
             mutableMapOf(
@@ -69,6 +71,8 @@ class TimetableFilterConfig(
                 // remember to also update plugins supported element types
                 "/PublicationDelivery/dataObjects/CompositeFrame/frames/TimetableFrame/vehicleJourneys" +
                     "/ServiceJourney/trainNumbers/TrainNumberRef" to versionRefNormalizerHandler,
+                "/PublicationDelivery/dataObjects/CompositeFrame/frames/TimetableFrame/vehicleJourneys" +
+                    "/ServiceJourney/passingTimes/TimetabledPassingTime" to timetabledPassingTimeIdHandler,
                 baseInterchangePath to interchangeDeduplicationHandler,
             )
 

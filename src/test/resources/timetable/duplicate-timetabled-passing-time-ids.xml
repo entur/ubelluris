@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<PublicationDelivery xmlns="http://www.netex.org.uk/netex" xmlns:ns2="http://www.opengis.net/gml/3.2" xmlns:ns3="http://www.siri.org.uk/siri" version="1.15:NO-NeTEx-networktimetable:1.5">
+    <PublicationTimestamp>2026-08-27T10:00:00</PublicationTimestamp>
+    <ParticipantRef>TEST</ParticipantRef>
+    <dataObjects>
+        <CompositeFrame created="2026-08-27T10:00:00" version="1" id="SE:001:CompositeFrame:1">
+            <ValidBetween>
+                <FromDate>2026-01-01T00:00:00</FromDate>
+            </ValidBetween>
+            <codespaces>
+                <Codespace id="SE:001">
+                    <Xmlns>SE:001</Xmlns>
+                    <XmlnsUrl>http://www.samtrafiken.se/ns/test</XmlnsUrl>
+                </Codespace>
+            </codespaces>
+            <frames>
+                <TimetableFrame version="1" id="SE:001:TimetableFrame:1">
+                    <vehicleJourneys>
+                        <ServiceJourney id="SE:001:ServiceJourney:1" version="1">
+                            <JourneyPatternRef ref="SE:001:JourneyPattern:1" version="1"/>
+                            <passingTimes>
+                                <!-- First duplicate ID -->
+                                <TimetabledPassingTime id="SE:001:TimetabledPassingTime:1" version="1">
+                                    <ArrivalTime>08:00:00</ArrivalTime>
+                                    <DepartureTime>08:00:00</DepartureTime>
+                                </TimetabledPassingTime>
+                                <!-- Second occurrence of same ID -->
+                                <TimetabledPassingTime id="SE:001:TimetabledPassingTime:1" version="1">
+                                    <ArrivalTime>08:15:00</ArrivalTime>
+                                    <DepartureTime>08:15:00</DepartureTime>
+                                </TimetabledPassingTime>
+                                <!-- Third occurrence of same ID -->
+                                <TimetabledPassingTime id="SE:001:TimetabledPassingTime:1" version="1">
+                                    <ArrivalTime>08:30:00</ArrivalTime>
+                                    <DepartureTime>08:30:00</DepartureTime>
+                                </TimetabledPassingTime>
+                            </passingTimes>
+                        </ServiceJourney>
+                        <ServiceJourney id="SE:001:ServiceJourney:2" version="1">
+                            <JourneyPatternRef ref="SE:001:JourneyPattern:1" version="1"/>
+                            <passingTimes>
+                                <!-- Another set of duplicates with different ID -->
+                                <TimetabledPassingTime id="SE:001:TimetabledPassingTime:2" version="1">
+                                    <ArrivalTime>09:00:00</ArrivalTime>
+                                    <DepartureTime>09:00:00</DepartureTime>
+                                </TimetabledPassingTime>
+                                <TimetabledPassingTime id="SE:001:TimetabledPassingTime:2" version="1">
+                                    <ArrivalTime>09:15:00</ArrivalTime>
+                                    <DepartureTime>09:15:00</DepartureTime>
+                                </TimetabledPassingTime>
+                            </passingTimes>
+                        </ServiceJourney>
+                    </vehicleJourneys>
+                </TimetableFrame>
+            </frames>
+        </CompositeFrame>
+    </dataObjects>
+</PublicationDelivery>
