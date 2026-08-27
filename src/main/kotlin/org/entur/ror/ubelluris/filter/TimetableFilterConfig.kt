@@ -3,6 +3,7 @@ package org.entur.ror.ubelluris.filter
 import org.entur.netex.tools.lib.config.FilterConfig
 import org.entur.netex.tools.lib.config.FilterConfigBuilder
 import org.entur.ror.ubelluris.config.CliConfig
+import org.entur.ror.ubelluris.sax.handlers.BookWhenFilterHandler
 import org.entur.ror.ubelluris.sax.handlers.PublicationTimestampHandler
 import org.entur.ror.ubelluris.sax.handlers.ServiceJourneyInterchangeDeduplicationHandler
 import org.entur.ror.ubelluris.sax.plugins.LineOperatorEnricher
@@ -30,7 +31,7 @@ class TimetableFilterConfig(
         // they MUST be added to this list to ensure proper deduplication.
         // Missing elements will be written even for duplicate ServiceJourneyInterchange elements.
         // TODO: find a way to skip entire ServiceJourneyInterchange element without having to register all child elements explicitly.
-        val childElements =
+        val serviceJourneyInterchangeChildElements =
             listOf(
                 // Core properties
                 "Priority",
@@ -55,13 +56,16 @@ class TimetableFilterConfig(
                 "PrivateCode",
             )
 
-        // Build handler map: register the same handler instance for parent and all children
         val handlerMap =
             mutableMapOf(
                 "/PublicationDelivery/PublicationTimestamp" to PublicationTimestampHandler(),
+                "/PublicationDelivery/dataObjects/CompositeFrame/frames/TimetableFrame/vehicleJourneys" +
+                    "/ServiceJourney/FlexibleServiceProperties/BookWhen" to BookWhenFilterHandler(),
                 baseInterchangePath to interchangeDeduplicationHandler,
             )
-        childElements.forEach { childElement ->
+
+        // need to handle all child elements of ServiceJourneyInterchange to not leave dangling children
+        serviceJourneyInterchangeChildElements.forEach { childElement ->
             handlerMap["$baseInterchangePath/$childElement"] = interchangeDeduplicationHandler
         }
 
