@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<PublicationDelivery xmlns="http://www.netex.org.uk/netex" xmlns:ns2="http://www.opengis.net/gml/3.2" xmlns:ns3="http://www.siri.org.uk/siri" xmlns:ns4="http://www.samtrafiken.se/netex" version="1.15:NO-NeTEx-networktimetable:1.5">
+  <dataObjects>
+    <SiteFrame version="1" id="SE:001:SiteFrame:001">
+      <topographicPlaces>
+        <TopographicPlace version="any" id="SE:050:TopographicPlace:AT">
+          <IsoCode>AT</IsoCode>
+          <Descriptor>
+            <Name>Austria</Name>
+          </Descriptor>
+          <TopographicPlaceType>country</TopographicPlaceType>
+          <CountryRef ref="at"/>
+        </TopographicPlace>
+        <TopographicPlace version="any" id="SE:050:TopographicPlace:DK">
+          <IsoCode>DK</IsoCode>
+          <Descriptor>
+            <Name>Denmark</Name>
+          </Descriptor>
+          <TopographicPlaceType>country</TopographicPlaceType>
+          <CountryRef ref="dk"/>
+        </TopographicPlace>
+      </topographicPlaces>
+    </SiteFrame>
+    <CompositeFrame version="1" id="SE:001:CompositeFrame:001">
+      <frames>
+        <ServiceFrame version="1" id="SE:001:ServiceFrame:001">
+          <routes>
+            <Route version="any" id="SE:001:Route:R-tram">
+              <LineRef ref="SE:001:Line:L-tram" version="1"/>
+            </Route>
+          </routes>
+          <lines>
+            <Line version="1" id="SE:001:Line:L-tram">
+              <TransportMode>tram</TransportMode>
+            </Line>
+          </lines>
+          <journeyPatterns>
+            <JourneyPattern version="any" id="SE:001:JourneyPattern:JP-tram">
+              <RouteRef ref="SE:001:Route:R-tram" version="any"/>
+              <pointsInSequence>
+                <StopPointInJourneyPattern order="1" version="any" id="SE:001:StopPointInJourneyPattern:SPIJP-tram-1">
+                  <ScheduledStopPointRef ref="SE:001:ScheduledStopPoint:101"/>
+                </StopPointInJourneyPattern>
+              </pointsInSequence>
+            </JourneyPattern>
+          </journeyPatterns>
+        </ServiceFrame>
+      </frames>
+    </CompositeFrame>
+  </dataObjects>
+</PublicationDelivery>

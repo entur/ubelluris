@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<PublicationDelivery xmlns="http://www.netex.org.uk/netex" xmlns:ns2="http://www.opengis.net/gml/3.2" xmlns:ns3="http://www.siri.org.uk/siri" xmlns:ns4="http://www.samtrafiken.se/netex" version="1.15:NO-NeTEx-networktimetable:1.5">
+    <PublicationTimestamp>2026-08-25T15:15:11</PublicationTimestamp>
+    <ParticipantRef>SAM</ParticipantRef>
+    <dataObjects>
+        <CompositeFrame created="2026-08-25T02:58:37" version="20260825025837" id="SE:013:CompositeFrame:9011013033000000">
+            <ValidBetween>
+                <FromDate>1970-01-01T00:00:00</FromDate>
+            </ValidBetween>
+            <codespaces>
+                <Codespace id="SE:013">
+                    <Xmlns>SE:013</Xmlns>
+                    <XmlnsUrl>http://www.samtrafiken.se/ns/halland</XmlnsUrl>
+                </Codespace>
+            </codespaces>
+            <FrameDefaults>
+                <DefaultLocale>
+                    <TimeZone>Europe/Stockholm</TimeZone>
+                    <DefaultLanguage>sv</DefaultLanguage>
+                </DefaultLocale>
+                <DefaultLocationSystem>4326</DefaultLocationSystem>
+            </FrameDefaults>
+            <frames>
+                <TimetableFrame version="20260825025837" id="SE:013:TimetableFrame:9011013033000000">
+                    <journeyInterchanges>
+                        <ServiceJourneyInterchange version="any" id="SE:013:ServiceJourneyInterchange:A_9022013003003001_130000000000001272_130000000000001168">
+                            <Priority>0</Priority>
+                            <Guaranteed>false</Guaranteed>
+                            <Advertised>true</Advertised>
+                            <FromPointRef ref="SE:013:ScheduledStopPoint:9022013003003001"/>
+                            <ToPointRef ref="SE:013:ScheduledStopPoint:9022013003003001"/>
+                            <FromJourneyRef ref="SE:013:ServiceJourney:130000000000001272"/>
+                            <ToJourneyRef ref="SE:013:ServiceJourney:130000000000001168" version="any"/>
+                        </ServiceJourneyInterchange>
+                        <ServiceJourneyInterchange version="any" id="SE:013:ServiceJourneyInterchange:A_9022013003003001_130000000000001294_130000000000001168">
+                            <Priority>0</Priority>
+                            <Guaranteed>false</Guaranteed>
+                            <Advertised>true</Advertised>
+                            <FromPointRef ref="SE:013:ScheduledStopPoint:9022013003003001"/>
+                            <ToPointRef ref="SE:013:ScheduledStopPoint:9022013003003001"/>
+                            <FromJourneyRef ref="SE:013:ServiceJourney:130000000000001294"/>
+                            <ToJourneyRef ref="SE:013:ServiceJourney:130000000000001168" version="any"/>
+                        </ServiceJourneyInterchange>
+                    </journeyInterchanges>
+                </TimetableFrame>
+            </frames>
+        </CompositeFrame>
+    </dataObjects>
+</PublicationDelivery>
