@@ -31,7 +31,7 @@ class VersionRefNormalizerPlugin : AbstractNetexPlugin() {
     override fun getSupportedElementTypes() =
         setOf(
             "TrainNumber",
-            "VehicleType"
+            "VehicleType",
         )
 
     override fun startElement(

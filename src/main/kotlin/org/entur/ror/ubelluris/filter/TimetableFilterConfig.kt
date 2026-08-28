@@ -72,7 +72,7 @@ class TimetableFilterConfig(
                 "/PublicationDelivery/dataObjects/CompositeFrame/frames/TimetableFrame/vehicleJourneys" +
                     "/ServiceJourney/trainNumbers/TrainNumberRef" to versionRefNormalizerHandler,
                 "/PublicationDelivery/dataObjects/CompositeFrame/frames/ResourceFrame/vehicles" +
-                        "/Vehicle/VehicleTypeRef" to versionRefNormalizerHandler,
+                    "/Vehicle/VehicleTypeRef" to versionRefNormalizerHandler,
                 "/PublicationDelivery/dataObjects/CompositeFrame/frames/TimetableFrame/vehicleJourneys" +
                     "/ServiceJourney/passingTimes/TimetabledPassingTime" to timetabledPassingTimeIdHandler,
                 baseInterchangePath to interchangeDeduplicationHandler,
