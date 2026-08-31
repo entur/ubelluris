@@ -9,9 +9,11 @@ import org.entur.ror.ubelluris.sax.handlers.ServiceJourneyInterchangeDeduplicati
 import org.entur.ror.ubelluris.sax.handlers.TimetabledPassingTimeIdHandler
 import org.entur.ror.ubelluris.sax.handlers.VersionRefNormalizerHandler
 import org.entur.ror.ubelluris.sax.plugins.LineOperatorEnricher
+import org.entur.ror.ubelluris.sax.plugins.LinePublicCodeFilterPlugin
 import org.entur.ror.ubelluris.sax.plugins.ServiceJourneyInterchangeCollectorPlugin
 import org.entur.ror.ubelluris.sax.plugins.TransportModeToLocalScheduledStopPointMapper
 import org.entur.ror.ubelluris.sax.plugins.VersionRefNormalizerPlugin
+import org.entur.ror.ubelluris.sax.selectors.entities.LineFilteringEntitySelector
 
 class TimetableFilterConfig(
     private val cliConfig: CliConfig,
@@ -20,6 +22,15 @@ class TimetableFilterConfig(
     val interchangeCollectorPlugin = ServiceJourneyInterchangeCollectorPlugin()
     val lineOperatorEnricher = LineOperatorEnricher()
     val versionRefNormalizerPlugin = VersionRefNormalizerPlugin()
+
+    // Regex patterns for filtering Lines based on PublicCode
+    // Lines matching any of these patterns will be removed along with their dependent entities
+    private val linePublicCodeRegexPatterns =
+        listOf(
+            Regex("\\s*(NO\\s*\\d+(?:\\s*[,/]\\s*\\d+)*)\\s*"),
+        )
+
+    val linePublicCodeFilterPlugin = LinePublicCodeFilterPlugin(linePublicCodeRegexPatterns)
 
     override fun build(): FilterConfig {
         val baseInterchangePath =
@@ -75,9 +86,9 @@ class TimetableFilterConfig(
                     "/Vehicle/VehicleTypeRef" to versionRefNormalizerHandler,
                 "/PublicationDelivery/dataObjects/CompositeFrame/frames/TimetableFrame/vehicleJourneys" +
                     "/ServiceJourney/passingTimes/TimetabledPassingTime" to timetabledPassingTimeIdHandler,
-                baseInterchangePath to interchangeDeduplicationHandler,
             )
 
+        handlerMap[baseInterchangePath] = interchangeDeduplicationHandler
         // need to handle all child elements of ServiceJourneyInterchange to not leave dangling children
         serviceJourneyInterchangeChildElements.forEach { childElement ->
             handlerMap["$baseInterchangePath/$childElement"] = interchangeDeduplicationHandler
@@ -90,6 +101,11 @@ class TimetableFilterConfig(
                     transportModeToLocalScheduledStopPointMapper,
                     interchangeCollectorPlugin,
                     lineOperatorEnricher,
+                    linePublicCodeFilterPlugin,
+                ),
+            ).withEntitySelectors(
+                listOf(
+                    LineFilteringEntitySelector(linePublicCodeFilterPlugin.repository),
                 ),
             ).withSkipElements(
                 listOf(
@@ -100,6 +116,13 @@ class TimetableFilterConfig(
             .withPreserveComments(false)
             .withUseSelfClosingTagsWhereApplicable(true)
             .withPruneReferences(false)
-            .build()
+            .withUnreferencedEntitiesToPrune(
+                setOf(
+                    "Line",
+                    "Route",
+                    "JourneyPattern",
+                    "ServiceJourney",
+                ),
+            ).build()
     }
 }
