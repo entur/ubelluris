@@ -116,11 +116,16 @@ class TimetableFilterConfig(
             .withPruneReferences(false)
             .withUnreferencedEntitiesToPrune(
                 setOf(
+                    // cleans up after line removal
                     "Line",
                     "Route",
                     "JourneyPattern",
                     "ServiceJourney",
-                    "DestinationDisplay"
+                    "DestinationDisplay",
+                    // cleans up authorities that do not provide contact details
+                    "Authority",
+                    "Operator",
+                    "Network",
                 ),
             ).build()
     }
