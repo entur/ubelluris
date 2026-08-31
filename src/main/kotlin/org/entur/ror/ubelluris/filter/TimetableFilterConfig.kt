@@ -23,11 +23,9 @@ class TimetableFilterConfig(
     val lineOperatorEnricher = LineOperatorEnricher()
     val versionRefNormalizerPlugin = VersionRefNormalizerPlugin()
 
-    // Regex patterns for filtering Lines based on PublicCode
-    // Lines matching any of these patterns will be removed along with their dependent entities
     private val linePublicCodeRegexPatterns =
         listOf(
-            Regex("\\s*(NO\\s*\\d+(?:\\s*[,/]\\s*\\d+)*)\\s*"),
+            Regex("\\s*(NO\\s*\\d+(?:\\s*[,/]\\s*\\d+)*\\s*[,/]?)\\s*"),
         )
 
     val linePublicCodeFilterPlugin = LinePublicCodeFilterPlugin(linePublicCodeRegexPatterns)
@@ -122,6 +120,7 @@ class TimetableFilterConfig(
                     "Route",
                     "JourneyPattern",
                     "ServiceJourney",
+                    "DestinationDisplay"
                 ),
             ).build()
     }
