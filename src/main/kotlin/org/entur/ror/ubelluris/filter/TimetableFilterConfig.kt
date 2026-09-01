@@ -113,7 +113,7 @@ class TimetableFilterConfig(
             .withRemovePrivateData(false)
             .withPreserveComments(false)
             .withUseSelfClosingTagsWhereApplicable(true)
-            .withPruneReferences(true)
+            .withPruneReferences(false)
             .withUnreferencedEntitiesToPrune(
                 setOf(
                     // cleans up after line removal
