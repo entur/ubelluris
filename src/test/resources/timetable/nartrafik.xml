@@ -32,6 +32,11 @@
                             <LineRef ref="SE:012:Line:9011012850300000" version="081128" />
                             <DirectionType>outbound</DirectionType>
                         </Route>
+                        <Route version="any" id="SE:012:Route:NOT_REMOVED">
+                            <Name>Keslövs station</Name>
+                            <LineRef ref="SE:012:Line:NOT_REMOVED" version="231210" />
+                            <DirectionType>outbound</DirectionType>
+                        </Route>
                     </routes>
                     <lines>
                         <Line version="081128" id="SE:012:Line:9011012850300000">
@@ -70,6 +75,10 @@
                             <OperatorRef ref="SE:012:Operator:9013012001200000" />
                             <RepresentedByGroupRef ref="SE:012:Network:9010012000000000" />
                         </Line>
+                        <Line version="231210" id="SE:012:Line:NOT_REMOVED">
+                            <Name>1</Name>
+                            <PublicCode>1</PublicCode>
+                        </Line>
                     </lines>
                     <journeyPatterns>
                         <JourneyPattern version="any" id="SE:012:JourneyPattern:121129420000048642">
@@ -80,6 +89,9 @@
                         </JourneyPattern>
                         <JourneyPattern version="any" id="SE:012:JourneyPattern:121129420000048641">
                             <RouteRef ref="SE:012:Route:121120000217589610" version="any" />
+                        </JourneyPattern>
+                        <JourneyPattern version="any" id="SE:012:JourneyPattern:NOT_REMOVED">
+                            <RouteRef ref="SE:012:Route:NOT_REMOVED" version="any" />
                         </JourneyPattern>
                     </journeyPatterns>
                 </ServiceFrame>
@@ -100,6 +112,16 @@
                         <ServiceJourney version="any" id="SE:012:ServiceJourney:121120100359706173">
                             <JourneyPatternRef ref="SE:012:JourneyPattern:121129420000100884" version="any" />
                             <OperatorRef ref="SE:012:Operator:9013012001200000" />
+                        </ServiceJourney>
+                        <ServiceJourney version="any" id="SE:012:ServiceJourney:NOT_REMOVED">
+                            <JourneyPatternRef ref="SE:012:JourneyPattern:NOT_REMOVED" version="any" />
+                            <OperatorRef ref="SE:012:Operator:9013012001200000" />
+                        </ServiceJourney>
+                        <ServiceJourney version="any" id="SE:012:ServiceJourney:1234">
+                            <LineRef ref="SE:012:Line:9011012850300000" />
+                        </ServiceJourney>
+                        <ServiceJourney version="any" id="SE:012:ServiceJourney:4321">
+                            <RouteRef ref="SE:012:Route:121120000217589610" />
                         </ServiceJourney>
                     </vehicleJourneys>
                 </TimetableFrame>

@@ -13,7 +13,7 @@ import org.entur.ror.ubelluris.sax.plugins.LinePublicCodeFilterPlugin
 import org.entur.ror.ubelluris.sax.plugins.ServiceJourneyInterchangeCollectorPlugin
 import org.entur.ror.ubelluris.sax.plugins.TransportModeToLocalScheduledStopPointMapper
 import org.entur.ror.ubelluris.sax.plugins.VersionRefNormalizerPlugin
-import org.entur.ror.ubelluris.sax.selectors.entities.LineFilteringEntitySelector
+import org.entur.ror.ubelluris.sax.selectors.entities.CascadingLineRemovalSelector
 
 class TimetableFilterConfig(
     private val cliConfig: CliConfig,
@@ -103,7 +103,7 @@ class TimetableFilterConfig(
                 ),
             ).withEntitySelectors(
                 listOf(
-                    LineFilteringEntitySelector(linePublicCodeFilterPlugin.repository),
+                    CascadingLineRemovalSelector(linePublicCodeFilterPlugin.repository),
                 ),
             ).withSkipElements(
                 listOf(
@@ -113,14 +113,10 @@ class TimetableFilterConfig(
             .withRemovePrivateData(false)
             .withPreserveComments(false)
             .withUseSelfClosingTagsWhereApplicable(true)
-            .withPruneReferences(false)
+            .withPruneReferences(true)
             .withUnreferencedEntitiesToPrune(
                 setOf(
                     // cleans up after line removal
-                    "Line",
-                    "Route",
-                    "JourneyPattern",
-                    "ServiceJourney",
                     "DestinationDisplay",
                     // cleans up authorities that do not provide contact details
                     "Authority",

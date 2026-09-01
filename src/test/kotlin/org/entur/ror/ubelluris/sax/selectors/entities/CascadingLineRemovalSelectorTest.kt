@@ -11,7 +11,7 @@ import java.io.File
 import java.nio.file.Files
 import java.nio.file.Path
 
-class LineFilteringEntitySelectorTest {
+class CascadingLineRemovalSelectorTest {
     @TempDir
     lateinit var tempDir: Path
 
@@ -60,8 +60,9 @@ class LineFilteringEntitySelectorTest {
         removedLines.forEach { lineId ->
             assertThat(result).doesNotContain(lineId)
         }
-        // route, journeypattern, servicejourney should be removed by pruning
+        // routes, journeypatterns, servicejourneys should be removed by pruning
         assertThat(result).doesNotContain("SE:012:Route:121120000217589630")
+        assertThat(result).doesNotContain("SE:012:Route:4321")
         assertThat(result).doesNotContain("SE:012:JourneyPattern:121129420000048642")
         assertThat(result).doesNotContain("SE:012:JourneyPattern:121129420000100884")
         assertThat(result).doesNotContain("SE:012:JourneyPattern:121129420000048641")
@@ -69,5 +70,11 @@ class LineFilteringEntitySelectorTest {
         assertThat(result).doesNotContain("SE:012:ServiceJourney:121120100359706157")
         assertThat(result).doesNotContain("SE:012:ServiceJourney:121120000359706173")
         assertThat(result).doesNotContain("SE:012:ServiceJourney:121120100359706173")
+        assertThat(result).doesNotContain("SE:012:ServiceJourney:1234")
+
+        assertThat(result).contains("SE:012:Line:NOT_REMOVED")
+        assertThat(result).contains("SE:012:Route:NOT_REMOVED")
+        assertThat(result).contains("SE:012:JourneyPattern:NOT_REMOVED")
+        assertThat(result).contains("SE:012:ServiceJourney:NOT_REMOVED")
     }
 }

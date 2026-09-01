@@ -1,6 +1,7 @@
 package org.entur.ror.ubelluris.filter
 
 import net.logstash.logback.argument.StructuredArguments.kv
+import org.entur.netex.tools.lib.report.FilterReport
 import org.entur.netex.tools.pipeline.app.FilterNetexApp
 import org.entur.ror.ubelluris.config.CliConfig
 import org.entur.ror.ubelluris.model.TimetableData
@@ -38,14 +39,29 @@ class TimetableFilterService(
             Files.createDirectories(resultsDir)
 
             val filterConfig = TimetableFilterConfig(cliConfig)
-            FilterNetexApp(
-                filterConfig = filterConfig.build(),
-                input = rawData,
-                target = resultsDir.toFile(),
-            ).run()
+            val filterResult =
+                FilterNetexApp(
+                    filterConfig = filterConfig.build(),
+                    input = rawData,
+                    target = resultsDir.toFile(),
+                ).run()
 
             // Post-process: enrich Lines with OperatorRef from ServiceJourneys
             val lineOperatorInserter = LineOperatorInserter(filterConfig.lineOperatorEnricher)
+
+            // After removing lines, some PublicationDeliveries may become "empty"
+            // This will trigger errors in Antur, so we delete those files from the results directory
+            val emptyFiles = filesWithoutServiceJourneys(filterResult)
+
+            emptyFiles.forEach { file ->
+                try {
+                    Files.deleteIfExists(file.toPath())
+                    logger.info("Deleted empty file: ${file.path}")
+                } catch (e: Exception) {
+                    logger.warn("Failed to delete empty file: ${file.path}", e)
+                }
+            }
+
             Files
                 .walk(resultsDir)
                 .filter { it.extension == "xml" }
@@ -63,4 +79,11 @@ class TimetableFilterService(
 
             TimetableData(provider, resultsDir, quayModes)
         }
+
+    private fun filesWithoutServiceJourneys(report: FilterReport): Set<File> =
+        report.entitiesByFile
+            .filter { (_, entities) ->
+                entities.none { it.type == "ServiceJourney" } &&
+                    entities.none { it.type == "DatedServiceJourney" }
+            }.keys
 }
