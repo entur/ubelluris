@@ -53,14 +53,16 @@ class TimetableFilterService(
             // This will trigger errors in Antur, so we delete those files from the results directory
             val emptyFiles = filesWithoutServiceJourneys(filterResult)
 
-            emptyFiles.forEach { file ->
-                try {
-                    Files.deleteIfExists(file.toPath())
-                    logger.info("Deleted empty file: ${file.path}")
-                } catch (e: Exception) {
-                    logger.warn("Failed to delete empty file: ${file.path}", e)
+            emptyFiles
+                .filter(::isLineFile)
+                .forEach { file ->
+                    try {
+                        Files.deleteIfExists(file.toPath())
+                        logger.info("Deleted empty file: ${file.path}")
+                    } catch (e: Exception) {
+                        logger.warn("Failed to delete empty file: ${file.path}", e)
+                    }
                 }
-            }
 
             Files
                 .walk(resultsDir)
@@ -86,4 +88,6 @@ class TimetableFilterService(
                 entities.none { it.type == "ServiceJourney" } &&
                     entities.none { it.type == "DatedServiceJourney" }
             }.keys
+
+    private fun isLineFile(file: File) = !file.name.startsWith("_")
 }
