@@ -1,6 +1,6 @@
 package org.entur.ror.ubelluris.filter
 
-import org.entur.netex.tools.pipeline.app.FilterNetexApp
+import org.entur.netex.tools.lib.app.FilterNetexApp
 import org.entur.ror.ubelluris.config.CliConfig
 import org.entur.ror.ubelluris.model.TimetableData
 import org.entur.ror.ubelluris.processor.KeyValueMigrationProcessor
