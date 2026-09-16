@@ -213,7 +213,7 @@ class StopPlaceTypeNormalizerTest {
     }
 
     @Test
-    fun shouldNotChangeQuayCountLogicForNonBusMode(
+    fun shouldNormalizeInvalidStopPlaceTypeForTramModeInsteadOfApplyingBusQuayCountLogic(
         @TempDir tempDir: Path,
     ) {
         val inputXml =
@@ -243,7 +243,10 @@ class StopPlaceTypeNormalizerTest {
         processor.process(xmlFile)
 
         val result = xmlFile.readText()
-        assertThat(result).contains("<StopPlaceType>busStation</StopPlaceType>")
+        // The bus-specific quay-count logic must not fire for tram mode (it
+        // would otherwise leave "busStation" as-is for < 6 quays); instead the
+        // StopPlaceType is normalized to a valid tram type.
+        assertThat(result).contains("<StopPlaceType>onstreetTram</StopPlaceType>")
     }
 
     @Test

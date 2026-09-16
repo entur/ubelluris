@@ -15,6 +15,9 @@ class StopPlaceTypeNormalizer {
     private val logger = LoggerFactory.getLogger(javaClass)
     private val ns = Namespace.getNamespace("http://www.netex.org.uk/netex")
 
+    private val validWaterStopPlaceTypes = setOf("ferryStop", "ferryPort", "harbourPort")
+    private val validTramStopPlaceTypes = setOf("onstreetTram", "tramStation")
+
     fun process(xmlFile: File): File {
         logger.info("Running StopPlaceType normalization on ${xmlFile.name}")
 
@@ -59,19 +62,32 @@ class StopPlaceTypeNormalizer {
         }
 
         val currentType = stopPlaceType.text?.trim()
+        val transportModeValue = transportMode?.text?.trim()
+
+        if (transportModeValue == "water" && currentType !in validWaterStopPlaceTypes) {
+            stopPlaceType.text = "ferryStop"
+            logger.debug(
+                "Normalized StopPlaceType '{}' -> 'ferryStop' (TransportMode='water') for {}",
+                currentType,
+                kv(STOP_PLACE_ID, stopPlace.getAttributeValue("id")),
+            )
+            return
+        }
+
+        if (transportModeValue == "tram" && currentType !in validTramStopPlaceTypes) {
+            stopPlaceType.text = "onstreetTram"
+            logger.debug(
+                "Normalized StopPlaceType '{}' -> 'onstreetTram' (TransportMode='tram') for {}",
+                currentType,
+                kv(STOP_PLACE_ID, stopPlace.getAttributeValue("id")),
+            )
+            return
+        }
 
         if (currentType == "other") {
-            val transportModeValue = transportMode?.text?.trim()
-            val normalizedType =
-                when (transportModeValue) {
-                    "water" -> "ferryStop"
-                    "tram" -> "onstreetTram"
-                    else -> "onstreetBus"
-                }
-            stopPlaceType.text = normalizedType
+            stopPlaceType.text = "onstreetBus"
             logger.debug(
-                "Normalized StopPlaceType 'other' -> '{}' (TransportMode='{}') for {}",
-                normalizedType,
+                "Normalized StopPlaceType 'other' -> 'onstreetBus' (TransportMode='{}') for {}",
                 transportModeValue,
                 kv(STOP_PLACE_ID, stopPlace.getAttributeValue("id")),
             )
