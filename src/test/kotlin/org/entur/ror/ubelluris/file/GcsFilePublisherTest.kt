@@ -1,19 +1,23 @@
 package org.entur.ror.ubelluris.file
 
-import com.google.cloud.storage.Blob
 import com.google.cloud.storage.BlobInfo
 import com.google.cloud.storage.Storage
+import com.google.cloud.storage.transfermanager.ParallelUploadConfig
+import com.google.cloud.storage.transfermanager.TransferManager
+import com.google.cloud.storage.transfermanager.TransferStatus
+import com.google.cloud.storage.transfermanager.UploadJob
+import com.google.cloud.storage.transfermanager.UploadResult
 import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.entur.ror.ubelluris.config.GcsConfig
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.io.TempDir
-import org.mockito.Mockito.mock
-import org.mockito.Mockito.times
 import org.mockito.kotlin.any
 import org.mockito.kotlin.argumentCaptor
+import org.mockito.kotlin.doReturn
+import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
-import java.io.InputStream
 import java.nio.file.Files
 import java.nio.file.Path
 
@@ -28,10 +32,31 @@ class GcsFilePublisherTest {
         )
 
     private val mockStorage: Storage = mock()
-    private val mockBlob: Blob = mock()
+    private val mockTransferManager: TransferManager = mock()
     private val storagePath = Path.of("2026", "01", "01")
 
-    private val filePublisher = GcsFilePublisher(config, mockStorage, storagePath)
+    private val filePublisher = GcsFilePublisher(config, mockStorage, storagePath) { mockTransferManager }
+
+    private fun stubSuccessfulUploads() {
+        whenever(mockTransferManager.uploadFiles(any(), any())).thenAnswer { invocation ->
+            val files = invocation.getArgument<List<Path>>(0)
+            val uploadConfig = invocation.getArgument<ParallelUploadConfig>(1)
+            val results =
+                files.map { file ->
+                    val blobInfo = uploadConfig.uploadBlobInfoFactory.apply(uploadConfig.bucketName, file.toString())
+                    UploadResult.newBuilder(blobInfo, TransferStatus.SUCCESS).setUploadedBlob(blobInfo).build()
+                }
+            mock<UploadJob> { on { uploadResults } doReturn results }
+        }
+    }
+
+    private fun uploadedBlobs(): List<BlobInfo> {
+        val filesCaptor = argumentCaptor<List<Path>>()
+        val configCaptor = argumentCaptor<ParallelUploadConfig>()
+        verify(mockTransferManager).uploadFiles(filesCaptor.capture(), configCaptor.capture())
+        val uploadConfig = configCaptor.firstValue
+        return filesCaptor.firstValue.map { uploadConfig.uploadBlobInfoFactory.apply(uploadConfig.bucketName, it.toString()) }
+    }
 
     @TempDir
     lateinit var tempDir: Path
@@ -56,7 +81,7 @@ class GcsFilePublisherTest {
             """.trimIndent(),
         )
 
-        whenever(mockStorage.createFrom(any<BlobInfo>(), any<InputStream>())).thenReturn(mockBlob)
+        stubSuccessfulUploads()
 
         val result = filePublisher.publish(xmlFile, emptyMap())
 
@@ -68,14 +93,11 @@ class GcsFilePublisherTest {
         val xmlFile = tempDir.resolve("test_file.xml")
         Files.writeString(xmlFile, "<test>content</test>")
 
-        whenever(mockStorage.createFrom(any<BlobInfo>(), any<InputStream>())).thenReturn(mockBlob)
+        stubSuccessfulUploads()
 
         filePublisher.publish(xmlFile, emptyMap())
 
-        val blobInfoCaptor = argumentCaptor<BlobInfo>()
-        verify(mockStorage).createFrom(blobInfoCaptor.capture(), any<InputStream>())
-
-        val capturedBlobInfo = blobInfoCaptor.firstValue
+        val capturedBlobInfo = uploadedBlobs().single()
         assertThat(capturedBlobInfo.bucket).isEqualTo("test-bucket")
         assertThat(capturedBlobInfo.name).isEqualTo("2026/01/01/stops/test_file.xml")
     }
@@ -94,17 +116,33 @@ class GcsFilePublisherTest {
                 provider to dir
             }
 
-        whenever(mockStorage.createFrom(any<BlobInfo>(), any<InputStream>())).thenReturn(mockBlob)
+        stubSuccessfulUploads()
 
         filePublisher.publish(stopPlaceFile, timetablePaths)
 
-        val blobInfoCaptor = argumentCaptor<BlobInfo>()
-        verify(mockStorage, times(3)).createFrom(blobInfoCaptor.capture(), any<InputStream>())
-
-        val blobNames = blobInfoCaptor.allValues.map { it.name }
+        val blobNames = uploadedBlobs().map { it.name }
+        assertThat(blobNames).hasSize(3)
         assertThat(blobNames).contains("2026/01/01/stops/stops.xml")
         providers.forEach { provider ->
             assertThat(blobNames).contains("2026/01/01/timetable/$provider.zip")
         }
+    }
+
+    @Test
+    fun shouldFailWhenUploadDoesNotSucceed() {
+        val xmlFile = tempDir.resolve("test_file.xml")
+        Files.writeString(xmlFile, "<test>content</test>")
+
+        val failedResult =
+            UploadResult
+                .newBuilder(BlobInfo.newBuilder("test-bucket", "test_file.xml").build(), TransferStatus.FAILED_TO_FINISH)
+                .setException(RuntimeException("Connection reset"))
+                .build()
+        val failedJob = mock<UploadJob> { on { uploadResults } doReturn listOf(failedResult) }
+        whenever(mockTransferManager.uploadFiles(any(), any())).thenReturn(failedJob)
+
+        assertThatThrownBy { filePublisher.publish(xmlFile, emptyMap()) }
+            .isInstanceOf(IllegalStateException::class.java)
+            .hasMessageContaining("FAILED_TO_FINISH")
     }
 }
