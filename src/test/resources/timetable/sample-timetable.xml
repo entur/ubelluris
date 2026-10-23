@@ -32,9 +32,11 @@
               <pointsInSequence>
                 <StopPointInJourneyPattern order="1" version="any" id="SE:001:StopPointInJourneyPattern:SPIJP-tram-1">
                   <ScheduledStopPointRef ref="SE:001:ScheduledStopPoint:101"/>
+                  <RequestStop>false</RequestStop>
                 </StopPointInJourneyPattern>
                 <StopPointInJourneyPattern order="2" version="any" id="SE:001:StopPointInJourneyPattern:SPIJP-tram-2">
                   <ScheduledStopPointRef ref="SE:001:ScheduledStopPoint:102"/>
+                  <RequestStop>false</RequestStop>
                 </StopPointInJourneyPattern>
               </pointsInSequence>
             </JourneyPattern>

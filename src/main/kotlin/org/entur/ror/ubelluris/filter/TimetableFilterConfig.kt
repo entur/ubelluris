@@ -108,6 +108,8 @@ class TimetableFilterConfig(
             ).withSkipElements(
                 listOf(
                     "/PublicationDelivery/dataObjects/SiteFrame/topographicPlaces/TopographicPlace/CountryRef",
+                    "/PublicationDelivery/dataObjects/CompositeFrame/frames/ServiceFrame/journeyPatterns/JourneyPattern/pointsInSequence/StopPointInJourneyPattern/RequestStop",
+                    "/PublicationDelivery/dataObjects/ServiceFrame/journeyPatterns/JourneyPattern/pointsInSequence/StopPointInJourneyPattern/RequestStop",
                 ),
             ).withCustomElementHandlers(handlerMap)
             .withRemovePrivateData(false)
