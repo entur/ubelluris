@@ -64,6 +64,13 @@ class TimetableFilterConfigTest {
     }
 
     @Test
+    fun shouldRemoveRequestStop() {
+        val result = runFilter("sample-timetable.xml")
+
+        assertThat(result).doesNotContain("<RequestStop")
+    }
+
+    @Test
     fun shouldPreserveOtherTimetableData() {
         val result = runFilter("timetable-with-countryref.xml")
 
