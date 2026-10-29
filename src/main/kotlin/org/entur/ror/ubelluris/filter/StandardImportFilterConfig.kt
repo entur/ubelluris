@@ -4,6 +4,7 @@ import org.entur.netex.tools.lib.config.FilterConfig
 import org.entur.netex.tools.lib.config.FilterConfigBuilder
 import org.entur.ror.ubelluris.config.CliConfig
 import org.entur.ror.ubelluris.sax.handlers.CodespaceIdHandler
+import org.entur.ror.ubelluris.sax.handlers.CoordinateRoundingHandler
 import org.entur.ror.ubelluris.sax.handlers.ParentStopPlaceAttributeSkipHandler
 import org.entur.ror.ubelluris.sax.handlers.PublicCodeFilterHandler
 import org.entur.ror.ubelluris.sax.handlers.PublicationTimestampHandler
@@ -88,6 +89,14 @@ class StandardImportFilterConfig(
                         ),
                     "/PublicationDelivery/dataObjects/SiteFrame/stopPlaces/StopPlace/quays/Quay/PrivateCode"
                         to TextTrimmingHandler(),
+                    "/PublicationDelivery/dataObjects/SiteFrame/stopPlaces/StopPlace/Centroid/Location/Latitude"
+                        to CoordinateRoundingHandler(),
+                    "/PublicationDelivery/dataObjects/SiteFrame/stopPlaces/StopPlace/Centroid/Location/Longitude"
+                        to CoordinateRoundingHandler(),
+                    "/PublicationDelivery/dataObjects/SiteFrame/stopPlaces/StopPlace/quays/Quay/Centroid/Location/Latitude"
+                        to CoordinateRoundingHandler(),
+                    "/PublicationDelivery/dataObjects/SiteFrame/stopPlaces/StopPlace/quays/Quay/Centroid/Location/Longitude"
+                        to CoordinateRoundingHandler(),
                     "/PublicationDelivery/dataObjects/SiteFrame/stopPlaces/StopPlace/TransportMode"
                         to parentStopPlaceAttributeSkipHandler,
                     "/PublicationDelivery/dataObjects/SiteFrame/stopPlaces/StopPlace/StopPlaceType"
