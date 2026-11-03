@@ -4,6 +4,7 @@ import org.entur.netex.tools.lib.config.FilterConfig
 import org.entur.netex.tools.lib.config.FilterConfigBuilder
 import org.entur.ror.ubelluris.config.CliConfig
 import org.entur.ror.ubelluris.sax.handlers.BookWhenFilterHandler
+import org.entur.ror.ubelluris.sax.handlers.EmptyMembersFilterHandler
 import org.entur.ror.ubelluris.sax.handlers.PublicationTimestampHandler
 import org.entur.ror.ubelluris.sax.handlers.ServiceJourneyInterchangeDeduplicationHandler
 import org.entur.ror.ubelluris.sax.handlers.TimetabledPassingTimeIdHandler
@@ -90,6 +91,17 @@ class TimetableFilterConfig(
         // need to handle all child elements of ServiceJourneyInterchange to not leave dangling children
         serviceJourneyInterchangeChildElements.forEach { childElement ->
             handlerMap["$baseInterchangePath/$childElement"] = interchangeDeduplicationHandler
+        }
+
+        val groupOfStopPlacesMembersPath =
+            "/PublicationDelivery/dataObjects/SiteFrame/groupsOfStopPlaces/GroupOfStopPlaces/members"
+        val emptyMembersFilterHandler = EmptyMembersFilterHandler()
+        handlerMap[groupOfStopPlacesMembersPath] = emptyMembersFilterHandler
+        // child elements must use the same handler so that the buffered members start tag is written before them.
+        // NOTE: If new child element types are allowed in GOSP members, they MUST be added here,
+        // otherwise they will be written without the enclosing members start tag.
+        listOf("StopPlaceRef", "TaxiRankRef").forEach { childElement ->
+            handlerMap["$groupOfStopPlacesMembersPath/$childElement"] = emptyMembersFilterHandler
         }
 
         return FilterConfigBuilder()
