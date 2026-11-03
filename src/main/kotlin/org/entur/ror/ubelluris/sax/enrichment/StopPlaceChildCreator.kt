@@ -29,7 +29,7 @@ class StopPlaceChildCreator {
                 when (mode) {
                     TransportMode.TRAM -> "onstreetTram"
                     TransportMode.WATER -> "ferryStop"
-                    TransportMode.BUS -> stopPlaceTypeElement.text
+                    TransportMode.BUS, TransportMode.TAXI -> stopPlaceTypeElement.text
                 }
         }
 

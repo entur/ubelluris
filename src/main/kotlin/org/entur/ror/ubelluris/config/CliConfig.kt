@@ -11,6 +11,7 @@ data class CliConfig(
     var transportModes: List<TransportMode> = listOf(TransportMode.TRAM, TransportMode.WATER),
     val illegalPublicCodes: List<String> = listOf("-"),
     val filterPublicCodes: List<String> = listOf("*"),
+    val lineTransportModesToRemove: List<TransportMode> = listOf(TransportMode.TAXI),
     val resultsDir: String = "results",
     val dropParentStops: Boolean = false,
 )

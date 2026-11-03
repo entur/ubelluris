@@ -19,7 +19,7 @@ import org.entur.ror.ubelluris.sax.plugins.VersionRefNormalizerPlugin
 import org.entur.ror.ubelluris.sax.selectors.entities.CascadingLineRemovalSelector
 
 class TimetableFilterConfig(
-    private val cliConfig: CliConfig,
+    cliConfig: CliConfig,
 ) : FilterProfileConfiguration {
     val transportModeToLocalScheduledStopPointMapper = TransportModeToLocalScheduledStopPointMapper(cliConfig.transportModes)
     val interchangeCollectorPlugin = ServiceJourneyInterchangeCollectorPlugin()
@@ -39,7 +39,7 @@ class TimetableFilterConfig(
         )
     val lineTransportModeFilterPlugin =
         LineTransportModeFilterPlugin(
-            transportModesToRemove = setOf("taxi"),
+            transportModesToRemove = cliConfig.lineTransportModesToRemove.toSet(),
             repository = lineFilteringRepository,
         )
 

@@ -4,6 +4,7 @@ import net.logstash.logback.argument.StructuredArguments.kv
 import org.entur.netex.tools.lib.model.Entity
 import org.entur.netex.tools.lib.plugin.AbstractNetexPlugin
 import org.entur.ror.ubelluris.model.NetexTypes
+import org.entur.ror.ubelluris.model.TransportMode
 import org.slf4j.LoggerFactory
 import org.xml.sax.Attributes
 
@@ -12,11 +13,11 @@ import org.xml.sax.Attributes
  * When a Line's TransportMode is one of the provided modes, the Line is marked
  * for removal and stored in the LineFilteringRepository.
  *
- * @property transportModesToRemove TransportMode values (e.g. "taxi") that cause a Line to be removed
+ * @property transportModesToRemove TransportModes (e.g. TAXI) that cause a Line to be removed
  * @property repository Repository to add Line IDs to, may be shared with other line filter plugins
  */
 class LineTransportModeFilterPlugin(
-    private val transportModesToRemove: Set<String>,
+    private val transportModesToRemove: Set<TransportMode>,
     val repository: LineFilteringRepository,
 ) : AbstractNetexPlugin() {
     private val logger = LoggerFactory.getLogger(javaClass)
@@ -75,13 +76,13 @@ class LineTransportModeFilterPlugin(
             NetexTypes.TRANSPORT_MODE -> {
                 val lineId = currentLineId
                 if (isProcessingTransportMode && lineId != null) {
-                    val transportMode = stringBuilder.toString().trim()
-                    if (transportMode in transportModesToRemove) {
+                    val transportMode = TransportMode.fromNetexValue(stringBuilder.toString().trim())
+                    if (transportMode != null && transportMode in transportModesToRemove) {
                         repository.addLineId(lineId)
                         logger.info(
                             "Filtering Line with TransportMode",
                             kv("lineId", lineId),
-                            kv("transportMode", transportMode),
+                            kv("transportMode", transportMode.netexValue),
                         )
                     }
                     stringBuilder.clear()

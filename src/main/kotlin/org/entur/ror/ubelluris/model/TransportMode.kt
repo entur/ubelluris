@@ -15,6 +15,9 @@ enum class TransportMode(
 
     @SerialName("water")
     WATER("water"),
+
+    @SerialName("taxi")
+    TAXI("taxi"),
     ;
 
     companion object {
