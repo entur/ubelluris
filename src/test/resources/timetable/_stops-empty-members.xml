@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<PublicationDelivery xmlns="http://www.netex.org.uk/netex" version="1.15:NO-NeTEx-stops:1.5">
+    <PublicationTimestamp>2026-11-02T01:46:37</PublicationTimestamp>
+    <ParticipantRef>SE</ParticipantRef>
+    <dataObjects>
+        <SiteFrame version="1" id="SE:001:SiteFrame:1">
+            <groupsOfStopPlaces>
+                <GroupOfStopPlaces version="1" id="SE:001:GroupOfStopPlaces:1">
+                    <Name>Empty</Name>
+                    <members/>
+                </GroupOfStopPlaces>
+                <GroupOfStopPlaces version="1" id="SE:001:GroupOfStopPlaces:2">
+                    <Name>NotEmpty</Name>
+                    <members>
+                        <StopPlaceRef ref="SE:001:StopPlace:2" version="1"/>
+                    </members>
+                </GroupOfStopPlaces>
+                <GroupOfStopPlaces version="1" id="SE:001:GroupOfStopPlaces:3">
+                    <Name>TaxiRank</Name>
+                    <members>
+                        <TaxiRankRef ref="SE:001:TaxiRank:3" version="1"/>
+                    </members>
+                </GroupOfStopPlaces>
+                <GroupOfStopPlaces version="1" id="SE:001:GroupOfStopPlaces:4">
+                    <Name>EmptyWithStartAndEndTag</Name>
+                    <members>
+                    </members>
+                </GroupOfStopPlaces>
+            </groupsOfStopPlaces>
+        </SiteFrame>
+    </dataObjects>
+</PublicationDelivery>
