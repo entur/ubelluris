@@ -1,8 +1,5 @@
 package org.entur.ror.ubelluris.sax.plugins
 
-import java.io.File
-import java.nio.file.Files
-import java.nio.file.Path
 import org.assertj.core.api.Assertions.assertThat
 import org.entur.netex.tools.lib.NetexProcessor
 import org.entur.netex.tools.lib.config.FilterConfig
@@ -11,6 +8,9 @@ import org.entur.ror.ubelluris.filter.TimetableFilterConfig
 import org.entur.ror.ubelluris.model.TransportMode
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.io.TempDir
+import java.io.File
+import java.nio.file.Files
+import java.nio.file.Path
 
 class LineTransportModeFilterPluginTest {
     @TempDir
