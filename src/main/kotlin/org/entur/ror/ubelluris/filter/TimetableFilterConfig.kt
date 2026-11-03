@@ -10,7 +10,9 @@ import org.entur.ror.ubelluris.sax.handlers.ServiceJourneyInterchangeDeduplicati
 import org.entur.ror.ubelluris.sax.handlers.TimetabledPassingTimeIdHandler
 import org.entur.ror.ubelluris.sax.handlers.VersionRefNormalizerHandler
 import org.entur.ror.ubelluris.sax.plugins.LineOperatorEnricher
+import org.entur.ror.ubelluris.sax.plugins.LineFilteringRepository
 import org.entur.ror.ubelluris.sax.plugins.LinePublicCodeFilterPlugin
+import org.entur.ror.ubelluris.sax.plugins.LineTransportModeFilterPlugin
 import org.entur.ror.ubelluris.sax.plugins.ServiceJourneyInterchangeCollectorPlugin
 import org.entur.ror.ubelluris.sax.plugins.TransportModeToLocalScheduledStopPointMapper
 import org.entur.ror.ubelluris.sax.plugins.VersionRefNormalizerPlugin
@@ -29,7 +31,17 @@ class TimetableFilterConfig(
             Regex("\\s*(NO\\s*\\d+(?:\\s*[,/]\\s*\\d+)*\\s*[,/]?)\\s*"),
         )
 
-    val linePublicCodeFilterPlugin = LinePublicCodeFilterPlugin(linePublicCodeRegexPatterns)
+    val lineFilteringRepository = LineFilteringRepository()
+    val linePublicCodeFilterPlugin =
+        LinePublicCodeFilterPlugin(
+            regexPatterns = linePublicCodeRegexPatterns,
+            repository = lineFilteringRepository,
+        )
+    val lineTransportModeFilterPlugin =
+        LineTransportModeFilterPlugin(
+            transportModesToRemove = setOf("taxi"),
+            repository = lineFilteringRepository,
+        )
 
     override fun build(): FilterConfig {
         val baseInterchangePath =
@@ -112,10 +124,11 @@ class TimetableFilterConfig(
                     interchangeCollectorPlugin,
                     lineOperatorEnricher,
                     linePublicCodeFilterPlugin,
+                    lineTransportModeFilterPlugin,
                 ),
             ).withEntitySelectors(
                 listOf(
-                    CascadingLineRemovalSelector(linePublicCodeFilterPlugin.repository),
+                    CascadingLineRemovalSelector(lineFilteringRepository),
                 ),
             ).withSkipElements(
                 listOf(
