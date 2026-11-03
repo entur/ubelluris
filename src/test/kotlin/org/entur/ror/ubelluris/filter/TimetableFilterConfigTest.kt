@@ -146,6 +146,29 @@ class TimetableFilterConfigTest {
         assertThat(normalizedActual).isEqualTo(normalizedExpected)
     }
 
+    @Test
+    fun shouldDisableAlightingOnFirstAndBoardingOnLastStopPointInJourneyPattern() {
+        val result = runFilter("timetable-with-boarding-alighting.xml")
+
+        assertThat(stopPoint(result, "JP-1-1"))
+            .contains("<ForAlighting>false</ForAlighting>", "<ForBoarding>true</ForBoarding>")
+        assertThat(stopPoint(result, "JP-1-2"))
+            .contains("<ForAlighting>true</ForAlighting>", "<ForBoarding>true</ForBoarding>")
+        assertThat(stopPoint(result, "JP-1-3"))
+            .contains("<ForAlighting>true</ForAlighting>", "<ForBoarding>false</ForBoarding>")
+    }
+
+    private fun stopPoint(
+        xml: String,
+        idSuffix: String,
+    ): String =
+        requireNotNull(
+            Regex(
+                "<StopPointInJourneyPattern[^>]*id=\"SE:001:StopPointInJourneyPattern:$idSuffix\".*?</StopPointInJourneyPattern>",
+                RegexOption.DOT_MATCHES_ALL,
+            ).find(xml),
+        ) { "StopPointInJourneyPattern $idSuffix not found" }.value
+
     /**
      * Normalize XML for comparison by:
      * - Removing the PublicationTimestamp value (it's dynamic)

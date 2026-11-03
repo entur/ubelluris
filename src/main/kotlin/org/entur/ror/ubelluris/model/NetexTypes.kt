@@ -13,6 +13,8 @@ object NetexTypes {
     const val ROUTE_REF = "RouteRef"
     const val STOP_POINT_IN_JOURNEY_PATTERN = "StopPointInJourneyPattern"
     const val JOURNEY_PATTERN = "JourneyPattern"
+    const val FOR_ALIGHTING = "ForAlighting"
+    const val FOR_BOARDING = "ForBoarding"
     const val QUAY = "Quay"
     const val PUBLIC_CODE = "PublicCode"
     const val KEY_VALUE = "KeyValue"

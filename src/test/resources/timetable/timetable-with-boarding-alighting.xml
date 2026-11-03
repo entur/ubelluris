@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<PublicationDelivery xmlns="http://www.netex.org.uk/netex" version="1.15:NO-NeTEx-networktimetable:1.5">
+  <dataObjects>
+    <CompositeFrame version="1" id="SE:001:CompositeFrame:001">
+      <frames>
+        <ServiceFrame version="1" id="SE:001:ServiceFrame:001">
+          <journeyPatterns>
+            <JourneyPattern version="any" id="SE:001:JourneyPattern:JP-1">
+              <pointsInSequence>
+                <StopPointInJourneyPattern order="1" version="any" id="SE:001:StopPointInJourneyPattern:JP-1-1">
+                  <ScheduledStopPointRef ref="SE:001:ScheduledStopPoint:101"/>
+                  <ForAlighting>true</ForAlighting>
+                  <ForBoarding>true</ForBoarding>
+                </StopPointInJourneyPattern>
+                <StopPointInJourneyPattern order="2" version="any" id="SE:001:StopPointInJourneyPattern:JP-1-2">
+                  <ScheduledStopPointRef ref="SE:001:ScheduledStopPoint:102"/>
+                  <ForAlighting>true</ForAlighting>
+                  <ForBoarding>true</ForBoarding>
+                </StopPointInJourneyPattern>
+                <StopPointInJourneyPattern order="3" version="any" id="SE:001:StopPointInJourneyPattern:JP-1-3">
+                  <ScheduledStopPointRef ref="SE:001:ScheduledStopPoint:103"/>
+                  <ForAlighting>true</ForAlighting>
+                  <ForBoarding>true</ForBoarding>
+                </StopPointInJourneyPattern>
+              </pointsInSequence>
+            </JourneyPattern>
+            <JourneyPattern version="any" id="SE:001:JourneyPattern:JP-2">
+              <pointsInSequence>
+                <StopPointInJourneyPattern order="1" version="any" id="SE:001:StopPointInJourneyPattern:JP-2-1">
+                  <ScheduledStopPointRef ref="SE:001:ScheduledStopPoint:201"/>
+                  <ForBoarding>true</ForBoarding>
+                </StopPointInJourneyPattern>
+                <StopPointInJourneyPattern order="2" version="any" id="SE:001:StopPointInJourneyPattern:JP-2-2">
+                  <ScheduledStopPointRef ref="SE:001:ScheduledStopPoint:202"/>
+                  <ForAlighting>true</ForAlighting>
+                </StopPointInJourneyPattern>
+              </pointsInSequence>
+            </JourneyPattern>
+          </journeyPatterns>
+        </ServiceFrame>
+      </frames>
+    </CompositeFrame>
+  </dataObjects>
+</PublicationDelivery>
