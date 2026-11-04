@@ -39,7 +39,7 @@ class CascadingLineRemovalSelectorTest {
             filterConfig = filterConfig,
         ).run(inputDir, outputDir)
 
-        val repository = timetableFilterConfig.linePublicCodeFilterPlugin.repository
+        val repository = timetableFilterConfig.lineFilteringRepository
         val removedLines =
             arrayOf(
                 "SE:012:Line:9011012850300000",

@@ -25,6 +25,7 @@ class JsonConfigTest {
         assertThat(config.transportModes).containsExactly(TransportMode.TRAM, TransportMode.WATER)
         assertThat(config.illegalPublicCodes).containsExactly("-")
         assertThat(config.filterPublicCodes).containsExactly("*")
+        assertThat(config.lineTransportModesToRemove).containsExactly(TransportMode.TAXI)
     }
 
     @Test
@@ -35,7 +36,8 @@ class JsonConfigTest {
               "sourceCodespace": "SE:050",
               "targetCodespace": "SAM",
               "timetableProviders": ["provider1"],
-              "transportModes": ["tram"]
+              "transportModes": ["tram"],
+              "lineTransportModesToRemove": ["taxi", "water"]
             }
             """.trimIndent()
 
@@ -45,5 +47,6 @@ class JsonConfigTest {
         assertThat(config.targetCodespace).isEqualTo("SAM")
         assertThat(config.timetableProviders).containsExactly("provider1")
         assertThat(config.transportModes).containsExactly(TransportMode.TRAM)
+        assertThat(config.lineTransportModesToRemove).containsExactly(TransportMode.TAXI, TransportMode.WATER)
     }
 }

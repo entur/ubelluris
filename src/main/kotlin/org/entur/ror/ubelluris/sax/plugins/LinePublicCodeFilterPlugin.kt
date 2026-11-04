@@ -13,12 +13,13 @@ import org.xml.sax.Attributes
  * for removal and stored in the LineFilteringRepository.
  *
  * @property regexPatterns List of regex patterns to match against Line PublicCode elements
+ * @property repository Repository to add Line IDs to, may be shared with other line filter plugins
  */
 class LinePublicCodeFilterPlugin(
     private val regexPatterns: List<Regex>,
+    val repository: LineFilteringRepository,
 ) : AbstractNetexPlugin() {
     private val logger = LoggerFactory.getLogger(javaClass)
-    val repository = LineFilteringRepository()
 
     private val linePublicCodeHandler = LinePublicCodeHandler(regexPatterns, repository, logger)
 
@@ -61,17 +62,6 @@ class LinePublicCodeFilterPlugin(
     }
 
     override fun getCollectedData(): LineFilteringRepository = repository
-}
-
-/**
- * Repository that stores Line IDs that should be removed based on regex filtering.
- */
-data class LineFilteringRepository(
-    val lineIdsToRemove: MutableSet<String> = mutableSetOf(),
-) {
-    fun addLineId(lineId: String) {
-        lineIdsToRemove.add(lineId)
-    }
 }
 
 /**
