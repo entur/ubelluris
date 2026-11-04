@@ -18,6 +18,7 @@ class GcsFileFetcher(
     private val config: GcsConfig,
     private val stopPlaceBlobPath: String,
     private val timetableBlobPaths: Map<String, String>,
+    private val salesBlobPath: String,
     private val downloadDir: Path = DEFAULT_DOWNLOAD_DIR,
 ) : FileFetcher {
     companion object {
@@ -55,11 +56,25 @@ class GcsFileFetcher(
                 }
             }
 
-        return FileFetchResult(stopPlacePath, timetablePaths)
+        val salesZipPath = downloadDir.resolve(salesBlobPath)
+        val salesDir = salesZipPath.parent
+        val salesPath =
+            if (containsXmlFiles(salesDir)) {
+                logger.info("Using cached sales dir: $salesDir")
+                salesDir
+            } else {
+                logger.info("Extracting sales zip from $salesZipPath")
+                extractZipToDirectory(salesZipPath, salesDir)
+            }
+
+        return FileFetchResult(stopPlacePath, timetablePaths, salesPath)
     }
 
+    private fun containsXmlFiles(directory: Path): Boolean =
+        Files.list(directory).use { files -> files.anyMatch { it.fileName.toString().endsWith(".xml") } }
+
     private fun downloadMissingBlobs() {
-        val allBlobPaths = listOf(stopPlaceBlobPath) + timetableBlobPaths.values
+        val allBlobPaths = listOf(stopPlaceBlobPath, salesBlobPath) + timetableBlobPaths.values
         val missingBlobs =
             allBlobPaths
                 .filter { !Files.exists(downloadDir.resolve(it)) }

@@ -2,6 +2,7 @@ package org.entur.ror.ubelluris
 
 import org.entur.ror.ubelluris.config.GcsConfig
 import org.entur.ror.ubelluris.config.JsonConfig
+import org.entur.ror.ubelluris.file.FilePublisher.Companion.SALES_DIR
 import org.entur.ror.ubelluris.file.FilePublisher.Companion.STOPS_DIR
 import org.entur.ror.ubelluris.file.FilePublisher.Companion.TIMETABLE_DIR
 import org.entur.ror.ubelluris.file.FileService
@@ -37,9 +38,10 @@ fun main(args: Array<String>) {
         cliConfig.timetableProviders.associateWith { provider ->
             storagePath.resolve("$TIMETABLE_DIR/$provider.zip").joinToString("/")
         }
+    val salesBlobPath = storagePath.resolve("$SALES_DIR/samtrafikensales_latest.zip").joinToString("/")
 
     UbellurisService(
-        fetcher = fileService.createFetcher(stopPlaceBlobPath, timetableBlobPaths),
+        fetcher = fileService.createFetcher(stopPlaceBlobPath, timetableBlobPaths, salesBlobPath),
         timetableProcessor = TimetableFilterService(cliConfig),
         stopPlaceProcessor =
             StopPlaceFilterService(

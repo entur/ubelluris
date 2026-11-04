@@ -3,6 +3,7 @@ package org.entur.ror.ubelluris.file
 import com.google.cloud.storage.Storage
 import org.assertj.core.api.Assertions.assertThat
 import org.entur.ror.ubelluris.config.GcsConfig
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.io.TempDir
 import org.mockito.kotlin.mock
@@ -26,23 +27,26 @@ class GcsFileFetcherTest {
             downloadEnabled = true,
         )
 
-    @Test
-    fun shouldExtractStopPlaceXmlFromZip() {
-        val stopPlaceBlobPath = "stops/stop_places.zip"
+    private val stopPlaceBlobPath = "stops/stop_places.zip"
+    private val salesBlobPath = "sales/samtrafikensales_latest.zip"
+
+    @BeforeEach
+    fun createCachedStopPlaceAndSalesZips() {
         val stopsDir = tempDir.resolve("stops")
         Files.createDirectories(stopsDir)
         createZipFile(stopsDir.resolve("stop_places.zip"), mapOf("stops.xml" to "<StopPlaces/>"))
 
-        val fetcher =
-            GcsFileFetcher(
-                storage = storage,
-                config = config,
-                stopPlaceBlobPath = stopPlaceBlobPath,
-                timetableBlobPaths = emptyMap(),
-                downloadDir = tempDir,
-            )
+        val salesDir = tempDir.resolve("sales")
+        Files.createDirectories(salesDir)
+        createZipFile(
+            salesDir.resolve("samtrafikensales_latest.zip"),
+            mapOf("sales_001.xml" to "<FareFrame/>", "sales_002.xml" to "<FareFrame/>"),
+        )
+    }
 
-        val result = fetcher.fetch()
+    @Test
+    fun shouldExtractStopPlaceXmlFromZip() {
+        val result = createFetcher().fetch()
 
         assertThat(result.stopPlacePath).exists()
         assertThat(result.stopPlacePath.fileName.toString()).isEqualTo("sweden_stop_places.xml")
@@ -51,11 +55,6 @@ class GcsFileFetcherTest {
 
     @Test
     fun shouldExtractMultipleTimetableZipsToSeparateDirectories() {
-        val stopPlaceBlobPath = "stops/stop_places.zip"
-        val stopsDir = tempDir.resolve("stops")
-        Files.createDirectories(stopsDir)
-        createZipFile(stopsDir.resolve("stop_places.zip"), mapOf("stops.xml" to "<StopPlaces/>"))
-
         val timetableDir = tempDir.resolve("timetable")
         Files.createDirectories(timetableDir)
         createZipFile(
@@ -67,20 +66,14 @@ class GcsFileFetcherTest {
             mapOf("line_001.xml" to "<Line/>"),
         )
 
-        val fetcher =
-            GcsFileFetcher(
-                storage = storage,
-                config = config,
-                stopPlaceBlobPath = stopPlaceBlobPath,
+        val result =
+            createFetcher(
                 timetableBlobPaths =
                     mapOf(
                         "provider1" to "timetable/provider1.zip",
                         "provider2" to "timetable/provider2.zip",
                     ),
-                downloadDir = tempDir,
-            )
-
-        val result = fetcher.fetch()
+            ).fetch()
 
         val provider1Dir = result.timetablePaths["provider1"]!!
         assertThat(provider1Dir).isDirectory()
@@ -96,26 +89,35 @@ class GcsFileFetcherTest {
     }
 
     @Test
-    fun shouldSkipDownloadWhenFilesAlreadyCached() {
-        val stopPlaceBlobPath = "stops/stop_places.zip"
-        val stopsDir = tempDir.resolve("stops")
-        Files.createDirectories(stopsDir)
-        createZipFile(stopsDir.resolve("stop_places.zip"), mapOf("stops.xml" to "<StopPlaces/>"))
+    fun shouldExtractSalesZipIntoSalesDirectory() {
+        val result = createFetcher().fetch()
 
-        val fetcher =
-            GcsFileFetcher(
-                storage = storage,
-                config = config,
-                stopPlaceBlobPath = stopPlaceBlobPath,
-                timetableBlobPaths = emptyMap(),
-                downloadDir = tempDir,
-            )
+        assertThat(result.salesPath).isEqualTo(tempDir.resolve("sales"))
+        assertThat(Files.list(result.salesPath).toList())
+            .extracting<String> { it.fileName.toString() }
+            .containsExactlyInAnyOrder("samtrafikensales_latest.zip", "sales_001.xml", "sales_002.xml")
+    }
+
+    @Test
+    fun shouldSkipDownloadWhenFilesAlreadyCached() {
+        val fetcher = createFetcher()
 
         fetcher.fetch()
         val secondResult = fetcher.fetch()
 
         assertThat(secondResult.stopPlacePath).exists()
+        assertThat(secondResult.salesPath.resolve("sales_001.xml")).exists()
     }
+
+    private fun createFetcher(timetableBlobPaths: Map<String, String> = emptyMap()) =
+        GcsFileFetcher(
+            storage = storage,
+            config = config,
+            stopPlaceBlobPath = stopPlaceBlobPath,
+            timetableBlobPaths = timetableBlobPaths,
+            salesBlobPath = salesBlobPath,
+            downloadDir = tempDir,
+        )
 
     private fun createZipFile(
         path: Path,
