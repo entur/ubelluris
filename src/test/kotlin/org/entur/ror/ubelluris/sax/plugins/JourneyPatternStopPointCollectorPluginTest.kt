@@ -29,12 +29,14 @@ class JourneyPatternStopPointCollectorPluginTest {
     }
 
     @Test
-    fun shouldFallBackToDocumentOrderWhenOrderIsMissing() {
-        journeyPattern("JP-1", listOf("JP-1-1" to null, "JP-1-2" to null, "JP-1-3" to null))
+    fun shouldIgnoreJourneyPatternWithMissingOrInvalidOrder() {
+        journeyPattern("JP-1", listOf("JP-1-1" to "1", "JP-1-2" to null, "JP-1-3" to "3"))
+        journeyPattern("JP-2", listOf("JP-2-1" to "1", "JP-2-2" to "x"))
+        journeyPattern("JP-3", listOf("JP-3-1" to "1", "JP-3-2" to "2"))
         plugin.endDocument("doc1.xml")
 
-        assertThat(plugin.getFirstStopPoints()).containsExactly(key("JP-1", "JP-1-1", null))
-        assertThat(plugin.getLastStopPoints()).containsExactly(key("JP-1", "JP-1-3", null))
+        assertThat(plugin.getFirstStopPoints()).containsExactly(key("JP-3", "JP-3-1", "1"))
+        assertThat(plugin.getLastStopPoints()).containsExactly(key("JP-3", "JP-3-2", "2"))
     }
 
     @Test

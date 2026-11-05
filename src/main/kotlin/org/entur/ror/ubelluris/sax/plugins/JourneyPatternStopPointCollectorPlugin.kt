@@ -22,6 +22,9 @@ open class JourneyPatternStopPointCollectorPlugin : AbstractNetexPlugin() {
     // JourneyPattern ID -> stop points in document order, for the document currently being parsed
     private val stopPointsByJourneyPattern = mutableMapOf<String, MutableList<StopPointInJourneyPatternData>>()
 
+    // JourneyPatterns in the current document with a StopPointInJourneyPattern lacking a valid order
+    private val invalidJourneyPatternIds = mutableSetOf<String>()
+
     private val documentsByKey = mutableMapOf<StopPointInJourneyPatternKey, MutableSet<String>>()
     private val firstStopPoints = mutableSetOf<StopPointInJourneyPatternKey>()
     private val lastStopPoints = mutableSetOf<StopPointInJourneyPatternKey>()
@@ -51,11 +54,22 @@ open class JourneyPatternStopPointCollectorPlugin : AbstractNetexPlugin() {
                 val jpId = currentJourneyPatternId ?: return
                 val id = attributes?.getValue("id") ?: return
                 val order = attributes.getValue("order")
-                val stopPoints = stopPointsByJourneyPattern.getOrPut(jpId) { mutableListOf() }
-                stopPoints.add(
+                val sortOrder = order?.toIntOrNull()
+                if (sortOrder == null) {
+                    logger.warn(
+                        "StopPointInJourneyPattern {} in JourneyPattern {} has missing or invalid order '{}'; " +
+                            "ForAlighting/ForBoarding will not be corrected for this JourneyPattern",
+                        id,
+                        jpId,
+                        order,
+                    )
+                    invalidJourneyPatternIds.add(jpId)
+                    return
+                }
+                stopPointsByJourneyPattern.getOrPut(jpId) { mutableListOf() }.add(
                     StopPointInJourneyPatternData(
                         key = StopPointInJourneyPatternKey(jpId, id, attributes.getValue("version"), order),
-                        sortOrder = order?.toIntOrNull() ?: stopPoints.size,
+                        sortOrder = sortOrder,
                     ),
                 )
             }
@@ -76,9 +90,11 @@ open class JourneyPatternStopPointCollectorPlugin : AbstractNetexPlugin() {
     override fun endDocument(documentName: String) = finishDocument(documentName)
 
     private fun finishDocument(documentName: String) {
-        stopPointsByJourneyPattern.values.forEach { stopPoints ->
-            stopPoints.minByOrNull { it.sortOrder }?.let { firstStopPoints.add(it.key) }
-            stopPoints.maxByOrNull { it.sortOrder }?.let { lastStopPoints.add(it.key) }
+        stopPointsByJourneyPattern.forEach { (jpId, stopPoints) ->
+            if (jpId !in invalidJourneyPatternIds) {
+                stopPoints.minByOrNull { it.sortOrder }?.let { firstStopPoints.add(it.key) }
+                stopPoints.maxByOrNull { it.sortOrder }?.let { lastStopPoints.add(it.key) }
+            }
             stopPoints.forEach { stopPoint ->
                 val documents = documentsByKey.getOrPut(stopPoint.key) { mutableSetOf() }
                 if (documents.isNotEmpty() && documentName !in documents) {
@@ -93,6 +109,7 @@ open class JourneyPatternStopPointCollectorPlugin : AbstractNetexPlugin() {
             }
         }
         stopPointsByJourneyPattern.clear()
+        invalidJourneyPatternIds.clear()
         currentJourneyPatternId = null
     }
 
