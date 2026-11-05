@@ -111,9 +111,11 @@ class TimetableFilterConfig(
 
         val boardingAlightingHandler = StopPointInJourneyPatternBoardingAlightingHandler(journeyPatternStopPointCollectorPlugin)
         listOf(
-            "/PublicationDelivery/dataObjects/CompositeFrame/frames/ServiceFrame/journeyPatterns/JourneyPattern/pointsInSequence/StopPointInJourneyPattern",
-            "/PublicationDelivery/dataObjects/ServiceFrame/journeyPatterns/JourneyPattern/pointsInSequence/StopPointInJourneyPattern",
-        ).forEach { stopPointPath ->
+            "/PublicationDelivery/dataObjects/CompositeFrame/frames/ServiceFrame/journeyPatterns/JourneyPattern",
+            "/PublicationDelivery/dataObjects/ServiceFrame/journeyPatterns/JourneyPattern",
+        ).forEach { journeyPatternPath ->
+            val stopPointPath = "$journeyPatternPath/pointsInSequence/StopPointInJourneyPattern"
+            handlerMap[journeyPatternPath] = boardingAlightingHandler
             handlerMap[stopPointPath] = boardingAlightingHandler
             handlerMap["$stopPointPath/${NetexTypes.FOR_ALIGHTING}"] = boardingAlightingHandler
             handlerMap["$stopPointPath/${NetexTypes.FOR_BOARDING}"] = boardingAlightingHandler

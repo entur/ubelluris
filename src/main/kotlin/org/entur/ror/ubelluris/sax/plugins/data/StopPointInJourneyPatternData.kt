@@ -1,7 +1,17 @@
 package org.entur.ror.ubelluris.sax.plugins.data
 
-data class StopPointInJourneyPatternData(
-    val id: String,
+/**
+ * Identifies a StopPointInJourneyPattern. NeTEx requires id + version + order to be unique within a document;
+ * the JourneyPattern id is included as an extra safeguard.
+ */
+data class StopPointInJourneyPatternKey(
     val journeyPatternId: String,
-    val order: Int,
+    val id: String,
+    val version: String?,
+    val order: String?,
+)
+
+data class StopPointInJourneyPatternData(
+    val key: StopPointInJourneyPatternKey,
+    val sortOrder: Int,
 )

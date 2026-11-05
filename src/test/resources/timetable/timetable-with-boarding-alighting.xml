@@ -36,6 +36,20 @@
                 </StopPointInJourneyPattern>
               </pointsInSequence>
             </JourneyPattern>
+            <JourneyPattern version="any" id="SE:001:JourneyPattern:JP-3">
+              <pointsInSequence>
+                <StopPointInJourneyPattern order="1" version="any" id="SE:001:StopPointInJourneyPattern:JP-1-3">
+                  <ScheduledStopPointRef ref="SE:001:ScheduledStopPoint:103"/>
+                  <ForAlighting>true</ForAlighting>
+                  <ForBoarding>true</ForBoarding>
+                </StopPointInJourneyPattern>
+                <StopPointInJourneyPattern order="2" version="any" id="SE:001:StopPointInJourneyPattern:JP-3-2">
+                  <ScheduledStopPointRef ref="SE:001:ScheduledStopPoint:302"/>
+                  <ForAlighting>true</ForAlighting>
+                  <ForBoarding>true</ForBoarding>
+                </StopPointInJourneyPattern>
+              </pointsInSequence>
+            </JourneyPattern>
           </journeyPatterns>
         </ServiceFrame>
       </frames>
