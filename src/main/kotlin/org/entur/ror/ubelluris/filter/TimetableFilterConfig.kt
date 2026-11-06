@@ -3,12 +3,15 @@ package org.entur.ror.ubelluris.filter
 import org.entur.netex.tools.lib.config.FilterConfig
 import org.entur.netex.tools.lib.config.FilterConfigBuilder
 import org.entur.ror.ubelluris.config.CliConfig
+import org.entur.ror.ubelluris.model.NetexTypes
 import org.entur.ror.ubelluris.sax.handlers.BookWhenFilterHandler
 import org.entur.ror.ubelluris.sax.handlers.EmptyMembersFilterHandler
 import org.entur.ror.ubelluris.sax.handlers.PublicationTimestampHandler
 import org.entur.ror.ubelluris.sax.handlers.ServiceJourneyInterchangeDeduplicationHandler
+import org.entur.ror.ubelluris.sax.handlers.StopPointInJourneyPatternBoardingAlightingHandler
 import org.entur.ror.ubelluris.sax.handlers.TimetabledPassingTimeIdHandler
 import org.entur.ror.ubelluris.sax.handlers.VersionRefNormalizerHandler
+import org.entur.ror.ubelluris.sax.plugins.JourneyPatternStopPointCollectorPlugin
 import org.entur.ror.ubelluris.sax.plugins.LineFilteringRepository
 import org.entur.ror.ubelluris.sax.plugins.LineOperatorEnricher
 import org.entur.ror.ubelluris.sax.plugins.LinePublicCodeFilterPlugin
@@ -23,6 +26,7 @@ class TimetableFilterConfig(
 ) : FilterProfileConfiguration {
     val transportModeToLocalScheduledStopPointMapper = TransportModeToLocalScheduledStopPointMapper(cliConfig.transportModes)
     val interchangeCollectorPlugin = ServiceJourneyInterchangeCollectorPlugin()
+    val journeyPatternStopPointCollectorPlugin = JourneyPatternStopPointCollectorPlugin()
     val lineOperatorEnricher = LineOperatorEnricher()
     val versionRefNormalizerPlugin = VersionRefNormalizerPlugin()
 
@@ -105,6 +109,18 @@ class TimetableFilterConfig(
             handlerMap["$baseInterchangePath/$childElement"] = interchangeDeduplicationHandler
         }
 
+        val boardingAlightingHandler = StopPointInJourneyPatternBoardingAlightingHandler(journeyPatternStopPointCollectorPlugin)
+        listOf(
+            "/PublicationDelivery/dataObjects/CompositeFrame/frames/ServiceFrame/journeyPatterns/JourneyPattern",
+            "/PublicationDelivery/dataObjects/ServiceFrame/journeyPatterns/JourneyPattern",
+        ).forEach { journeyPatternPath ->
+            val stopPointPath = "$journeyPatternPath/pointsInSequence/StopPointInJourneyPattern"
+            handlerMap[journeyPatternPath] = boardingAlightingHandler
+            handlerMap[stopPointPath] = boardingAlightingHandler
+            handlerMap["$stopPointPath/${NetexTypes.FOR_ALIGHTING}"] = boardingAlightingHandler
+            handlerMap["$stopPointPath/${NetexTypes.FOR_BOARDING}"] = boardingAlightingHandler
+        }
+
         val groupOfStopPlacesMembersPath =
             "/PublicationDelivery/dataObjects/SiteFrame/groupsOfStopPlaces/GroupOfStopPlaces/members"
         val emptyMembersFilterHandler = EmptyMembersFilterHandler()
@@ -122,6 +138,7 @@ class TimetableFilterConfig(
                     versionRefNormalizerPlugin,
                     transportModeToLocalScheduledStopPointMapper,
                     interchangeCollectorPlugin,
+                    journeyPatternStopPointCollectorPlugin,
                     lineOperatorEnricher,
                     linePublicCodeFilterPlugin,
                     lineTransportModeFilterPlugin,

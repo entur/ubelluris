@@ -146,6 +146,69 @@ class TimetableFilterConfigTest {
         assertThat(normalizedActual).isEqualTo(normalizedExpected)
     }
 
+    @Test
+    fun shouldDisableAlightingOnFirstAndBoardingOnLastStopPointInJourneyPattern() {
+        val result = runFilter("timetable-with-boarding-alighting.xml")
+
+        assertThat(stopPoint(result, "JP-1-1"))
+            .contains("<ForAlighting>false</ForAlighting>", "<ForBoarding>true</ForBoarding>")
+        assertThat(stopPoint(result, "JP-1-2"))
+            .contains("<ForAlighting>true</ForAlighting>", "<ForBoarding>true</ForBoarding>")
+        assertThat(stopPoint(result, "JP-1-3"))
+            .contains("<ForAlighting>true</ForAlighting>", "<ForBoarding>false</ForBoarding>")
+    }
+
+    @Test
+    fun shouldDistinguishSameStopPointIdInDifferentJourneyPatterns() {
+        val result = runFilter("timetable-with-boarding-alighting.xml")
+
+        // JP-1-3 is last in JP-1 but first in JP-3
+        val jp3 =
+            requireNotNull(
+                Regex(
+                    "<JourneyPattern[^>]*id=\"SE:001:JourneyPattern:JP-3\".*?</JourneyPattern>",
+                    RegexOption.DOT_MATCHES_ALL,
+                ).find(result),
+            ).value
+        assertThat(stopPoint(jp3, "JP-1-3"))
+            .contains("<ForAlighting>false</ForAlighting>", "<ForBoarding>true</ForBoarding>")
+    }
+
+    @Test
+    fun shouldNotCorrectStopPointsThatOccurInMultipleFiles() {
+        val inputDir = Files.createDirectories(tempDir.resolve("multi-input")).toFile()
+        val outputDir = Files.createDirectories(tempDir.resolve("multi-output")).toFile()
+        val input =
+            requireNotNull(javaClass.getResourceAsStream("/timetable/timetable-with-boarding-alighting.xml")).readBytes()
+        File(inputDir, "a.xml").writeBytes(input)
+        File(inputDir, "b.xml").writeBytes(input)
+
+        val cliConfig =
+            CliConfig(
+                sourceCodespace = "SE",
+                targetCodespace = "SE",
+                transportModes = listOf(TransportMode.TRAM),
+            )
+        NetexProcessor(filterConfig = TimetableFilterConfig(cliConfig).build()).run(inputDir, outputDir)
+
+        listOf("a.xml", "b.xml").forEach { fileName ->
+            val result = File(outputDir, fileName).readText()
+            assertThat(stopPoint(result, "JP-1-1")).contains("<ForAlighting>true</ForAlighting>")
+            assertThat(stopPoint(result, "JP-1-3")).contains("<ForBoarding>true</ForBoarding>")
+        }
+    }
+
+    private fun stopPoint(
+        xml: String,
+        idSuffix: String,
+    ): String =
+        requireNotNull(
+            Regex(
+                "<StopPointInJourneyPattern[^>]*id=\"SE:001:StopPointInJourneyPattern:$idSuffix\".*?</StopPointInJourneyPattern>",
+                RegexOption.DOT_MATCHES_ALL,
+            ).find(xml),
+        ) { "StopPointInJourneyPattern $idSuffix not found" }.value
+
     /**
      * Normalize XML for comparison by:
      * - Removing the PublicationTimestamp value (it's dynamic)
