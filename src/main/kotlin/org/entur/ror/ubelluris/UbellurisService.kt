@@ -5,6 +5,7 @@ import org.entur.ror.ubelluris.file.FileFetcher
 import org.entur.ror.ubelluris.file.FilePublisher
 import org.entur.ror.ubelluris.filter.StopPlaceFilterService
 import org.entur.ror.ubelluris.filter.TimetableFilterService
+import org.entur.ror.ubelluris.sales.SalesDataService
 import org.slf4j.LoggerFactory
 import java.nio.file.Path
 
@@ -21,6 +22,8 @@ class UbellurisService(
 
         val rawFiles: FileFetchResult = fetcher.fetch()
         logger.info("Fetched files: $rawFiles")
+
+        val salesData = SalesDataService().process(rawFiles.salesPath)
 
         val processedTimetables = timetableProcessor.process(rawFiles.timetablePaths)
         logger.info("Processed timetables: $processedTimetables")

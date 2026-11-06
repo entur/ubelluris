@@ -27,4 +27,5 @@ object NetexTypes {
     const val SERVICE_JOURNEY = "ServiceJourney"
     const val JOURNEY_PATTERN_REF = "JourneyPatternRef"
     const val OPERATOR_REF = "OperatorRef"
+    const val TRAIN_NUMBER = "TrainNumber"
 }
