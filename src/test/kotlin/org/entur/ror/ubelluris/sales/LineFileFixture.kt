@@ -3,7 +3,40 @@ package org.entur.ror.ubelluris.sales
 import java.nio.file.Files
 import java.nio.file.Path
 
-/** Writes a minimal Samtrafiken line file with one Line and one ServiceJourney to [directory]. */
+fun writeDateOnlySharedDataFile(
+    directory: Path,
+    datesByDayTypeId: Map<String, List<String>>,
+) {
+    val dayTypesXml =
+        datesByDayTypeId.keys.joinToString("") {
+            """<DayType id="$it"><properties><PropertyOfDay><DaysOfWeek/></PropertyOfDay></properties></DayType>"""
+        }
+    val dayTypeAssignmentsXml =
+        datesByDayTypeId.entries.joinToString("") { (dayTypeId, dates) ->
+            dates.joinToString("") { date ->
+                """<DayTypeAssignment id="$dayTypeId:$date"><Date>$date</Date><DayTypeRef ref="$dayTypeId"/></DayTypeAssignment>"""
+            }
+        }
+    Files.writeString(
+        directory.resolve("_shared_data.xml"),
+        """
+        <?xml version="1.0" encoding="UTF-8"?>
+        <PublicationDelivery xmlns="http://www.netex.org.uk/netex">
+          <dataObjects>
+            <CompositeFrame id="SE:100:CompositeFrame:1">
+              <frames>
+                <ServiceCalendarFrame id="SE:100:ServiceCalendarFrame:1">
+                  <dayTypes>$dayTypesXml</dayTypes>
+                  <dayTypeAssignments>$dayTypeAssignmentsXml</dayTypeAssignments>
+                </ServiceCalendarFrame>
+              </frames>
+            </CompositeFrame>
+          </dataObjects>
+        </PublicationDelivery>
+        """.trimIndent(),
+    )
+}
+
 fun writeLineFile(
     directory: Path,
     fileName: String,
@@ -14,7 +47,9 @@ fun writeLineFile(
     salesAuthorityNumber: String? = "279",
     productCode: String? = "LT",
     serviceJourneyId: String = "SE:030:ServiceJourney:${trainNr ?: "bus"}",
+    dayTypeRefs: List<String> = listOf("SE:030:DayType:A", "SE:030:DayType:B"),
 ) {
+    val dayTypeRefsXml = dayTypeRefs.joinToString("") { """<DayTypeRef ref="$it"/>""" }
     val productCodeKeyValueXml =
         productCode?.let { "<KeyValue><Key>productCode</Key><Value>$it</Value></KeyValue>" }.orEmpty()
     val lineKeyListXml =
@@ -69,10 +104,7 @@ fun writeLineFile(
                         <KeyValue><Key>fingerprint</Key><Value>abc</Value></KeyValue>
                       </keyList>
                       $serviceJourneyTransportModeXml
-                      <dayTypes>
-                        <DayTypeRef ref="SE:030:DayType:A"/>
-                        <DayTypeRef ref="SE:030:DayType:B"/>
-                      </dayTypes>
+                      <dayTypes>$dayTypeRefsXml</dayTypes>
                       <JourneyPatternRef ref="SE:030:JourneyPattern:1"/>
                       $trainNumbersXml
                     </ServiceJourney>
