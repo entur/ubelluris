@@ -2,6 +2,7 @@ package org.entur.ror.ubelluris.filter
 
 import org.entur.netex.tools.lib.config.FilterConfig
 import org.entur.netex.tools.lib.config.FilterConfigBuilder
+import org.entur.netex.tools.lib.output.XMLElementHandler
 import org.entur.ror.ubelluris.config.CliConfig
 import org.entur.ror.ubelluris.model.NetexTypes
 import org.entur.ror.ubelluris.sax.handlers.BookWhenFilterHandler
@@ -24,6 +25,8 @@ import org.entur.ror.ubelluris.sax.selectors.entities.CascadingLineRemovalSelect
 class TimetableFilterConfig(
     cliConfig: CliConfig,
 ) : FilterProfileConfiguration {
+    private val features = cliConfig.timetableFilterFeatures
+
     val transportModeToLocalScheduledStopPointMapper = TransportModeToLocalScheduledStopPointMapper(cliConfig.transportModes)
     val interchangeCollectorPlugin = ServiceJourneyInterchangeCollectorPlugin()
     val journeyPatternStopPointCollectorPlugin = JourneyPatternStopPointCollectorPlugin()
@@ -48,6 +51,109 @@ class TimetableFilterConfig(
         )
 
     override fun build(): FilterConfig {
+        val handlerMap = mutableMapOf<String, XMLElementHandler>()
+
+        if (features.publicationTimestamp) {
+            handlerMap["/PublicationDelivery/PublicationTimestamp"] = PublicationTimestampHandler()
+        }
+
+        if (features.bookWhenFilter) {
+            handlerMap[
+                "/PublicationDelivery/dataObjects/CompositeFrame/frames/TimetableFrame/vehicleJourneys" +
+                    "/ServiceJourney/FlexibleServiceProperties/BookWhen",
+            ] = BookWhenFilterHandler()
+        }
+
+        if (features.versionRefNormalizer) {
+            val versionRefNormalizerHandler = VersionRefNormalizerHandler(versionRefNormalizerPlugin.registry)
+            // remember to also update plugins supported element types
+            handlerMap[
+                "/PublicationDelivery/dataObjects/CompositeFrame/frames/TimetableFrame/vehicleJourneys" +
+                    "/ServiceJourney/trainNumbers/TrainNumberRef",
+            ] = versionRefNormalizerHandler
+            handlerMap[
+                "/PublicationDelivery/dataObjects/CompositeFrame/frames/ResourceFrame/vehicles" +
+                    "/Vehicle/VehicleTypeRef",
+            ] = versionRefNormalizerHandler
+        }
+
+        if (features.timetabledPassingTimeId) {
+            handlerMap[
+                "/PublicationDelivery/dataObjects/CompositeFrame/frames/TimetableFrame/vehicleJourneys" +
+                    "/ServiceJourney/passingTimes/TimetabledPassingTime",
+            ] = TimetabledPassingTimeIdHandler()
+        }
+
+        if (features.interchangeDeduplication) {
+            registerInterchangeDeduplication(handlerMap)
+        }
+
+        if (features.firstAndLastStopBoardingAlighting) {
+            registerBoardingAlighting(handlerMap)
+        }
+
+        if (features.emptyGroupOfStopPlacesMembersFilter) {
+            registerEmptyGroupOfStopPlacesMembersFilter(handlerMap)
+        }
+
+        val plugins =
+            buildList {
+                if (features.versionRefNormalizer) add(versionRefNormalizerPlugin)
+                if (features.transportModeToLocalScheduledStopPoint) add(transportModeToLocalScheduledStopPointMapper)
+                if (features.interchangeDeduplication) add(interchangeCollectorPlugin)
+                if (features.firstAndLastStopBoardingAlighting) add(journeyPatternStopPointCollectorPlugin)
+                if (features.lineOperatorEnricher) add(lineOperatorEnricher)
+                if (features.lineRemovalBasedOnPublicCodes) add(linePublicCodeFilterPlugin)
+                if (features.lineRemovalBasedOnTransportMode) add(lineTransportModeFilterPlugin)
+            }
+
+        val lineRemovalEnabled =
+            features.lineRemovalBasedOnPublicCodes || features.lineRemovalBasedOnTransportMode
+
+        val entitySelectors =
+            if (lineRemovalEnabled) listOf(CascadingLineRemovalSelector(lineFilteringRepository)) else emptyList()
+
+        val skipElements =
+            buildList {
+                if (features.skipTopographicPlaceCountryRef) {
+                    add("/PublicationDelivery/dataObjects/SiteFrame/topographicPlaces/TopographicPlace/CountryRef")
+                }
+                if (features.skipRequestStop) {
+                    add(
+                        "/PublicationDelivery/dataObjects/CompositeFrame/frames/ServiceFrame/journeyPatterns/JourneyPattern/pointsInSequence/StopPointInJourneyPattern/RequestStop",
+                    )
+                    add(
+                        "/PublicationDelivery/dataObjects/ServiceFrame/journeyPatterns/JourneyPattern/pointsInSequence/StopPointInJourneyPattern/RequestStop",
+                    )
+                }
+            }
+
+        val unreferencedEntitiesToPrune =
+            if (features.pruneUnreferencedEntities) {
+                buildSet {
+                    // cleans up after line removal
+                    if (lineRemovalEnabled) add("DestinationDisplay")
+                    // cleans up authorities that do not provide contact details
+                    addAll(listOf("Authority", "Operator", "Network"))
+                }
+            } else {
+                emptySet()
+            }
+
+        return FilterConfigBuilder()
+            .withPlugins(plugins)
+            .withEntitySelectors(entitySelectors)
+            .withSkipElements(skipElements)
+            .withCustomElementHandlers(handlerMap)
+            .withRemovePrivateData(false)
+            .withPreserveComments(false)
+            .withUseSelfClosingTagsWhereApplicable(true)
+            .withPruneReferences(false)
+            .withUnreferencedEntitiesToPrune(unreferencedEntitiesToPrune)
+            .build()
+    }
+
+    private fun registerInterchangeDeduplication(handlerMap: MutableMap<String, XMLElementHandler>) {
         val baseInterchangePath =
             "/PublicationDelivery/dataObjects/CompositeFrame/frames/TimetableFrame/journeyInterchanges/ServiceJourneyInterchange"
 
@@ -86,29 +192,14 @@ class TimetableFilterConfig(
                 "PrivateCode",
             )
 
-        val versionRefNormalizerHandler = VersionRefNormalizerHandler(versionRefNormalizerPlugin.registry)
-        val timetabledPassingTimeIdHandler = TimetabledPassingTimeIdHandler()
-
-        val handlerMap =
-            mutableMapOf(
-                "/PublicationDelivery/PublicationTimestamp" to PublicationTimestampHandler(),
-                "/PublicationDelivery/dataObjects/CompositeFrame/frames/TimetableFrame/vehicleJourneys" +
-                    "/ServiceJourney/FlexibleServiceProperties/BookWhen" to BookWhenFilterHandler(),
-                // remember to also update plugins supported element types
-                "/PublicationDelivery/dataObjects/CompositeFrame/frames/TimetableFrame/vehicleJourneys" +
-                    "/ServiceJourney/trainNumbers/TrainNumberRef" to versionRefNormalizerHandler,
-                "/PublicationDelivery/dataObjects/CompositeFrame/frames/ResourceFrame/vehicles" +
-                    "/Vehicle/VehicleTypeRef" to versionRefNormalizerHandler,
-                "/PublicationDelivery/dataObjects/CompositeFrame/frames/TimetableFrame/vehicleJourneys" +
-                    "/ServiceJourney/passingTimes/TimetabledPassingTime" to timetabledPassingTimeIdHandler,
-            )
-
         handlerMap[baseInterchangePath] = interchangeDeduplicationHandler
         // need to handle all child elements of ServiceJourneyInterchange to not leave dangling children
         serviceJourneyInterchangeChildElements.forEach { childElement ->
             handlerMap["$baseInterchangePath/$childElement"] = interchangeDeduplicationHandler
         }
+    }
 
+    private fun registerBoardingAlighting(handlerMap: MutableMap<String, XMLElementHandler>) {
         val boardingAlightingHandler = StopPointInJourneyPatternBoardingAlightingHandler(journeyPatternStopPointCollectorPlugin)
         listOf(
             "/PublicationDelivery/dataObjects/CompositeFrame/frames/ServiceFrame/journeyPatterns/JourneyPattern",
@@ -120,7 +211,9 @@ class TimetableFilterConfig(
             handlerMap["$stopPointPath/${NetexTypes.FOR_ALIGHTING}"] = boardingAlightingHandler
             handlerMap["$stopPointPath/${NetexTypes.FOR_BOARDING}"] = boardingAlightingHandler
         }
+    }
 
+    private fun registerEmptyGroupOfStopPlacesMembersFilter(handlerMap: MutableMap<String, XMLElementHandler>) {
         val groupOfStopPlacesMembersPath =
             "/PublicationDelivery/dataObjects/SiteFrame/groupsOfStopPlaces/GroupOfStopPlaces/members"
         val emptyMembersFilterHandler = EmptyMembersFilterHandler()
@@ -131,42 +224,5 @@ class TimetableFilterConfig(
         listOf("StopPlaceRef", "TaxiRankRef").forEach { childElement ->
             handlerMap["$groupOfStopPlacesMembersPath/$childElement"] = emptyMembersFilterHandler
         }
-
-        return FilterConfigBuilder()
-            .withPlugins(
-                listOf(
-                    versionRefNormalizerPlugin,
-                    transportModeToLocalScheduledStopPointMapper,
-                    interchangeCollectorPlugin,
-                    journeyPatternStopPointCollectorPlugin,
-                    lineOperatorEnricher,
-                    linePublicCodeFilterPlugin,
-                    lineTransportModeFilterPlugin,
-                ),
-            ).withEntitySelectors(
-                listOf(
-                    CascadingLineRemovalSelector(lineFilteringRepository),
-                ),
-            ).withSkipElements(
-                listOf(
-                    "/PublicationDelivery/dataObjects/SiteFrame/topographicPlaces/TopographicPlace/CountryRef",
-                    "/PublicationDelivery/dataObjects/CompositeFrame/frames/ServiceFrame/journeyPatterns/JourneyPattern/pointsInSequence/StopPointInJourneyPattern/RequestStop",
-                    "/PublicationDelivery/dataObjects/ServiceFrame/journeyPatterns/JourneyPattern/pointsInSequence/StopPointInJourneyPattern/RequestStop",
-                ),
-            ).withCustomElementHandlers(handlerMap)
-            .withRemovePrivateData(false)
-            .withPreserveComments(false)
-            .withUseSelfClosingTagsWhereApplicable(true)
-            .withPruneReferences(false)
-            .withUnreferencedEntitiesToPrune(
-                setOf(
-                    // cleans up after line removal
-                    "DestinationDisplay",
-                    // cleans up authorities that do not provide contact details
-                    "Authority",
-                    "Operator",
-                    "Network",
-                ),
-            ).build()
     }
 }
