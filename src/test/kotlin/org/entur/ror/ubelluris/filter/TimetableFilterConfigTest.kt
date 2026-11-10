@@ -3,6 +3,7 @@ package org.entur.ror.ubelluris.filter
 import org.assertj.core.api.Assertions.assertThat
 import org.entur.netex.tools.lib.NetexProcessor
 import org.entur.ror.ubelluris.config.CliConfig
+import org.entur.ror.ubelluris.config.TimetableFilterFeatures
 import org.entur.ror.ubelluris.model.TransportMode
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.io.TempDir
@@ -14,12 +15,16 @@ class TimetableFilterConfigTest {
     @TempDir
     lateinit var tempDir: Path
 
-    private fun runFilter(resourceFileName: String): String {
+    private fun runFilter(
+        resourceFileName: String,
+        timetableFilterFeatures: TimetableFilterFeatures = TimetableFilterFeatures(),
+    ): String {
         val cliConfig =
             CliConfig(
                 sourceCodespace = "SE",
                 targetCodespace = "SE",
                 transportModes = listOf(TransportMode.TRAM),
+                timetableFilterFeatures = timetableFilterFeatures,
             )
         val filterConfig = TimetableFilterConfig(cliConfig).build()
 
@@ -68,6 +73,58 @@ class TimetableFilterConfigTest {
         val result = runFilter("sample-timetable.xml")
 
         assertThat(result).doesNotContain("<RequestStop")
+    }
+
+    @Test
+    fun shouldKeepCountryRefWhenFeatureDisabled() {
+        val result =
+            runFilter(
+                "timetable-with-countryref.xml",
+                TimetableFilterFeatures(skipTopographicPlaceCountryRef = false),
+            )
+
+        assertThat(result).contains("<CountryRef")
+    }
+
+    @Test
+    fun shouldKeepRequestStopWhenFeatureDisabled() {
+        val result = runFilter("sample-timetable.xml", TimetableFilterFeatures(skipRequestStop = false))
+
+        assertThat(result).contains("<RequestStop")
+    }
+
+    @Test
+    fun shouldNotRegisterDisabledFeatures() {
+        val cliConfig =
+            CliConfig(
+                sourceCodespace = "SE",
+                targetCodespace = "SE",
+                timetableFilterFeatures =
+                    TimetableFilterFeatures(
+                        versionRefNormalizer = false,
+                        transportModeToLocalScheduledStopPoint = false,
+                        lineRemovalBasedOnPublicCodes = false,
+                        lineRemovalBasedOnTransportMode = false,
+                        skipTopographicPlaceCountryRef = false,
+                        skipRequestStop = false,
+                        publicationTimestamp = false,
+                        bookWhenFilter = false,
+                        timetabledPassingTimeId = false,
+                        interchangeDeduplication = false,
+                        firstAndLastStopBoardingAlighting = false,
+                        emptyGroupOfStopPlacesMembersFilter = false,
+                        lineOperatorEnricher = false,
+                        pruneUnreferencedEntities = false,
+                    ),
+            )
+
+        val filterConfig = TimetableFilterConfig(cliConfig).build()
+
+        assertThat(filterConfig.plugins).isEmpty()
+        assertThat(filterConfig.entitySelectors).isEmpty()
+        assertThat(filterConfig.skipElements).isEmpty()
+        assertThat(filterConfig.customElementHandlers).isEmpty()
+        assertThat(filterConfig.unreferencedEntitiesToPrune).isEmpty()
     }
 
     @Test
