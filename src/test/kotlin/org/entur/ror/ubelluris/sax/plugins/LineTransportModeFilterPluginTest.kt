@@ -4,6 +4,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.entur.netex.tools.lib.NetexProcessor
 import org.entur.netex.tools.lib.config.FilterConfig
 import org.entur.ror.ubelluris.config.CliConfig
+import org.entur.ror.ubelluris.emptySalesData
 import org.entur.ror.ubelluris.filter.TimetableFilterConfig
 import org.entur.ror.ubelluris.model.TransportMode
 import org.junit.jupiter.api.Test
@@ -80,6 +81,7 @@ class LineTransportModeFilterPluginTest {
                     targetCodespace = "TEST",
                     transportModes = listOf(TransportMode.TRAM),
                 ),
+                emptySalesData(),
             )
 
         val result = run(timetableFilterConfig.build())

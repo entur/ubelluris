@@ -93,7 +93,7 @@ class GcsFileFetcherTest {
         val result = createFetcher().fetch()
 
         assertThat(result.salesPath).isEqualTo(tempDir.resolve("sales"))
-        assertThat(Files.list(result.salesPath).toList())
+        assertThat(Files.list(result.salesPath!!).toList())
             .extracting<String> { it.fileName.toString() }
             .containsExactlyInAnyOrder("samtrafikensales_latest.zip", "sales_001.xml", "sales_002.xml")
     }
@@ -106,18 +106,30 @@ class GcsFileFetcherTest {
         val secondResult = fetcher.fetch()
 
         assertThat(secondResult.stopPlacePath).exists()
-        assertThat(secondResult.salesPath.resolve("sales_001.xml")).exists()
+        assertThat(secondResult.salesPath!!.resolve("sales_001.xml")).exists()
     }
 
-    private fun createFetcher(timetableBlobPaths: Map<String, String> = emptyMap()) =
-        GcsFileFetcher(
-            storage = storage,
-            config = config,
-            stopPlaceBlobPath = stopPlaceBlobPath,
-            timetableBlobPaths = timetableBlobPaths,
-            salesBlobPath = salesBlobPath,
-            downloadDir = tempDir,
-        )
+    @Test
+    fun shouldNotFetchSalesDataWithoutSalesBlobPath() {
+        val result = createFetcher(salesBlobPath = null).fetch()
+
+        assertThat(result.salesPath).isNull()
+        assertThat(Files.list(tempDir.resolve("sales")).toList())
+            .extracting<String> { it.fileName.toString() }
+            .containsExactly("samtrafikensales_latest.zip")
+    }
+
+    private fun createFetcher(
+        timetableBlobPaths: Map<String, String> = emptyMap(),
+        salesBlobPath: String? = this.salesBlobPath,
+    ) = GcsFileFetcher(
+        storage = storage,
+        config = config,
+        stopPlaceBlobPath = stopPlaceBlobPath,
+        timetableBlobPaths = timetableBlobPaths,
+        salesBlobPath = salesBlobPath,
+        downloadDir = tempDir,
+    )
 
     private fun createZipFile(
         path: Path,

@@ -1,42 +1,37 @@
 package org.entur.ror.ubelluris.sales
 
-import java.nio.file.Files
+import org.rutebanken.netex.model.AllVehicleModesOfTransportEnumeration
+import org.rutebanken.netex.model.DayTypeRefStructure
+import org.rutebanken.netex.model.DayTypeRefs_RelStructure
+import org.rutebanken.netex.model.GroupOfLinesRefStructure
+import org.rutebanken.netex.model.JourneyPattern
+import org.rutebanken.netex.model.JourneyPatternRefStructure
+import org.rutebanken.netex.model.JourneyPatternsInFrame_RelStructure
+import org.rutebanken.netex.model.JourneysInFrame_RelStructure
+import org.rutebanken.netex.model.KeyListStructure
+import org.rutebanken.netex.model.KeyValueStructure
+import org.rutebanken.netex.model.Line
+import org.rutebanken.netex.model.LineRefStructure
+import org.rutebanken.netex.model.LinesInFrame_RelStructure
+import org.rutebanken.netex.model.Route
+import org.rutebanken.netex.model.RouteRefStructure
+import org.rutebanken.netex.model.RoutesInFrame_RelStructure
+import org.rutebanken.netex.model.ServiceFrame
+import org.rutebanken.netex.model.ServiceJourney
+import org.rutebanken.netex.model.TimetableFrame
+import org.rutebanken.netex.model.TrainNumber
+import org.rutebanken.netex.model.TrainNumberRefStructure
+import org.rutebanken.netex.model.TrainNumberRefs_RelStructure
+import org.rutebanken.netex.model.TrainNumbersInFrame_RelStructure
+import org.rutebanken.netex.model.ValidBetween
 import java.nio.file.Path
+import java.time.LocalDateTime
 
-fun writeDateOnlySharedDataFile(
-    directory: Path,
-    datesByDayTypeId: Map<String, List<String>>,
-) {
-    val dayTypesXml =
-        datesByDayTypeId.keys.joinToString("") {
-            """<DayType id="$it"><properties><PropertyOfDay><DaysOfWeek/></PropertyOfDay></properties></DayType>"""
-        }
-    val dayTypeAssignmentsXml =
-        datesByDayTypeId.entries.joinToString("") { (dayTypeId, dates) ->
-            dates.joinToString("") { date ->
-                """<DayTypeAssignment id="$dayTypeId:$date"><Date>$date</Date><DayTypeRef ref="$dayTypeId"/></DayTypeAssignment>"""
-            }
-        }
-    Files.writeString(
-        directory.resolve("_shared_data.xml"),
-        """
-        <?xml version="1.0" encoding="UTF-8"?>
-        <PublicationDelivery xmlns="http://www.netex.org.uk/netex">
-          <dataObjects>
-            <CompositeFrame id="SE:100:CompositeFrame:1">
-              <frames>
-                <ServiceCalendarFrame id="SE:100:ServiceCalendarFrame:1">
-                  <dayTypes>$dayTypesXml</dayTypes>
-                  <dayTypeAssignments>$dayTypeAssignmentsXml</dayTypeAssignments>
-                </ServiceCalendarFrame>
-              </frames>
-            </CompositeFrame>
-          </dataObjects>
-        </PublicationDelivery>
-        """.trimIndent(),
-    )
-}
-
+/**
+ * Writes a minimal Samtrafiken line file with one Line and one ServiceJourney to [directory].
+ * Route and JourneyPattern ids are derived from [lineId], so files with different Lines can share a directory.
+ * The XML is built with netex-java-model and written with [writePublicationDelivery].
+ */
 fun writeLineFile(
     directory: Path,
     fileName: String,
@@ -48,73 +43,88 @@ fun writeLineFile(
     productCode: String? = "LT",
     serviceJourneyId: String = "SE:030:ServiceJourney:${trainNr ?: "bus"}",
     dayTypeRefs: List<String> = listOf("SE:030:DayType:A", "SE:030:DayType:B"),
+    serviceJourneyKeyList: Boolean = true,
+    serviceJourneyValidBetween: Boolean = false,
 ) {
-    val dayTypeRefsXml = dayTypeRefs.joinToString("") { """<DayTypeRef ref="$it"/>""" }
-    val productCodeKeyValueXml =
-        productCode?.let { "<KeyValue><Key>productCode</Key><Value>$it</Value></KeyValue>" }.orEmpty()
-    val lineKeyListXml =
-        salesAuthorityNumber
-            ?.let { "<keyList><KeyValue><Key>salesAuthorityNumber</Key><Value>$it</Value></KeyValue></keyList>" }
-            .orEmpty()
-    val serviceJourneyTransportModeXml =
-        serviceJourneyTransportMode?.let { "<TransportMode>$it</TransportMode>" }.orEmpty()
-    val trainNumbersXml =
-        trainNr
-            ?.let {
-                """<trainNumbers><TrainNumberRef ref="SE:030:TrainNumber:$it" version="any"/></trainNumbers>"""
-            }.orEmpty()
-    val trainNumberDefinitionsXml =
-        trainNr
-            ?.let {
-                """<trainNumbers><TrainNumber id="SE:030:TrainNumber:$it"><ForAdvertisement>$it</ForAdvertisement></TrainNumber></trainNumbers>"""
-            }.orEmpty()
+    val routeId = "$lineId:Route"
+    val journeyPatternId = "$lineId:JourneyPattern"
+    val trainNumberId = trainNr?.let { "SE:030:TrainNumber:$it" }
 
-    Files.writeString(
+    val line =
+        Line()
+            .withId(lineId)
+            .withVersion(TEST_NETEX_VERSION)
+            .withTransportMode(AllVehicleModesOfTransportEnumeration.fromValue(transportMode))
+            .withRepresentedByGroupRef(GroupOfLinesRefStructure().withRef("SE:030:Network:813"))
+    salesAuthorityNumber?.let { line.withKeyList(keyList("salesAuthorityNumber" to it)) }
+
+    val serviceJourney =
+        ServiceJourney()
+            .withId(serviceJourneyId)
+            .withVersion(TEST_NETEX_VERSION)
+            .withDayTypes(
+                DayTypeRefs_RelStructure().withDayTypeRef(
+                    dayTypeRefs.map { netexFactory.createDayTypeRef(DayTypeRefStructure().withRef(it)) },
+                ),
+            ).withJourneyPatternRef(netexFactory.createJourneyPatternRef(JourneyPatternRefStructure().withRef(journeyPatternId)))
+    if (serviceJourneyValidBetween) {
+        serviceJourney.withValidBetween(ValidBetween().withFromDate(LocalDateTime.parse("2026-11-01T00:00:00")))
+    }
+    if (serviceJourneyKeyList) {
+        serviceJourney.withKeyList(keyList(*listOfNotNull(productCode?.let { "productCode" to it }, "fingerprint" to "abc").toTypedArray()))
+    }
+    serviceJourneyTransportMode?.let { serviceJourney.withTransportMode(AllVehicleModesOfTransportEnumeration.fromValue(it)) }
+    trainNumberId?.let {
+        serviceJourney.withTrainNumbers(TrainNumberRefs_RelStructure().withTrainNumberRef(TrainNumberRefStructure().withRef(it)))
+    }
+
+    val serviceFrame =
+        ServiceFrame()
+            .withId("SE:030:ServiceFrame:1")
+            .withVersion(TEST_NETEX_VERSION)
+            .withRoutes(
+                RoutesInFrame_RelStructure().withRoute_(
+                    netexFactory.createRoute(
+                        Route()
+                            .withId(routeId)
+                            .withVersion(TEST_NETEX_VERSION)
+                            .withLineRef(netexFactory.createLineRef(LineRefStructure().withRef(lineId))),
+                    ),
+                ),
+            ).withLines(LinesInFrame_RelStructure().withLine_(netexFactory.createLine(line)))
+            .withJourneyPatterns(
+                JourneyPatternsInFrame_RelStructure().withJourneyPattern_OrJourneyPatternView(
+                    netexFactory.createJourneyPattern(
+                        JourneyPattern()
+                            .withId(journeyPatternId)
+                            .withVersion(TEST_NETEX_VERSION)
+                            .withRouteRef(RouteRefStructure().withRef(routeId)),
+                    ),
+                ),
+            )
+
+    val timetableFrame =
+        TimetableFrame()
+            .withId("SE:030:TimetableFrame:1")
+            .withVersion(TEST_NETEX_VERSION)
+            .withVehicleJourneys(
+                JourneysInFrame_RelStructure().withVehicleJourneyOrDatedVehicleJourneyOrNormalDatedVehicleJourney(serviceJourney),
+            )
+    trainNumberId?.let {
+        timetableFrame.withTrainNumbers(
+            TrainNumbersInFrame_RelStructure().withTrainNumberOrTrainNumberRef(
+                TrainNumber().withId(it).withVersion(TEST_NETEX_VERSION).withForAdvertisement(trainNr),
+            ),
+        )
+    }
+
+    writePublicationDelivery(
         directory.resolve(fileName),
-        """
-        <?xml version="1.0" encoding="UTF-8"?>
-        <PublicationDelivery xmlns="http://www.netex.org.uk/netex">
-          <dataObjects>
-            <CompositeFrame id="SE:030:CompositeFrame:1">
-              <frames>
-                <ServiceFrame id="SE:030:ServiceFrame:1">
-                  <routes>
-                    <Route id="SE:030:Route:1">
-                      <LineRef ref="$lineId"/>
-                    </Route>
-                  </routes>
-                  <lines>
-                    <Line id="$lineId">
-                      $lineKeyListXml
-                      <TransportMode>$transportMode</TransportMode>
-                      <RepresentedByGroupRef ref="SE:030:Network:813"/>
-                    </Line>
-                  </lines>
-                  <journeyPatterns>
-                    <JourneyPattern id="SE:030:JourneyPattern:1">
-                      <RouteRef ref="SE:030:Route:1"/>
-                    </JourneyPattern>
-                  </journeyPatterns>
-                </ServiceFrame>
-                <TimetableFrame id="SE:030:TimetableFrame:1">
-                  <vehicleJourneys>
-                    <ServiceJourney id="$serviceJourneyId">
-                      <keyList>
-                        $productCodeKeyValueXml
-                        <KeyValue><Key>fingerprint</Key><Value>abc</Value></KeyValue>
-                      </keyList>
-                      $serviceJourneyTransportModeXml
-                      <dayTypes>$dayTypeRefsXml</dayTypes>
-                      <JourneyPatternRef ref="SE:030:JourneyPattern:1"/>
-                      $trainNumbersXml
-                    </ServiceJourney>
-                  </vehicleJourneys>
-                  $trainNumberDefinitionsXml
-                </TimetableFrame>
-              </frames>
-            </CompositeFrame>
-          </dataObjects>
-        </PublicationDelivery>
-        """.trimIndent(),
+        "SE:030:CompositeFrame:1",
+        netexFactory.createServiceFrame(serviceFrame),
+        netexFactory.createTimetableFrame(timetableFrame),
     )
 }
+
+private fun keyList(vararg keyValues: Pair<String, String>): KeyListStructure =
+    KeyListStructure().withKeyValue(keyValues.map { (key, value) -> KeyValueStructure().withKey(key).withValue(value) })

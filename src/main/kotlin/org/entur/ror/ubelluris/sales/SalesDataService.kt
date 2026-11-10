@@ -1,8 +1,9 @@
 package org.entur.ror.ubelluris.sales
 
+import org.entur.ror.ubelluris.config.CliConfig
 import org.entur.ror.ubelluris.model.SalesData
 import org.entur.ror.ubelluris.model.SalesServiceJourney
-import org.entur.ror.ubelluris.model.SalesSharedData
+import org.entur.ror.ubelluris.model.SharedCalendarData
 import org.slf4j.LoggerFactory
 import java.nio.file.Files
 import java.nio.file.Path
@@ -10,6 +11,7 @@ import kotlin.io.path.extension
 import kotlin.io.path.name
 
 class SalesDataService(
+    private val cliConfig: CliConfig,
     private val lineFileParser: SalesLineFileParser = SalesLineFileParser(),
     private val sharedDataParser: SalesSharedDataParser = SalesSharedDataParser(),
 ) {
@@ -19,13 +21,20 @@ class SalesDataService(
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
-    fun process(salesDir: Path): SalesData =
-        SalesData(
+    /** [salesDir] is null when the sales data is not fetched, because the feature useSalesData is disabled. */
+    fun process(salesDir: Path?): SalesData {
+        if (!cliConfig.timetableFilterFeatures.useSalesData) {
+            logger.info("Feature useSalesData is disabled, skipping sales data")
+            return SalesData.EMPTY
+        }
+        requireNotNull(salesDir) { "Feature useSalesData is enabled, but no sales data was fetched" }
+        return SalesData(
             trainNrServiceJourneysMap = processLineFiles(salesDir),
-            sharedData = processSharedData(salesDir),
+            calendarData = processSharedData(salesDir),
         )
+    }
 
-    fun processSharedData(salesDir: Path): SalesSharedData {
+    fun processSharedData(salesDir: Path): SharedCalendarData {
         val sharedDataPath = salesDir.resolve(SHARED_DATA_FILE_NAME)
         logger.info("Processing sales shared data from {}", sharedDataPath)
 

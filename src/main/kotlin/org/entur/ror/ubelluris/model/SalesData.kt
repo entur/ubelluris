@@ -6,11 +6,25 @@ import java.time.LocalDateTime
 
 data class SalesData(
     val trainNrServiceJourneysMap: Map<String, List<SalesServiceJourney>>,
-    val sharedData: SalesSharedData,
-)
+    val calendarData: SharedCalendarData,
+) {
+    companion object {
+        val EMPTY =
+            SalesData(
+                trainNrServiceJourneysMap = emptyMap(),
+                calendarData =
+                    SharedCalendarData(
+                        dayTypes = emptyMap(),
+                        operatingPeriods = emptyMap(),
+                        dayTypeAssignments = emptyMap(),
+                        dayTypeDateAssignments = emptyMap(),
+                    ),
+            )
+    }
+}
 
 // Populated from _shared_data
-data class SalesSharedData(
+data class SharedCalendarData(
     val dayTypes: Map<String, List<DayOfWeek>>, // DayType id -> DaysOfWeek, empty when the DayType only uses dates
     val operatingPeriods: Map<String, Pair<LocalDateTime, LocalDateTime>>, // OperatingPeriod id -> FromDate, ToDate
     val dayTypeAssignments: Map<String, String>, // DayType id -> OperatingPeriod id

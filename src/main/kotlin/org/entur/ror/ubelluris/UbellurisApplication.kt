@@ -8,6 +8,7 @@ import org.entur.ror.ubelluris.file.FilePublisher.Companion.TIMETABLE_DIR
 import org.entur.ror.ubelluris.file.FileService
 import org.entur.ror.ubelluris.filter.StopPlaceFilterService
 import org.entur.ror.ubelluris.filter.TimetableFilterService
+import org.entur.ror.ubelluris.sales.SalesDataService
 import java.io.File
 import java.time.LocalDate
 import kotlin.io.path.Path
@@ -38,7 +39,12 @@ fun main(args: Array<String>) {
         cliConfig.timetableProviders.associateWith { provider ->
             storagePath.resolve("$TIMETABLE_DIR/$provider.zip").joinToString("/")
         }
-    val salesBlobPath = storagePath.resolve("$SALES_DIR/samtrafikensales_latest.zip").joinToString("/")
+    val salesBlobPath =
+        if (cliConfig.timetableFilterFeatures.useSalesData) {
+            storagePath.resolve("$SALES_DIR/samtrafikensales_latest.zip").joinToString("/")
+        } else {
+            null
+        }
 
     UbellurisService(
         fetcher = fileService.createFetcher(stopPlaceBlobPath, timetableBlobPaths, salesBlobPath),
@@ -48,6 +54,7 @@ fun main(args: Array<String>) {
                 cliConfig = cliConfig,
                 blacklistFilePath = blacklistFilePath,
             ),
+        salesDataProcessor = SalesDataService(cliConfig),
         publisher = fileService.createPublisher(storagePath, Path(cliConfig.resultsDir)),
     ).run()
 }

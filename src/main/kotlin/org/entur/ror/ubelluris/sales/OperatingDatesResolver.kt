@@ -1,6 +1,6 @@
 package org.entur.ror.ubelluris.sales
 
-import org.entur.ror.ubelluris.model.SalesSharedData
+import org.entur.ror.ubelluris.model.SharedCalendarData
 import java.time.LocalDate
 
 /**
@@ -13,7 +13,7 @@ import java.time.LocalDate
  * An unknown DayType has no dates.
  */
 class OperatingDatesResolver(
-    private val calendar: SalesSharedData,
+    private val calendar: SharedCalendarData,
 ) {
     private val datesByDayTypeId = mutableMapOf<String, Set<LocalDate>>()
 

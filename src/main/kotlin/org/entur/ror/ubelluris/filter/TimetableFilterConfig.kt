@@ -5,10 +5,12 @@ import org.entur.netex.tools.lib.config.FilterConfigBuilder
 import org.entur.netex.tools.lib.output.XMLElementHandler
 import org.entur.ror.ubelluris.config.CliConfig
 import org.entur.ror.ubelluris.model.NetexTypes
+import org.entur.ror.ubelluris.model.SalesData
 import org.entur.ror.ubelluris.sax.handlers.BookWhenFilterHandler
 import org.entur.ror.ubelluris.sax.handlers.EmptyMembersFilterHandler
 import org.entur.ror.ubelluris.sax.handlers.PublicationTimestampHandler
 import org.entur.ror.ubelluris.sax.handlers.ServiceJourneyInterchangeDeduplicationHandler
+import org.entur.ror.ubelluris.sax.handlers.ServiceJourneySalesKeyValueHandler
 import org.entur.ror.ubelluris.sax.handlers.StopPointInJourneyPatternBoardingAlightingHandler
 import org.entur.ror.ubelluris.sax.handlers.TimetabledPassingTimeIdHandler
 import org.entur.ror.ubelluris.sax.handlers.VersionRefNormalizerHandler
@@ -17,6 +19,7 @@ import org.entur.ror.ubelluris.sax.plugins.LineFilteringRepository
 import org.entur.ror.ubelluris.sax.plugins.LineOperatorEnricher
 import org.entur.ror.ubelluris.sax.plugins.LinePublicCodeFilterPlugin
 import org.entur.ror.ubelluris.sax.plugins.LineTransportModeFilterPlugin
+import org.entur.ror.ubelluris.sax.plugins.SalesMatchDataCollector
 import org.entur.ror.ubelluris.sax.plugins.ServiceJourneyInterchangeCollectorPlugin
 import org.entur.ror.ubelluris.sax.plugins.TransportModeToLocalScheduledStopPointMapper
 import org.entur.ror.ubelluris.sax.plugins.VersionRefNormalizerPlugin
@@ -24,6 +27,7 @@ import org.entur.ror.ubelluris.sax.selectors.entities.CascadingLineRemovalSelect
 
 class TimetableFilterConfig(
     cliConfig: CliConfig,
+    salesData: SalesData,
 ) : FilterProfileConfiguration {
     private val features = cliConfig.timetableFilterFeatures
 
@@ -32,6 +36,8 @@ class TimetableFilterConfig(
     val journeyPatternStopPointCollectorPlugin = JourneyPatternStopPointCollectorPlugin()
     val lineOperatorEnricher = LineOperatorEnricher()
     val versionRefNormalizerPlugin = VersionRefNormalizerPlugin()
+    val salesMatchDataCollector = SalesMatchDataCollector()
+    val serviceJourneySalesKeyValueHandler = ServiceJourneySalesKeyValueHandler(salesData, salesMatchDataCollector)
 
     private val linePublicCodeRegexPatterns =
         listOf(
@@ -84,6 +90,12 @@ class TimetableFilterConfig(
             ] = TimetabledPassingTimeIdHandler()
         }
 
+        if (features.useSalesData) {
+            ServiceJourneySalesKeyValueHandler.handledPaths.forEach { path ->
+                handlerMap[path] = serviceJourneySalesKeyValueHandler
+            }
+        }
+
         if (features.interchangeDeduplication) {
             registerInterchangeDeduplication(handlerMap)
         }
@@ -98,6 +110,7 @@ class TimetableFilterConfig(
 
         val plugins =
             buildList {
+                if (features.useSalesData) add(salesMatchDataCollector)
                 if (features.versionRefNormalizer) add(versionRefNormalizerPlugin)
                 if (features.transportModeToLocalScheduledStopPoint) add(transportModeToLocalScheduledStopPointMapper)
                 if (features.interchangeDeduplication) add(interchangeCollectorPlugin)

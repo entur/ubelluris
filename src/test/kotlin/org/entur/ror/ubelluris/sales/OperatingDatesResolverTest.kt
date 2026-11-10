@@ -2,7 +2,7 @@ package org.entur.ror.ubelluris.sales
 
 import org.assertj.core.api.Assertions.assertThat
 import org.entur.ror.ubelluris.model.DayTypeDateAssignment
-import org.entur.ror.ubelluris.model.SalesSharedData
+import org.entur.ror.ubelluris.model.SharedCalendarData
 import org.junit.jupiter.api.Test
 import java.time.DayOfWeek
 import java.time.LocalDate
@@ -11,7 +11,7 @@ import java.time.LocalDateTime
 class OperatingDatesResolverTest {
     // 2026-11-02 is a Monday. The period covers Monday 2026-11-02 to Sunday 2026-11-15, because ToDate is exclusive.
     private val calendar =
-        SalesSharedData(
+        SharedCalendarData(
             dayTypes =
                 mapOf(
                     "DayType:mondays" to listOf(DayOfWeek.MONDAY),

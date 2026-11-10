@@ -4,6 +4,7 @@ import net.logstash.logback.argument.StructuredArguments.kv
 import org.entur.netex.tools.lib.app.FilterNetexApp
 import org.entur.netex.tools.lib.report.FilterReport
 import org.entur.ror.ubelluris.config.CliConfig
+import org.entur.ror.ubelluris.model.SalesData
 import org.entur.ror.ubelluris.model.TimetableData
 import org.entur.ror.ubelluris.sax.enrichment.LineOperatorInserter
 import org.entur.ror.ubelluris.utils.LogKeys.PROVIDER
@@ -20,17 +21,21 @@ class TimetableFilterService(
 ) {
     private val logger = LoggerFactory.getLogger(javaClass)
 
-    fun process(rawTimetableData: Map<String, Path>): Map<String, TimetableData> {
+    fun process(
+        rawTimetableData: Map<String, Path>,
+        salesData: SalesData,
+    ): Map<String, TimetableData> {
         logger.info("Starting timetable filtering for providers: ${rawTimetableData.keys}")
 
         return rawTimetableData.mapValues { (provider, path) ->
-            filterProvider(provider, path.toFile())
+            filterProvider(provider, path.toFile(), salesData)
         }
     }
 
     private fun filterProvider(
         provider: String,
         rawData: File,
+        salesData: SalesData,
     ): TimetableData =
         MDC.putCloseable(PROVIDER, provider).use {
             logger.info("Filtering timetables for provider: {} from: {}", kv(PROVIDER, provider), rawData)
@@ -38,7 +43,7 @@ class TimetableFilterService(
             val resultsDir = Path(cliConfig.resultsDir).resolve(provider)
             Files.createDirectories(resultsDir)
 
-            val filterConfig = TimetableFilterConfig(cliConfig)
+            val filterConfig = TimetableFilterConfig(cliConfig, salesData)
             val filterResult =
                 FilterNetexApp(
                     filterConfig = filterConfig.build(),
@@ -74,6 +79,12 @@ class TimetableFilterService(
                         logger.warn("Failed to enrich operators for file: ${xmlFile.fileName}", e)
                     }
                 }
+
+            logger.info(
+                "Sales match summary for {}: {}",
+                kv(PROVIDER, provider),
+                filterConfig.serviceJourneySalesKeyValueHandler.matchSummary,
+            )
 
             val quayModes = filterConfig.transportModeToLocalScheduledStopPointMapper.getCollectedData()
 

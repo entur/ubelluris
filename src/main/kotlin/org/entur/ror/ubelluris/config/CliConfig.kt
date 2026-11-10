@@ -33,4 +33,5 @@ data class TimetableFilterFeatures(
     val emptyGroupOfStopPlacesMembersFilter: Boolean = true,
     val lineOperatorEnricher: Boolean = true,
     val pruneUnreferencedEntities: Boolean = true,
+    val useSalesData: Boolean = true,
 )

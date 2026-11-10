@@ -13,6 +13,7 @@ class UbellurisService(
     private val fetcher: FileFetcher,
     private val timetableProcessor: TimetableFilterService,
     private val stopPlaceProcessor: StopPlaceFilterService,
+    private val salesDataProcessor: SalesDataService,
     private val publisher: FilePublisher,
 ) {
     private val logger = LoggerFactory.getLogger(javaClass)
@@ -23,9 +24,9 @@ class UbellurisService(
         val rawFiles: FileFetchResult = fetcher.fetch()
         logger.info("Fetched files: $rawFiles")
 
-        val salesData = SalesDataService().process(rawFiles.salesPath)
+        val salesData = salesDataProcessor.process(rawFiles.salesPath)
 
-        val processedTimetables = timetableProcessor.process(rawFiles.timetablePaths)
+        val processedTimetables = timetableProcessor.process(rawFiles.timetablePaths, salesData)
         logger.info("Processed timetables: $processedTimetables")
 
         val processedStopPlaces = stopPlaceProcessor.process(rawFiles.stopPlacePath, processedTimetables)

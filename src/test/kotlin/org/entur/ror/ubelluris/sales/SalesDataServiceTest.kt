@@ -1,6 +1,10 @@
 package org.entur.ror.ubelluris.sales
 
 import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions.assertThatThrownBy
+import org.entur.ror.ubelluris.config.CliConfig
+import org.entur.ror.ubelluris.config.TimetableFilterFeatures
+import org.entur.ror.ubelluris.model.SalesData
 import org.entur.ror.ubelluris.model.SalesServiceJourney
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.io.TempDir
@@ -10,7 +14,30 @@ class SalesDataServiceTest {
     @TempDir
     lateinit var salesDir: Path
 
-    private val salesDataService = SalesDataService()
+    private val salesDataService = SalesDataService(cliConfig())
+
+    @Test
+    fun shouldNotCollectSalesDataWhenFeatureIsDisabled() {
+        writeLineFile(salesDir, "line_813_3294.xml", lineId = "SE:030:Line:1", transportMode = "rail", trainNr = "3294")
+        val salesDataServiceWithoutSales = SalesDataService(cliConfig(useSalesData = false))
+
+        val result = salesDataServiceWithoutSales.process(salesDir)
+
+        assertThat(result).isEqualTo(SalesData.EMPTY)
+    }
+
+    @Test
+    fun shouldReturnEmptySalesDataWithoutSalesDirWhenFeatureIsDisabled() {
+        val salesDataServiceWithoutSales = SalesDataService(cliConfig(useSalesData = false))
+
+        assertThat(salesDataServiceWithoutSales.process(null)).isEqualTo(SalesData.EMPTY)
+    }
+
+    @Test
+    fun shouldFailWithoutSalesDirWhenFeatureIsEnabled() {
+        assertThatThrownBy { salesDataService.process(null) }
+            .isInstanceOf(IllegalArgumentException::class.java)
+    }
 
     @Test
     fun shouldMapRailServiceJourneyFromLineFile() {
@@ -112,4 +139,11 @@ class SalesDataServiceTest {
 
         assertThat(result).isEmpty()
     }
+
+    private fun cliConfig(useSalesData: Boolean = true) =
+        CliConfig(
+            sourceCodespace = "SE:050",
+            targetCodespace = "SAM",
+            timetableFilterFeatures = TimetableFilterFeatures(useSalesData = useSalesData),
+        )
 }

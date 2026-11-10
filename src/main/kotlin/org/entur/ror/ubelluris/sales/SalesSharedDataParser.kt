@@ -1,10 +1,10 @@
 package org.entur.ror.ubelluris.sales
 
 import org.entur.ror.ubelluris.model.DayTypeDateAssignment
-import org.entur.ror.ubelluris.model.SalesSharedData
+import org.entur.ror.ubelluris.model.SharedCalendarData
 import org.entur.ror.ubelluris.utils.NetexEntityCollector
+import org.entur.ror.ubelluris.utils.parseNetexDaysOfWeek
 import java.nio.file.Path
-import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.LocalDateTime
 
@@ -17,17 +17,17 @@ class SalesSharedDataParser {
 
     private val entityCollector = NetexEntityCollector(setOf(DAY_TYPE, OPERATING_PERIOD, DAY_TYPE_ASSIGNMENT))
 
-    fun parse(sharedDataPath: Path): SalesSharedData {
+    fun parse(sharedDataPath: Path): SharedCalendarData {
         val entitiesByElementName = entityCollector.collect(sharedDataPath).groupBy { it.elementName }
 
         fun entitiesOf(elementName: String) = entitiesByElementName[elementName].orEmpty()
 
         val dayTypeAssignmentsByKind = entitiesOf(DAY_TYPE_ASSIGNMENT).partition { it.hasValue("OperatingPeriodRef") }
 
-        return SalesSharedData(
+        return SharedCalendarData(
             dayTypes =
                 entitiesOf(DAY_TYPE).associate {
-                    it.id to parseDaysOfWeek(it.valueOrNull("properties/PropertyOfDay/DaysOfWeek").orEmpty())
+                    it.id to parseNetexDaysOfWeek(it.valueOrNull("properties/PropertyOfDay/DaysOfWeek").orEmpty())
                 },
             operatingPeriods =
                 entitiesOf(OPERATING_PERIOD).associate {
@@ -48,10 +48,4 @@ class SalesSharedDataParser {
                 ),
         )
     }
-
-    private fun parseDaysOfWeek(daysOfWeekText: String): List<DayOfWeek> =
-        daysOfWeekText
-            .split(" ")
-            .filter { it.isNotBlank() }
-            .map { DayOfWeek.valueOf(it.uppercase()) }
 }

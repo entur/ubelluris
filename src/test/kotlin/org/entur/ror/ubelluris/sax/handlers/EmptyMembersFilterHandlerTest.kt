@@ -3,6 +3,7 @@ package org.entur.ror.ubelluris.sax.handlers
 import org.assertj.core.api.Assertions.assertThat
 import org.entur.netex.tools.lib.NetexProcessor
 import org.entur.ror.ubelluris.config.CliConfig
+import org.entur.ror.ubelluris.emptySalesData
 import org.entur.ror.ubelluris.filter.TimetableFilterConfig
 import org.entur.ror.ubelluris.model.TransportMode
 import org.junit.jupiter.api.Test
@@ -23,7 +24,7 @@ class EmptyMembersFilterHandlerTest {
                 targetCodespace = "SE",
                 transportModes = listOf(TransportMode.TRAM),
             )
-        val filterConfig = TimetableFilterConfig(cliConfig).build()
+        val filterConfig = TimetableFilterConfig(cliConfig, emptySalesData()).build()
 
         val inputDir = Files.createDirectories(tempDir.resolve("input")).toFile()
         val outputDir = Files.createDirectories(tempDir.resolve("output")).toFile()
