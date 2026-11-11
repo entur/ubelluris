@@ -21,7 +21,8 @@ class SalesMatchDataCollectorTest {
     lateinit var tempDir: Path
 
     private lateinit var inputDir: Path
-    private val collector = SalesMatchDataCollector()
+    private val repository = SalesMatchRepository()
+    private val collector = SalesMatchDataCollector(repository)
 
     @BeforeEach
     fun createInputDir() {
@@ -33,7 +34,7 @@ class SalesMatchDataCollectorTest {
     fun shouldCollectCalendarFromSharedData() {
         collect()
 
-        val calendar = collector.calendar()
+        val calendar = repository.calendar()
         assertThat(calendar.dayTypes).containsExactlyInAnyOrderEntriesOf(
             mapOf("SE:100:DayType:mondays" to listOf(DayOfWeek.MONDAY), "SE:100:DayType:datesOnly" to emptyList()),
         )
@@ -66,16 +67,16 @@ class SalesMatchDataCollectorTest {
 
         collect()
 
-        assertThat(collector.railServiceJourneys()).containsExactly(
+        assertThat(repository.railServiceJourneys()).containsExactly(
             TimetableRailServiceJourney(
                 serviceJourneyId = "SE:100:ServiceJourney:rail",
                 trainNrs = listOf("100"),
                 dayTypeRefs = listOf("SE:100:DayType:mondays", "SE:100:DayType:datesOnly"),
             ),
         )
-        assertThat(collector.hasKeyList("SE:100:ServiceJourney:rail")).isTrue()
-        assertThat(collector.keyListKeys("SE:100:ServiceJourney:rail")).containsExactlyInAnyOrder("productCode", "fingerprint")
-        assertThat(collector.lastElementBeforeKeyList("SE:100:ServiceJourney:rail")).isNull()
+        assertThat(repository.hasKeyList("SE:100:ServiceJourney:rail")).isTrue()
+        assertThat(repository.keyListKeys("SE:100:ServiceJourney:rail")).containsExactlyInAnyOrder("productCode", "fingerprint")
+        assertThat(repository.lastElementBeforeKeyList("SE:100:ServiceJourney:rail")).isNull()
     }
 
     @Test
@@ -93,7 +94,7 @@ class SalesMatchDataCollectorTest {
 
         collect()
 
-        assertThat(collector.railServiceJourneys()).isEmpty()
+        assertThat(repository.railServiceJourneys()).isEmpty()
     }
 
     private fun collect() {

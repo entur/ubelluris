@@ -22,6 +22,7 @@ import org.entur.ror.ubelluris.sax.plugins.LineOperatorEnricher
 import org.entur.ror.ubelluris.sax.plugins.LinePublicCodeFilterPlugin
 import org.entur.ror.ubelluris.sax.plugins.LineTransportModeFilterPlugin
 import org.entur.ror.ubelluris.sax.plugins.SalesMatchDataCollector
+import org.entur.ror.ubelluris.sax.plugins.SalesMatchRepository
 import org.entur.ror.ubelluris.sax.plugins.ServiceJourneyInterchangeCollectorPlugin
 import org.entur.ror.ubelluris.sax.plugins.TransportModeToLocalScheduledStopPointMapper
 import org.entur.ror.ubelluris.sax.plugins.VersionRefNormalizerPlugin
@@ -39,9 +40,10 @@ class TimetableFilterConfig(
     val journeyPatternStopPointCollectorPlugin = JourneyPatternStopPointCollectorPlugin()
     val lineOperatorEnricher = LineOperatorEnricher()
     val versionRefNormalizerPlugin = VersionRefNormalizerPlugin()
-    val salesMatchDataCollector = SalesMatchDataCollector()
-    val salesEnrichmentPlan = SalesEnrichmentPlan(salesData, salesMatchDataCollector, cliConfig.salesAuthorityNumberPriority)
-    private val serviceJourneySalesHandler = ServiceJourneySalesHandler(salesEnrichmentPlan, salesMatchDataCollector)
+    val salesMatchRepository = SalesMatchRepository()
+    val salesMatchDataCollector = SalesMatchDataCollector(salesMatchRepository)
+    val salesEnrichmentPlan = SalesEnrichmentPlan(salesData, salesMatchRepository, cliConfig.salesAuthorityNumberPriority)
+    private val serviceJourneySalesHandler = ServiceJourneySalesHandler(salesEnrichmentPlan, salesMatchRepository)
     private val salesOperatingDaysHandler = SalesOperatingDaysHandler(salesEnrichmentPlan)
 
     private val linePublicCodeRegexPatterns =

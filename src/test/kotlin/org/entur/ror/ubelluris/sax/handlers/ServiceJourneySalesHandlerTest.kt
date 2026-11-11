@@ -145,6 +145,23 @@ class ServiceJourneySalesHandlerTest {
     }
 
     @Test
+    fun shouldNotMatchAnyServiceJourneyWithoutSalesData() {
+        writeTimetableLineFile("line_matched.xml", "SE:100:Line:1", trainNr = "100", dayTypeRef = "SE:100:DayType:mondays")
+        val unpatchedFilterConfig =
+            TimetableFilterConfig(
+                CliConfig(sourceCodespace = "SE", targetCodespace = "SE", transportModes = listOf(TransportMode.BUS)),
+                salesData.forCarriers(emptySet()),
+            )
+
+        filter(unpatchedFilterConfig)
+
+        val serviceJourney = readServiceJourney("line_matched.xml")
+        assertThat(serviceJourney.getChild("keyList", namespace)).isNull()
+        assertThat(serviceJourney.getChild("dayTypes", namespace)).isNotNull()
+        assertThat(unpatchedFilterConfig.salesEnrichmentPlan.matchSummary).isEqualTo(SalesTimetableMatcher.MatchSummary())
+    }
+
+    @Test
     fun shouldAddKeyValuesToEndOfExistingKeyList() {
         writeTimetableLineFile(
             "line_with_key_list.xml",
@@ -195,6 +212,42 @@ class ServiceJourneySalesHandlerTest {
         assertThat(keyValues(serviceJourney)).containsExactly("productCode" to "RE", "salesAuthorityNumber" to "74")
     }
 
+    @Test
+    fun shouldWriteProductCodeOfPrioritizedSalesAuthorityNumberWhenSalesValuesDisagree() {
+        // Sales train 100 has a second sales ServiceJourney on the same date, with other sales values
+        val disagreeingSalesData =
+            salesData.copy(
+                trainNrServiceJourneysMap =
+                    mapOf(
+                        "100" to
+                            salesData.trainNrServiceJourneysMap.getValue("100") +
+                            SalesServiceJourney(
+                                serviceJourneyId = "SE:030:ServiceJourney:sales100_lt",
+                                productCode = "LT",
+                                salesAuthorityNumber = "275",
+                                dayTypeRefs = listOf("SE:030:DayType:2nov"),
+                                trainNr = "100",
+                            ),
+                    ),
+            )
+        val prioritizingFilterConfig =
+            TimetableFilterConfig(
+                CliConfig(
+                    sourceCodespace = "SE",
+                    targetCodespace = "SE",
+                    transportModes = listOf(TransportMode.BUS),
+                    salesAuthorityNumberPriority = listOf("275", "74"),
+                ),
+                disagreeingSalesData,
+            )
+        writeTimetableLineFile("line_matched.xml", "SE:100:Line:1", trainNr = "100", dayTypeRef = "SE:100:DayType:mondays")
+
+        filter(prioritizingFilterConfig)
+
+        assertThat(keyValues(readServiceJourney("line_matched.xml")))
+            .containsExactly("productCode" to "LT", "salesAuthorityNumber" to "275")
+    }
+
     private fun writeTimetableLineFile(
         fileName: String,
         lineId: String,
@@ -217,8 +270,8 @@ class ServiceJourneySalesHandlerTest {
         productCode = existingProductCode,
     )
 
-    private fun filter() {
-        NetexProcessor(filterConfig = timetableFilterConfig.build()).run(inputDir.toFile(), outputDir.toFile())
+    private fun filter(filterConfig: TimetableFilterConfig = timetableFilterConfig) {
+        NetexProcessor(filterConfig = filterConfig.build()).run(inputDir.toFile(), outputDir.toFile())
     }
 
     private fun readServiceJourney(fileName: String): Element = readElements(fileName, "ServiceJourney").single()

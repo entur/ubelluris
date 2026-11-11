@@ -87,6 +87,17 @@ class SalesTimetableMatcherTest {
     }
 
     @Test
+    fun shouldKeepProductCodeOfPrioritizedSalesAuthorityNumberWhateverThePriorityOrder() {
+        val matcherPrioritizing275 = SalesTimetableMatcher(salesData, timetableCalendar, listOf("275", "74"))
+        val matcherPrioritizing74 = SalesTimetableMatcher(salesData, timetableCalendar, listOf("74", "275"))
+
+        assertThat(matcherPrioritizing275.match(railServiceJourney("SJ:1", listOf("300"), "SE:100:DayType:10nov")).salesValues)
+            .isEqualTo(SalesValues("LT", "275"))
+        assertThat(matcherPrioritizing74.match(railServiceJourney("SJ:1", listOf("300"), "SE:100:DayType:10nov")).salesValues)
+            .isEqualTo(SalesValues("IC", "74"))
+    }
+
+    @Test
     fun shouldNotMatchWhenNoDisagreeingSalesAuthorityNumberHasPriority() {
         val prioritizingMatcher = SalesTimetableMatcher(salesData, timetableCalendar, listOf("999"))
 

@@ -21,6 +21,15 @@ data class SalesData(
                     ),
             )
     }
+
+    /** Only the sales ServiceJourneys of the given carriers, i.e. sales authority numbers. */
+    fun forCarriers(carriers: Set<String>): SalesData =
+        copy(
+            trainNrServiceJourneysMap =
+                trainNrServiceJourneysMap
+                    .mapValues { (_, salesServiceJourneys) -> salesServiceJourneys.filter { it.salesAuthorityNumber in carriers } }
+                    .filterValues { it.isNotEmpty() },
+        )
 }
 
 // Populated from _shared_data

@@ -6,6 +6,7 @@ import org.entur.ror.ubelluris.model.NetexTypes
 import org.entur.ror.ubelluris.sales.SalesEnrichmentPlan
 import org.entur.ror.ubelluris.sales.SalesTimetableMatcher
 import org.entur.ror.ubelluris.sax.plugins.SalesMatchDataCollector
+import org.entur.ror.ubelluris.sax.plugins.SalesMatchRepository
 import org.slf4j.LoggerFactory
 import org.xml.sax.Attributes
 
@@ -17,7 +18,7 @@ import org.xml.sax.Attributes
  */
 class ServiceJourneySalesHandler(
     private val salesEnrichmentPlan: SalesEnrichmentPlan,
-    private val salesMatchDataCollector: SalesMatchDataCollector,
+    private val salesMatchRepository: SalesMatchRepository,
 ) : XMLElementHandler {
     companion object {
         const val PRODUCT_CODE_KEY = "productCode"
@@ -138,10 +139,10 @@ class ServiceJourneySalesHandler(
 
         // NeTEx order: keyList comes directly after validityConditions, ValidBetween and alternativeTexts
         val writeAtEndOfElement =
-            if (salesMatchDataCollector.hasKeyList(serviceJourneyId)) {
+            if (salesMatchRepository.hasKeyList(serviceJourneyId)) {
                 KEY_LIST
             } else {
-                salesMatchDataCollector.lastElementBeforeKeyList(serviceJourneyId)
+                salesMatchRepository.lastElementBeforeKeyList(serviceJourneyId)
             }
         if (writeAtEndOfElement == null) {
             writeKeyList(uri, prefixOf(qName), keyValues, writer)
@@ -154,7 +155,7 @@ class ServiceJourneySalesHandler(
         serviceJourneyId: String,
         salesValues: SalesTimetableMatcher.SalesValues,
     ): List<Pair<String, String>> {
-        val existingKeys = salesMatchDataCollector.keyListKeys(serviceJourneyId)
+        val existingKeys = salesMatchRepository.keyListKeys(serviceJourneyId)
         val (alreadyInKeyList, notInKeyList) =
             listOf(PRODUCT_CODE_KEY to salesValues.productCode, SALES_AUTHORITY_NUMBER_KEY to salesValues.salesAuthorityNumber)
                 .partition { (key, _) -> key in existingKeys }

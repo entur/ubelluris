@@ -2,10 +2,51 @@
   "sourceCodespace": "SE:050",
   "targetCodespace": "SAM",
   "timetableProviders": [
-    "vt",
-    "halland",
+    "sl",
+    "ul",
+    "sormland",
+    "otraf",
+    "jlt",
+    "krono",
+    "klt",
+    "gotland",
+    "blekinge",
     "skane",
-    "sj"
+    "halland",
+    "vt",
+    "varm",
+    "orebro",
+    "vastmanland",
+    "dt",
+    "xt",
+    "dintur",
+    "jamtland",
+    "vasterbotten",
+    "norrbotten",
+    "btbuss",
+    "dg",
+    "falcks",
+    "harje",
+    "kirunabuss",
+    "lenna",
+    "lulea",
+    "masen",
+    "malartag",
+    "nikka",
+    "ressel",
+    "silverlinjen",
+    "sj",
+    "sjostadstrafiken",
+    "skelleftea",
+    "battaxi",
+    "stromma",
+    "tjf",
+    "trosa",
+    "uddevalla",
+    "flygbussarna",
+    "vy-varmlandstrafik",
+    "vastexp",
+    "ybuss"
   ],
   "transportModes": [
     "tram",
@@ -17,5 +58,12 @@
   "filterPublicCodes": [
     "*"
   ],
-  "dropParentStops": true
+  "dropParentStops": true,
+  "salesAuthorityNumberPriority": ["74"],
+  "salesPatches": [
+    {
+      "provider": "sj",
+      "carrier": "74"
+    }
+  ]
 }

@@ -1,7 +1,7 @@
 package org.entur.ror.ubelluris.sales
 
 import org.entur.ror.ubelluris.model.SalesData
-import org.entur.ror.ubelluris.sax.plugins.SalesMatchDataCollector
+import org.entur.ror.ubelluris.sax.plugins.SalesMatchRepository
 import java.time.LocalDate
 
 /**
@@ -10,12 +10,12 @@ import java.time.LocalDate
  *   one DatedServiceJourney per operating date,
  * - each operating date of a converted ServiceJourney becomes an OperatingDay.
  *
- * The plan is computed once, on first use. Use it only after [salesMatchDataCollector] has collected all files,
- * i.e. from entity selectors or export handlers.
+ * The plan is computed once, on first use. Use it only after the SalesMatchDataCollector has filled
+ * [salesMatchRepository] from all files, i.e. from entity selectors or export handlers.
  */
 class SalesEnrichmentPlan(
     private val salesData: SalesData,
-    private val salesMatchDataCollector: SalesMatchDataCollector,
+    private val salesMatchRepository: SalesMatchRepository,
     private val salesAuthorityNumberPriority: List<String> = emptyList(),
 ) {
     companion object {
@@ -39,8 +39,12 @@ class SalesEnrichmentPlan(
     )
 
     private val plan: Plan by lazy {
-        val calendar = salesMatchDataCollector.calendar()
-        val railServiceJourneys = salesMatchDataCollector.railServiceJourneys()
+        // Without sales data, e.g. for a provider without sales patches, nothing is matched and nothing is logged as unmatched
+        if (salesData.trainNrServiceJourneysMap.isEmpty()) {
+            return@lazy Plan(emptyMap(), emptyMap())
+        }
+        val calendar = salesMatchRepository.calendar()
+        val railServiceJourneys = salesMatchRepository.railServiceJourneys()
         val matcher = SalesTimetableMatcher(salesData, calendar, salesAuthorityNumberPriority)
         val timetableOperatingDatesResolver = OperatingDatesResolver(calendar)
 
@@ -53,7 +57,7 @@ class SalesEnrichmentPlan(
         Plan(matchesByServiceJourneyId, operatingDatesByConvertedServiceJourneyId)
     }
 
-    /** Match counts of all rail ServiceJourneys the collector found. */
+    /** Match counts of all rail ServiceJourneys in the repository. */
     val matchSummary: SalesTimetableMatcher.MatchSummary
         get() = SalesTimetableMatcher.MatchSummary.of(plan.matchesByServiceJourneyId.values)
 

@@ -43,7 +43,14 @@ class TimetableFilterService(
             val resultsDir = Path(cliConfig.resultsDir).resolve(provider)
             Files.createDirectories(resultsDir)
 
-            val filterConfig = TimetableFilterConfig(cliConfig, salesData)
+            val salesPatchCarriers = cliConfig.salesPatchCarriers(provider)
+            val salesPatchData = salesData.forCarriers(salesPatchCarriers)
+            if (salesPatchCarriers.isEmpty()) {
+                logger.info("No sales patch configured for {}", kv(PROVIDER, provider))
+            } else if (salesPatchData.trainNrServiceJourneysMap.isEmpty()) {
+                logger.warn("Sales data has no service journeys for the carriers {} of {}", salesPatchCarriers, kv(PROVIDER, provider))
+            }
+            val filterConfig = TimetableFilterConfig(cliConfig, salesPatchData)
             val filterResult =
                 FilterNetexApp(
                     filterConfig = filterConfig.build(),

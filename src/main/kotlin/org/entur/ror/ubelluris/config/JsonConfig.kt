@@ -12,7 +12,7 @@ class JsonConfig {
                     isLenient = true
                     ignoreUnknownKeys = true
                 }
-            return jsonParser.decodeFromStream<CliConfig>(configFile)
+            return jsonParser.decodeFromStream<CliConfig>(configFile).also { it.validate() }
         }
     }
 }
