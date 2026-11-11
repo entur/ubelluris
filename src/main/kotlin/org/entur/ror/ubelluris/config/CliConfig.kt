@@ -14,6 +14,7 @@ data class CliConfig(
     val lineTransportModesToRemove: List<TransportMode> = listOf(TransportMode.TAXI),
     val resultsDir: String = "results",
     val dropParentStops: Boolean = false,
+    val salesAuthorityNumberPriority: List<String> = emptyList(),
     val timetableFilterFeatures: TimetableFilterFeatures = TimetableFilterFeatures(),
 )
 

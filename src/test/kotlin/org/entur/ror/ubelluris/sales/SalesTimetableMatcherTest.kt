@@ -26,6 +26,23 @@ class SalesTimetableMatcherTest {
                             salesServiceJourney("SE:030:ServiceJourney:200_a", "200", "SE:030:DayType:10nov", productCode = "LT"),
                             salesServiceJourney("SE:030:ServiceJourney:200_b", "200", "SE:030:DayType:10nov", productCode = "RE"),
                         ),
+                    "300" to
+                        listOf(
+                            salesServiceJourney(
+                                "SE:030:ServiceJourney:300_a",
+                                "300",
+                                "SE:030:DayType:10nov",
+                                productCode = "LT",
+                                salesAuthorityNumber = "275",
+                            ),
+                            salesServiceJourney(
+                                "SE:030:ServiceJourney:300_b",
+                                "300",
+                                "SE:030:DayType:10nov",
+                                productCode = "IC",
+                                salesAuthorityNumber = "74",
+                            ),
+                        ),
                 ),
             calendarData =
                 dateOnlyCalendar(
@@ -59,6 +76,30 @@ class SalesTimetableMatcherTest {
     fun shouldNotMatchWhenOverlappingSalesServiceJourneysDisagree() {
         assertThat(matcher.match(railServiceJourney("SJ:1", listOf("200"), "SE:100:DayType:10nov")))
             .isEqualTo(ServiceJourneyMatch("SJ:1", MatchOutcome.AMBIGUOUS_OPERATING_DATE_MATCH))
+    }
+
+    @Test
+    fun shouldMatchWithValuesOfHighestPrioritySalesAuthorityNumberWhenOverlappingSalesServiceJourneysDisagree() {
+        val prioritizingMatcher = SalesTimetableMatcher(salesData, timetableCalendar, listOf("999", "74", "275"))
+
+        assertThat(prioritizingMatcher.match(railServiceJourney("SJ:1", listOf("300"), "SE:100:DayType:10nov")))
+            .isEqualTo(ServiceJourneyMatch("SJ:1", MatchOutcome.MATCHED, SalesValues("IC", "74")))
+    }
+
+    @Test
+    fun shouldNotMatchWhenNoDisagreeingSalesAuthorityNumberHasPriority() {
+        val prioritizingMatcher = SalesTimetableMatcher(salesData, timetableCalendar, listOf("999"))
+
+        assertThat(prioritizingMatcher.match(railServiceJourney("SJ:1", listOf("300"), "SE:100:DayType:10nov")).outcome)
+            .isEqualTo(MatchOutcome.AMBIGUOUS_OPERATING_DATE_MATCH)
+    }
+
+    @Test
+    fun shouldNotMatchWhenHighestPrioritySalesAuthorityNumberHasDifferentProductCodes() {
+        val prioritizingMatcher = SalesTimetableMatcher(salesData, timetableCalendar, listOf("279"))
+
+        assertThat(prioritizingMatcher.match(railServiceJourney("SJ:1", listOf("200"), "SE:100:DayType:10nov")).outcome)
+            .isEqualTo(MatchOutcome.AMBIGUOUS_OPERATING_DATE_MATCH)
     }
 
     @Test
@@ -120,10 +161,11 @@ class SalesTimetableMatcherTest {
         trainNr: String,
         dayTypeRef: String,
         productCode: String,
+        salesAuthorityNumber: String = "279",
     ) = SalesServiceJourney(
         serviceJourneyId = serviceJourneyId,
         productCode = productCode,
-        salesAuthorityNumber = "279",
+        salesAuthorityNumber = salesAuthorityNumber,
         dayTypeRefs = listOf(dayTypeRef),
         trainNr = trainNr,
     )

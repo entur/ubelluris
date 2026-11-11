@@ -23,7 +23,11 @@ import java.nio.file.Files
 import java.nio.file.Path
 import java.time.LocalDate
 
-class ServiceJourneySalesKeyValueHandlerTest {
+/**
+ * Runs the real TimetableFilterConfig on a timetable with the calendar of [writeTimetableSharedDataFile].
+ * Timetable DayType "mondays" operates only on 2026-11-02 (2026-11-09 is excluded, and ToDate 2026-11-16 is exclusive).
+ */
+class ServiceJourneySalesHandlerTest {
     @TempDir
     lateinit var tempDir: Path
 
@@ -31,7 +35,7 @@ class ServiceJourneySalesKeyValueHandlerTest {
     private lateinit var outputDir: Path
     private val namespace = Namespace.getNamespace("http://www.netex.org.uk/netex")
 
-    // Sales train 100 runs on Monday 2026-11-02, which is a date of timetable DayType "mondays"
+    // Sales train 100 runs on Monday 2026-11-02, which is the date of timetable DayType "mondays"
     private val salesData =
         SalesData(
             trainNrServiceJourneysMap =
@@ -79,18 +83,64 @@ class ServiceJourneySalesKeyValueHandlerTest {
         val serviceJourney = readServiceJourney("line_matched.xml")
         assertThat(serviceJourney.children.first().name).isEqualTo("keyList")
         assertThat(keyValues(serviceJourney)).containsExactly("productCode" to "RE", "salesAuthorityNumber" to "74")
-        assertThat(timetableFilterConfig.serviceJourneySalesKeyValueHandler.matchSummary)
+        assertThat(timetableFilterConfig.salesEnrichmentPlan.matchSummary)
             .isEqualTo(SalesTimetableMatcher.MatchSummary(railServiceJourneys = 1, matched = 1))
     }
 
     @Test
-    fun shouldNotChangeServiceJourneyWithoutMatch() {
+    fun shouldReplaceDayTypesOfMatchedServiceJourneyWithDatedServiceJourneyPerOperatingDate() {
+        writeTimetableLineFile("line_matched.xml", "SE:100:Line:1", trainNr = "100", dayTypeRef = "SE:100:DayType:mondays")
+
+        filter()
+
+        val serviceJourney = readServiceJourney("line_matched.xml")
+        assertThat(serviceJourney.getChild("dayTypes", namespace)).isNull()
+
+        val vehicleJourneys = serviceJourney.parentElement
+        assertThat(vehicleJourneys.children.map { it.name }).containsExactly("ServiceJourney", "DatedServiceJourney")
+        val datedServiceJourney = vehicleJourneys.getChild("DatedServiceJourney", namespace)
+        assertThat(datedServiceJourney.getAttributeValue("id")).isEqualTo("SE:100:DatedServiceJourney:line_matched.xml_2026-11-02")
+        assertThat(datedServiceJourney.getAttributeValue("version")).isEqualTo("1")
+        assertThat(datedServiceJourney.children.map { it.name }).containsExactly("ServiceJourneyRef", "OperatingDayRef")
+        assertThat(datedServiceJourney.getChild("ServiceJourneyRef", namespace).getAttributeValue("ref"))
+            .isEqualTo("SE:100:ServiceJourney:line_matched.xml")
+        assertThat(datedServiceJourney.getChild("OperatingDayRef", namespace).getAttributeValue("ref"))
+            .isEqualTo("SE:100:OperatingDay:2026-11-02")
+    }
+
+    @Test
+    fun shouldWriteOperatingDaysAndRemoveCalendarDataOnlyUsedByConvertedServiceJourneys() {
+        writeTimetableLineFile("line_matched.xml", "SE:100:Line:1", trainNr = "100", dayTypeRef = "SE:100:DayType:mondays")
+
+        filter()
+
+        val serviceCalendarFrame = readSharedServiceCalendarFrame()
+        assertThat(serviceCalendarFrame.children.map { it.name }).containsExactly("dayTypes", "operatingDays", "dayTypeAssignments")
+        val operatingDay = serviceCalendarFrame.getChild("operatingDays", namespace).getChildren("OperatingDay", namespace).single()
+        assertThat(operatingDay.getAttributeValue("id")).isEqualTo("SE:100:OperatingDay:2026-11-02")
+        assertThat(operatingDay.getChildText("CalendarDate", namespace)).isEqualTo("2026-11-02")
+
+        // DayType "datesOnly" was not used by the converted ServiceJourney, so it and its assignment stay
+        assertThat(ids(serviceCalendarFrame, "DayType")).containsExactly("SE:100:DayType:datesOnly")
+        assertThat(ids(serviceCalendarFrame, "DayTypeAssignment")).containsExactly("SE:100:DayTypeAssignment:datesOnly_261110")
+        assertThat(ids(serviceCalendarFrame, "OperatingPeriod")).isEmpty()
+    }
+
+    @Test
+    fun shouldNotChangeServiceJourneyWithoutMatchOrItsCalendarData() {
         writeTimetableLineFile("line_unmatched.xml", "SE:100:Line:1", trainNr = "100", dayTypeRef = "SE:100:DayType:datesOnly")
 
         filter()
 
-        assertThat(readServiceJourney("line_unmatched.xml").getChild("keyList", namespace)).isNull()
-        assertThat(timetableFilterConfig.serviceJourneySalesKeyValueHandler.matchSummary)
+        val serviceJourney = readServiceJourney("line_unmatched.xml")
+        assertThat(serviceJourney.getChild("keyList", namespace)).isNull()
+        assertThat(serviceJourney.getChild("dayTypes", namespace)).isNotNull()
+        assertThat(serviceJourney.parentElement.getChildren("DatedServiceJourney", namespace)).isEmpty()
+
+        val serviceCalendarFrame = readSharedServiceCalendarFrame()
+        assertThat(serviceCalendarFrame.getChild("operatingDays", namespace)).isNull()
+        assertThat(ids(serviceCalendarFrame, "DayType")).containsExactlyInAnyOrder("SE:100:DayType:mondays", "SE:100:DayType:datesOnly")
+        assertThat(timetableFilterConfig.salesEnrichmentPlan.matchSummary)
             .isEqualTo(SalesTimetableMatcher.MatchSummary(railServiceJourneys = 1, noOperatingDateOverlap = 1))
     }
 
@@ -141,7 +191,7 @@ class ServiceJourneySalesKeyValueHandlerTest {
         filter()
 
         val serviceJourney = readServiceJourney("line_with_valid_between.xml")
-        assertThat(serviceJourney.children.map { it.name }.take(3)).containsExactly("ValidBetween", "keyList", "dayTypes")
+        assertThat(serviceJourney.children.map { it.name }.take(2)).containsExactly("ValidBetween", "keyList")
         assertThat(keyValues(serviceJourney)).containsExactly("productCode" to "RE", "salesAuthorityNumber" to "74")
     }
 
@@ -171,12 +221,24 @@ class ServiceJourneySalesKeyValueHandlerTest {
         NetexProcessor(filterConfig = timetableFilterConfig.build()).run(inputDir.toFile(), outputDir.toFile())
     }
 
-    private fun readServiceJourney(fileName: String): Element =
+    private fun readServiceJourney(fileName: String): Element = readElements(fileName, "ServiceJourney").single()
+
+    private fun readSharedServiceCalendarFrame(): Element = readElements("_shared_data.xml", "ServiceCalendarFrame").single()
+
+    private fun readElements(
+        fileName: String,
+        elementName: String,
+    ): List<Element> =
         SAXBuilder()
             .build(outputDir.resolve(fileName).toFile())
             .rootElement
-            .getDescendants(Filters.element("ServiceJourney", namespace))
-            .single()
+            .getDescendants(Filters.element(elementName, namespace))
+            .toList()
+
+    private fun ids(
+        parent: Element,
+        elementName: String,
+    ): List<String> = parent.getDescendants(Filters.element(elementName, namespace)).map { it.getAttributeValue("id") }
 
     // A list, not a map, so that a duplicate Key is visible
     private fun keyValues(serviceJourney: Element): List<Pair<String, String>> =

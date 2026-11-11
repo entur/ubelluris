@@ -80,10 +80,13 @@ class TimetableFilterService(
                     }
                 }
 
+            val salesEnrichmentPlan = filterConfig.salesEnrichmentPlan
             logger.info(
-                "Sales match summary for {}: {}",
+                "Sales match summary for {}: {}. Converted {} service journeys to dated service journeys on {} operating days",
                 kv(PROVIDER, provider),
-                filterConfig.serviceJourneySalesKeyValueHandler.matchSummary,
+                salesEnrichmentPlan.matchSummary,
+                salesEnrichmentPlan.convertedServiceJourneyIds.size,
+                salesEnrichmentPlan.operatingDays.size,
             )
 
             val quayModes = filterConfig.transportModeToLocalScheduledStopPointMapper.getCollectedData()

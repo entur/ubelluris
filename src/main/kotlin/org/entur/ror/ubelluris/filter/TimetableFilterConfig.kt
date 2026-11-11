@@ -6,11 +6,13 @@ import org.entur.netex.tools.lib.output.XMLElementHandler
 import org.entur.ror.ubelluris.config.CliConfig
 import org.entur.ror.ubelluris.model.NetexTypes
 import org.entur.ror.ubelluris.model.SalesData
+import org.entur.ror.ubelluris.sales.SalesEnrichmentPlan
 import org.entur.ror.ubelluris.sax.handlers.BookWhenFilterHandler
 import org.entur.ror.ubelluris.sax.handlers.EmptyMembersFilterHandler
 import org.entur.ror.ubelluris.sax.handlers.PublicationTimestampHandler
+import org.entur.ror.ubelluris.sax.handlers.SalesOperatingDaysHandler
 import org.entur.ror.ubelluris.sax.handlers.ServiceJourneyInterchangeDeduplicationHandler
-import org.entur.ror.ubelluris.sax.handlers.ServiceJourneySalesKeyValueHandler
+import org.entur.ror.ubelluris.sax.handlers.ServiceJourneySalesHandler
 import org.entur.ror.ubelluris.sax.handlers.StopPointInJourneyPatternBoardingAlightingHandler
 import org.entur.ror.ubelluris.sax.handlers.TimetabledPassingTimeIdHandler
 import org.entur.ror.ubelluris.sax.handlers.VersionRefNormalizerHandler
@@ -24,6 +26,7 @@ import org.entur.ror.ubelluris.sax.plugins.ServiceJourneyInterchangeCollectorPlu
 import org.entur.ror.ubelluris.sax.plugins.TransportModeToLocalScheduledStopPointMapper
 import org.entur.ror.ubelluris.sax.plugins.VersionRefNormalizerPlugin
 import org.entur.ror.ubelluris.sax.selectors.entities.CascadingLineRemovalSelector
+import org.entur.ror.ubelluris.sax.selectors.entities.ConvertedServiceJourneyCalendarPruningSelector
 
 class TimetableFilterConfig(
     cliConfig: CliConfig,
@@ -37,7 +40,9 @@ class TimetableFilterConfig(
     val lineOperatorEnricher = LineOperatorEnricher()
     val versionRefNormalizerPlugin = VersionRefNormalizerPlugin()
     val salesMatchDataCollector = SalesMatchDataCollector()
-    val serviceJourneySalesKeyValueHandler = ServiceJourneySalesKeyValueHandler(salesData, salesMatchDataCollector)
+    val salesEnrichmentPlan = SalesEnrichmentPlan(salesData, salesMatchDataCollector, cliConfig.salesAuthorityNumberPriority)
+    private val serviceJourneySalesHandler = ServiceJourneySalesHandler(salesEnrichmentPlan, salesMatchDataCollector)
+    private val salesOperatingDaysHandler = SalesOperatingDaysHandler(salesEnrichmentPlan)
 
     private val linePublicCodeRegexPatterns =
         listOf(
@@ -91,8 +96,11 @@ class TimetableFilterConfig(
         }
 
         if (features.useSalesData) {
-            ServiceJourneySalesKeyValueHandler.handledPaths.forEach { path ->
-                handlerMap[path] = serviceJourneySalesKeyValueHandler
+            ServiceJourneySalesHandler.handledPaths.forEach { path ->
+                handlerMap[path] = serviceJourneySalesHandler
+            }
+            SalesOperatingDaysHandler.handledPaths.forEach { path ->
+                handlerMap[path] = salesOperatingDaysHandler
             }
         }
 
@@ -124,7 +132,10 @@ class TimetableFilterConfig(
             features.lineRemovalBasedOnPublicCodes || features.lineRemovalBasedOnTransportMode
 
         val entitySelectors =
-            if (lineRemovalEnabled) listOf(CascadingLineRemovalSelector(lineFilteringRepository)) else emptyList()
+            buildList {
+                if (lineRemovalEnabled) add(CascadingLineRemovalSelector(lineFilteringRepository))
+                if (features.useSalesData) add(ConvertedServiceJourneyCalendarPruningSelector(salesEnrichmentPlan))
+            }
 
         val skipElements =
             buildList {
@@ -213,7 +224,8 @@ class TimetableFilterConfig(
     }
 
     private fun registerBoardingAlighting(handlerMap: MutableMap<String, XMLElementHandler>) {
-        val boardingAlightingHandler = StopPointInJourneyPatternBoardingAlightingHandler(journeyPatternStopPointCollectorPlugin)
+        val boardingAlightingHandler =
+            StopPointInJourneyPatternBoardingAlightingHandler(journeyPatternStopPointCollectorPlugin)
         listOf(
             "/PublicationDelivery/dataObjects/CompositeFrame/frames/ServiceFrame/journeyPatterns/JourneyPattern",
             "/PublicationDelivery/dataObjects/ServiceFrame/journeyPatterns/JourneyPattern",

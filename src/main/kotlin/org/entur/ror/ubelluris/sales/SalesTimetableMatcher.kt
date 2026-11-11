@@ -15,11 +15,14 @@ data class TimetableRailServiceJourney(
 /**
  * Matches the rail ServiceJourneys of one provider's timetable data with the sales ServiceJourneys.
  * A match needs one train number that is in the sales data, overlapping operating dates, and one
- * productCode/salesAuthorityNumber among the overlapping sales ServiceJourneys. ServiceJourneys that cannot be matched are logged.
+ * productCode/salesAuthorityNumber among the overlapping sales ServiceJourneys. Uses [salesAuthorityNumberPriority]
+ * as a priority list when the overlapping sales ServiceJourneys have different values.
+ * ServiceJourneys that cannot be matched are logged.
  */
 class SalesTimetableMatcher(
     private val salesData: SalesData,
     timetableCalendar: SharedCalendarData,
+    private val salesAuthorityNumberPriority: List<String> = emptyList(),
 ) {
     private val logger = LoggerFactory.getLogger(javaClass)
     private val salesOperatingDatesResolver = OperatingDatesResolver(salesData.calendarData)
@@ -122,10 +125,11 @@ class SalesTimetableMatcher(
 
         val distinctSalesValues =
             overlappingSalesServiceJourneys.map { SalesValues(it.productCode, it.salesAuthorityNumber) }.distinct()
-        if (distinctSalesValues.size > 1) {
+        val prioritizedSalesValues = prioritizedSalesValues(distinctSalesValues)
+        if (prioritizedSalesValues.size > 1) {
             logger.warn(
                 "Timetable service journey {} with trainNr {} overlaps {} sales service journeys with different " +
-                    "productCode/salesAuthorityNumber {}: {}",
+                    "productCode/salesAuthorityNumber {} and no salesAuthorityNumber priority decides between them: {}",
                 serviceJourneyId,
                 trainNr,
                 overlappingSalesServiceJourneys.size,
@@ -135,7 +139,18 @@ class SalesTimetableMatcher(
             return unmatched(MatchOutcome.AMBIGUOUS_OPERATING_DATE_MATCH)
         }
 
-        return ServiceJourneyMatch(serviceJourneyId, MatchOutcome.MATCHED, distinctSalesValues.single())
+        return ServiceJourneyMatch(serviceJourneyId, MatchOutcome.MATCHED, prioritizedSalesValues.single())
+    }
+
+    // Keeps the values with the highest-priority salesAuthorityNumber. Returns all values when none has a priority.
+    private fun prioritizedSalesValues(distinctSalesValues: List<SalesValues>): List<SalesValues> {
+        if (distinctSalesValues.size <= 1) {
+            return distinctSalesValues
+        }
+        val highestPrioritySalesAuthorityNumber =
+            salesAuthorityNumberPriority.firstOrNull { prioritized -> distinctSalesValues.any { it.salesAuthorityNumber == prioritized } }
+                ?: return distinctSalesValues
+        return distinctSalesValues.filter { it.salesAuthorityNumber == highestPrioritySalesAuthorityNumber }
     }
 
     private fun describeDates(dates: Set<LocalDate>): String = "${dates.size} dates from ${dates.min()} to ${dates.max()}"
