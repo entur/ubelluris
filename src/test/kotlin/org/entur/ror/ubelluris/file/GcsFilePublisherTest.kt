@@ -33,9 +33,9 @@ class GcsFilePublisherTest {
 
     private val mockStorage: Storage = mock()
     private val mockTransferManager: TransferManager = mock()
-    private val storagePath = Path.of("2026", "01", "01")
+    private val outputPath = Path.of("2026", "01", "01")
 
-    private val filePublisher = GcsFilePublisher(config, mockStorage, storagePath) { mockTransferManager }
+    private val filePublisher = GcsFilePublisher(config, mockStorage, outputPath) { mockTransferManager }
 
     private fun stubSuccessfulUploads() {
         whenever(mockTransferManager.uploadFiles(any(), any())).thenAnswer { invocation ->
@@ -63,7 +63,7 @@ class GcsFilePublisherTest {
 
     @Test
     fun shouldPublishFile() {
-        val xmlFile = tempDir.resolve(storagePath).resolve("file_to_publish.xml")
+        val xmlFile = tempDir.resolve(outputPath).resolve("file_to_publish.xml")
         Files.createDirectories(xmlFile.parent)
 
         Files.writeString(
