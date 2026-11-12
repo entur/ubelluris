@@ -7,13 +7,13 @@ import java.nio.file.Files
 import java.nio.file.Path
 
 class LocalFilePublisherTest {
-    private val storagePath = Path.of("2026", "01", "01")
+    private val outputPath = Path.of("2026", "01", "01")
 
     @TempDir
     lateinit var tempDir: Path
 
     private val publisher by lazy {
-        LocalFilePublisher(storagePath, resultsDir = tempDir.resolve("results"))
+        LocalFilePublisher(outputPath, resultsDir = tempDir.resolve("results"))
     }
 
     @Test
@@ -25,7 +25,7 @@ class LocalFilePublisherTest {
         val providers = listOf("RUT", "ATB", "FLT")
         val timetablePaths =
             providers.associate { provider ->
-                val dir = tempDir.resolve(storagePath).resolve("timetable").resolve(provider)
+                val dir = tempDir.resolve(outputPath).resolve("timetable").resolve(provider)
                 Files.createDirectories(dir)
                 Files.writeString(dir.resolve("${provider}_line_001.xml"), "<Line />")
                 provider to dir
@@ -33,10 +33,10 @@ class LocalFilePublisherTest {
 
         val result = publisher.publish(stopPlaceFile, timetablePaths)
 
-        val expectedFilePlacement = result.resolve(storagePath).resolve(FilePublisher.STOPS_DIR).resolve(stopPlaceFile.fileName)
+        val expectedFilePlacement = result.resolve(outputPath).resolve(FilePublisher.STOPS_DIR).resolve(stopPlaceFile.fileName)
         assertThat(expectedFilePlacement).hasContent("<StopPlaces/>")
 
-        val timetableDir = result.resolve(storagePath).resolve("timetable")
+        val timetableDir = result.resolve(outputPath).resolve("timetable")
         providers.forEach { provider ->
             val expectedProviderFilePlacement = timetableDir.resolve(provider).resolve("${provider}_line_001.xml")
             assertThat(expectedProviderFilePlacement).hasContent("<Line />")

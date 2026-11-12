@@ -35,14 +35,14 @@ class FileService(
     }
 
     fun createPublisher(
-        storagePath: Path,
+        outputPath: Path,
         localCachePath: Path,
     ): FilePublisher {
         if (config.uploadEnabled) {
             val storage = createStorage()
-            return GcsFilePublisher(config, storage, storagePath)
+            return GcsFilePublisher(config, storage, outputPath)
         }
 
-        return LocalFilePublisher(storagePath, localCachePath)
+        return LocalFilePublisher(outputPath, localCachePath)
     }
 }
