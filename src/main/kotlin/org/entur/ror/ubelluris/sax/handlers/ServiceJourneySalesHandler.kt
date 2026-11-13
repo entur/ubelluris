@@ -3,7 +3,6 @@ package org.entur.ror.ubelluris.sax.handlers
 import org.entur.netex.tools.lib.output.DelegatingXMLElementWriter
 import org.entur.netex.tools.lib.output.XMLElementHandler
 import org.entur.ror.ubelluris.model.NetexTypes
-import org.entur.ror.ubelluris.sales.SalesEnrichmentPlan
 import org.entur.ror.ubelluris.sales.SalesTimetableMatcher
 import org.entur.ror.ubelluris.sax.plugins.SalesMatchDataCollector
 import org.entur.ror.ubelluris.sax.plugins.SalesMatchRepository
@@ -11,13 +10,12 @@ import org.slf4j.LoggerFactory
 import org.xml.sax.Attributes
 
 /**
- * Writes the sales enrichment of each ServiceJourney that [salesEnrichmentPlan] converts:
+ * Writes the sales enrichment in [salesMatchRepository] of each converted ServiceJourney:
  * - adds productCode and salesAuthorityNumber KeyValues to its keyList. A sales key that is already in the keyList is logged and not added.
  * - leaves out its dayTypes,
  * - writes one DatedServiceJourney per operating date directly after it, in the same vehicleJourneys.
  */
 class ServiceJourneySalesHandler(
-    private val salesEnrichmentPlan: SalesEnrichmentPlan,
     private val salesMatchRepository: SalesMatchRepository,
 ) : XMLElementHandler {
     companion object {
@@ -78,7 +76,7 @@ class ServiceJourneySalesHandler(
         pendingKeyValues = null
         convertedServiceJourney = null
         val serviceJourneyId = attributes?.getValue("id") ?: return
-        if (salesEnrichmentPlan.isConverted(serviceJourneyId)) {
+        if (salesMatchRepository.salesEnrichment.isConverted(serviceJourneyId)) {
             convertedServiceJourney = ConvertedServiceJourney(serviceJourneyId, attributes.getValue("version"))
         }
         startKeyValues(uri, qName, serviceJourneyId, writer)
@@ -131,7 +129,7 @@ class ServiceJourneySalesHandler(
         serviceJourneyId: String,
         writer: DelegatingXMLElementWriter,
     ) {
-        val salesValues = salesEnrichmentPlan.salesValues(serviceJourneyId) ?: return
+        val salesValues = salesMatchRepository.salesEnrichment.salesValues(serviceJourneyId) ?: return
         val keyValues = keyValuesNotInKeyList(serviceJourneyId, salesValues)
         if (keyValues.isEmpty()) {
             return
@@ -193,7 +191,7 @@ class ServiceJourneySalesHandler(
         writer: DelegatingXMLElementWriter,
     ) {
         val versionAttribute = serviceJourney.version?.let { "version" to it }
-        salesEnrichmentPlan.datedServiceJourneys(serviceJourney.id).forEach { datedServiceJourney ->
+        salesMatchRepository.salesEnrichment.datedServiceJourneys(serviceJourney.id).forEach { datedServiceJourney ->
             writer.writeElement(
                 uri,
                 prefix,

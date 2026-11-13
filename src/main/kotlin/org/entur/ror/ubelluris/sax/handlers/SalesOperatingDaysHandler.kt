@@ -2,24 +2,27 @@ package org.entur.ror.ubelluris.sax.handlers
 
 import org.entur.netex.tools.lib.output.DelegatingXMLElementWriter
 import org.entur.netex.tools.lib.output.XMLElementHandler
-import org.entur.ror.ubelluris.sales.SalesEnrichmentPlan
+import org.entur.ror.ubelluris.sales.SalesEnrichment
+import org.entur.ror.ubelluris.sax.plugins.SalesMatchRepository
 import org.xml.sax.Attributes
 
 /**
- * Writes the OperatingDays that the DatedServiceJourneys of [salesEnrichmentPlan] refer to into _shared_data.xml.
+ * Writes the OperatingDays that the exported DatedServiceJourneys in [salesMatchRepository] refer to into _shared_data.xml.
  */
 class SalesOperatingDaysHandler(
-    private val salesEnrichmentPlan: SalesEnrichmentPlan,
+    private val salesMatchRepository: SalesMatchRepository,
 ) : XMLElementHandler {
     companion object {
         private const val SERVICE_CALENDAR_FRAME = "ServiceCalendarFrame"
         private const val SERVICE_CALENDAR_FRAME_PATH = "/PublicationDelivery/dataObjects/CompositeFrame/frames/$SERVICE_CALENDAR_FRAME"
+        private const val OPERATING_DAYS = "operatingDays"
 
         // The children of a ServiceCalendarFrame that come after operatingDays
         private val ELEMENTS_AFTER_OPERATING_DAYS = setOf("operatingPeriods", "dayTypeAssignments")
 
         val handledPaths: List<String> =
-            listOf(SERVICE_CALENDAR_FRAME_PATH) + ELEMENTS_AFTER_OPERATING_DAYS.map { "$SERVICE_CALENDAR_FRAME_PATH/$it" }
+            listOf(SERVICE_CALENDAR_FRAME_PATH) +
+                (ELEMENTS_AFTER_OPERATING_DAYS + OPERATING_DAYS).map { "$SERVICE_CALENDAR_FRAME_PATH/$it" }
     }
 
     private var operatingDaysWritten = false
@@ -32,7 +35,7 @@ class SalesOperatingDaysHandler(
         writer: DelegatingXMLElementWriter,
     ) {
         if (elementNameOf(localName, qName) in ELEMENTS_AFTER_OPERATING_DAYS) {
-            writeOperatingDaysOnce(uri, prefixOf(qName), writer)
+            writeOperatingDaysElement(uri, prefixOf(qName), writer)
         }
         writer.startElement(uri, localName, qName, attributes)
     }
@@ -52,13 +55,26 @@ class SalesOperatingDaysHandler(
         qName: String?,
         writer: DelegatingXMLElementWriter,
     ) {
-        if (elementNameOf(localName, qName) == SERVICE_CALENDAR_FRAME) {
-            writeOperatingDaysOnce(uri, prefixOf(qName), writer)
+        when (elementNameOf(localName, qName)) {
+            OPERATING_DAYS -> writeOperatingDays(uri, prefixOf(qName), writer)
+            SERVICE_CALENDAR_FRAME -> writeOperatingDaysElement(uri, prefixOf(qName), writer)
         }
         writer.endElement(uri, localName, qName)
     }
 
-    private fun writeOperatingDaysOnce(
+    private fun writeOperatingDaysElement(
+        uri: String?,
+        prefix: String?,
+        writer: DelegatingXMLElementWriter,
+    ) {
+        if (operatingDaysWritten || salesMatchRepository.salesEnrichment.operatingDays.isEmpty()) {
+            operatingDaysWritten = true
+            return
+        }
+        writer.writeElement(uri, prefix, OPERATING_DAYS) { writeOperatingDays(uri, prefix, writer) }
+    }
+
+    private fun writeOperatingDays(
         uri: String?,
         prefix: String?,
         writer: DelegatingXMLElementWriter,
@@ -67,20 +83,14 @@ class SalesOperatingDaysHandler(
             return
         }
         operatingDaysWritten = true
-        val operatingDays = salesEnrichmentPlan.operatingDays
-        if (operatingDays.isEmpty()) {
-            return
-        }
-        writer.writeElement(uri, prefix, "operatingDays") {
-            operatingDays.forEach { operatingDay ->
-                writer.writeElement(
-                    uri,
-                    prefix,
-                    "OperatingDay",
-                    attributesOf("version" to SalesEnrichmentPlan.OPERATING_DAY_VERSION, "id" to operatingDay.operatingDayId),
-                ) {
-                    writer.writeElement(uri, prefix, "CalendarDate") { writer.writeText(operatingDay.date.toString()) }
-                }
+        salesMatchRepository.salesEnrichment.operatingDays.forEach { operatingDay ->
+            writer.writeElement(
+                uri,
+                prefix,
+                "OperatingDay",
+                attributesOf("version" to SalesEnrichment.OPERATING_DAY_VERSION, "id" to operatingDay.operatingDayId),
+            ) {
+                writer.writeElement(uri, prefix, "CalendarDate") { writer.writeText(operatingDay.date.toString()) }
             }
         }
     }

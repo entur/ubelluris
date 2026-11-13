@@ -1,7 +1,6 @@
 package org.entur.ror.ubelluris.filter
 
 import org.assertj.core.api.Assertions.assertThat
-import org.entur.netex.tools.lib.NetexProcessor
 import org.entur.ror.ubelluris.config.CliConfig
 import org.entur.ror.ubelluris.config.TimetableFilterFeatures
 import org.entur.ror.ubelluris.emptySalesData
@@ -27,8 +26,6 @@ class TimetableFilterConfigTest {
                 transportModes = listOf(TransportMode.TRAM),
                 timetableFilterFeatures = timetableFilterFeatures,
             )
-        val filterConfig = TimetableFilterConfig(cliConfig, emptySalesData()).build()
-
         val inputDir = Files.createDirectories(tempDir.resolve("input")).toFile()
         val outputDir = Files.createDirectories(tempDir.resolve("output")).toFile()
 
@@ -38,9 +35,7 @@ class TimetableFilterConfigTest {
             }.readBytes()
         File(inputDir, resourceFileName).writeBytes(inputBytes)
 
-        NetexProcessor(
-            filterConfig = filterConfig,
-        ).run(inputDir, outputDir)
+        TimetableFilterConfig(cliConfig, emptySalesData()).run(inputDir, outputDir)
 
         val outputFile = outputDir.listFiles()?.firstOrNull()
         requireNotNull(outputFile) { "No output file was created" }
@@ -161,7 +156,6 @@ class TimetableFilterConfigTest {
                 transportModes = listOf(TransportMode.TRAM),
             )
         val timetableFilterConfig = TimetableFilterConfig(cliConfig, emptySalesData())
-        val filterConfig = timetableFilterConfig.build()
 
         val inputDir = Files.createDirectories(tempDir.resolve("input")).toFile()
         val outputDir = Files.createDirectories(tempDir.resolve("output")).toFile()
@@ -172,9 +166,7 @@ class TimetableFilterConfigTest {
             }.readBytes()
         File(inputDir, "duplicate-service-journey-interchanges.xml").writeBytes(inputBytes)
 
-        NetexProcessor(
-            filterConfig = filterConfig,
-        ).run(inputDir, outputDir)
+        timetableFilterConfig.run(inputDir, outputDir)
 
         // Verify what the plugin collected during parsing
         val identicalDuplicates = timetableFilterConfig.interchangeCollectorPlugin.getIdenticalDuplicates()
@@ -248,7 +240,7 @@ class TimetableFilterConfigTest {
                 targetCodespace = "SE",
                 transportModes = listOf(TransportMode.TRAM),
             )
-        NetexProcessor(filterConfig = TimetableFilterConfig(cliConfig, emptySalesData()).build()).run(inputDir, outputDir)
+        TimetableFilterConfig(cliConfig, emptySalesData()).run(inputDir, outputDir)
 
         listOf("a.xml", "b.xml").forEach { fileName ->
             val result = File(outputDir, fileName).readText()

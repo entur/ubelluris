@@ -7,7 +7,7 @@ import org.entur.ror.ubelluris.model.TransportMode
 data class CliConfig(
     var sourceCodespace: String,
     var targetCodespace: String,
-    var timetableProviders: List<String> = listOf("vt", "halland", "skane"),
+    var timetableProviders: List<String> = listOf("vt", "halland", "skane", "sj"),
     var transportModes: List<TransportMode> = listOf(TransportMode.TRAM, TransportMode.WATER),
     val illegalPublicCodes: List<String> = listOf("-"),
     val filterPublicCodes: List<String> = listOf("*"),
@@ -15,13 +15,16 @@ data class CliConfig(
     val resultsDir: String = "results",
     val dropParentStops: Boolean = false,
     val salesAuthorityNumberPriority: List<String> = emptyList(),
-    val salesPatches: List<SalesPatch> = emptyList(),
+    val salesPatches: List<SalesPatch> = listOf(SalesPatch("sj", "74")),
     val timetableFilterFeatures: TimetableFilterFeatures = TimetableFilterFeatures(),
 ) {
     fun salesPatchCarriers(provider: String): Set<String> = salesPatches.filter { it.provider == provider }.map { it.carrier }.toSet()
 
     /** Fails when the configuration is not consistent. Provider names are case-sensitive, because they are used in file paths. */
     fun validate() {
+        require(!timetableFilterFeatures.useSalesData || salesPatches.isNotEmpty()) {
+            "Feature useSalesData is enabled, but no salesPatches are configured"
+        }
         val unknownProviders = salesPatches.map { it.provider }.filterNot { it in timetableProviders }.distinct()
         require(unknownProviders.isEmpty()) {
             "salesPatches has providers $unknownProviders that are not in timetableProviders $timetableProviders"

@@ -1,8 +1,6 @@
 package org.entur.ror.ubelluris.sax.plugins
 
 import org.assertj.core.api.Assertions.assertThat
-import org.entur.netex.tools.lib.NetexProcessor
-import org.entur.netex.tools.lib.config.FilterConfig
 import org.entur.ror.ubelluris.config.CliConfig
 import org.entur.ror.ubelluris.emptySalesData
 import org.entur.ror.ubelluris.filter.TimetableFilterConfig
@@ -62,12 +60,12 @@ class LineTransportModeFilterPluginTest {
         </PublicationDelivery>
         """.trimIndent()
 
-    private fun run(filterConfig: FilterConfig): String {
+    private fun run(timetableFilterConfig: TimetableFilterConfig): String {
         val inputDir = Files.createDirectories(tempDir.resolve("input")).toFile()
         val outputDir = Files.createDirectories(tempDir.resolve("output")).toFile()
         File(inputDir, "lines.xml").writeText(netex)
 
-        NetexProcessor(filterConfig = filterConfig).run(inputDir, outputDir)
+        timetableFilterConfig.run(inputDir, outputDir)
 
         return requireNotNull(outputDir.listFiles()?.firstOrNull()) { "No output file was created" }.readText()
     }
@@ -84,7 +82,7 @@ class LineTransportModeFilterPluginTest {
                 emptySalesData(),
             )
 
-        val result = run(timetableFilterConfig.build())
+        val result = run(timetableFilterConfig)
 
         assertThat(timetableFilterConfig.lineFilteringRepository.lineIdsToRemove).containsExactly("TEST:Line:TAXI")
 

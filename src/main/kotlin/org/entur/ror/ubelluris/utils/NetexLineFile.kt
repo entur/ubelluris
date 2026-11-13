@@ -1,6 +1,7 @@
 package org.entur.ror.ubelluris.utils
 
 import org.entur.ror.ubelluris.model.NetexTypes
+import org.slf4j.LoggerFactory.getLogger
 import java.nio.file.Path
 
 /**
@@ -25,6 +26,8 @@ class NetexLineFile private constructor(
 
         fun read(lineFilePath: Path): NetexLineFile = NetexLineFile(entityCollector.collect(lineFilePath))
     }
+
+    private val logger = getLogger(javaClass)
 
     private val entitiesByElementName = entities.groupBy { it.elementName }
     private val linesById = entitiesById(NetexTypes.LINE)
@@ -56,9 +59,12 @@ class NetexLineFile private constructor(
         return when (trainNumbers.size) {
             0 -> null
             1 -> trainNumbers.first()
-            else -> throw IllegalArgumentException(
-                "Expected exactly one train number on service journey ${serviceJourney.id}, but found ${trainNumbers.size}",
-            )
+            else -> {
+                logger.warn(
+                    "Only supports zero or one train number, but found ${trainNumbers.size}. Skipping sales for service journey ${serviceJourney.id}.",
+                )
+                null
+            }
         }
     }
 

@@ -102,7 +102,7 @@ class SalesTimetableMatcher(
             return unmatched(MatchOutcome.TRAIN_NR_NOT_IN_SALES)
         }
 
-        val timetableOperatingDates = timetableOperatingDatesResolver.resolve(serviceJourney.dayTypeRefs)
+        val timetableOperatingDates = timetableOperatingDates(serviceJourney)
         if (timetableOperatingDates.isEmpty()) {
             logger.warn("Timetable service journey {} with trainNr {} has no operating dates", serviceJourneyId, trainNr)
             return unmatched(MatchOutcome.WITHOUT_OPERATING_DATES)
@@ -141,6 +141,10 @@ class SalesTimetableMatcher(
 
         return ServiceJourneyMatch(serviceJourneyId, MatchOutcome.MATCHED, prioritizedSalesValues.single())
     }
+
+    /** The operating dates of a timetable ServiceJourney. The dates of each DayType are cached. */
+    fun timetableOperatingDates(serviceJourney: TimetableRailServiceJourney): Set<LocalDate> =
+        timetableOperatingDatesResolver.resolve(serviceJourney.dayTypeRefs)
 
     // Keeps the values with the highest-priority salesAuthorityNumber. Returns all values when none has a priority.
     private fun prioritizedSalesValues(distinctSalesValues: List<SalesValues>): List<SalesValues> {

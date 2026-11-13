@@ -8,6 +8,7 @@ import org.entur.ror.ubelluris.model.SalesData
 import org.entur.ror.ubelluris.model.SalesServiceJourney
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.io.TempDir
+import java.nio.file.Files
 import java.nio.file.Path
 
 class SalesDataServiceTest {
@@ -138,6 +139,13 @@ class SalesDataServiceTest {
         val result = salesDataService.processLineFiles(salesDir)
 
         assertThat(result).isEmpty()
+    }
+
+    @Test
+    fun shouldFailWhenLineFileCannotBeParsed() {
+        Files.writeString(salesDir.resolve("line_malformed.xml"), "<PublicationDelivery>")
+
+        assertThatThrownBy { salesDataService.processLineFiles(salesDir) }.isNotNull()
     }
 
     private fun cliConfig(useSalesData: Boolean = true) =

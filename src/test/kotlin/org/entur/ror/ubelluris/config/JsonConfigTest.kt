@@ -22,7 +22,7 @@ class JsonConfigTest {
 
         assertThat(config.sourceCodespace).isEqualTo("SE:050")
         assertThat(config.targetCodespace).isEqualTo("SAM")
-        assertThat(config.timetableProviders).containsExactly("vt", "halland", "skane")
+        assertThat(config.timetableProviders).containsExactly("vt", "halland", "skane", "sj")
         assertThat(config.transportModes).containsExactly(TransportMode.TRAM, TransportMode.WATER)
         assertThat(config.illegalPublicCodes).containsExactly("-")
         assertThat(config.filterPublicCodes).containsExactly("*")
@@ -36,7 +36,7 @@ class JsonConfigTest {
             {
               "sourceCodespace": "SE:050",
               "targetCodespace": "SAM",
-              "timetableProviders": ["provider1"],
+              "timetableProviders": ["provider1", "sj"],
               "transportModes": ["tram"],
               "lineTransportModesToRemove": ["taxi", "water"]
             }
@@ -46,7 +46,7 @@ class JsonConfigTest {
 
         assertThat(config.sourceCodespace).isEqualTo("SE:050")
         assertThat(config.targetCodespace).isEqualTo("SAM")
-        assertThat(config.timetableProviders).containsExactly("provider1")
+        assertThat(config.timetableProviders).containsExactly("provider1", "sj")
         assertThat(config.transportModes).containsExactly(TransportMode.TRAM)
         assertThat(config.lineTransportModesToRemove).containsExactly(TransportMode.TAXI, TransportMode.WATER)
     }
@@ -82,13 +82,25 @@ class JsonConfigTest {
             .hasMessageContaining("[SJ]")
     }
 
-    private fun configWithSalesPatches(salesPatches: String) =
-        """
+    @Test
+    fun shouldFailWhenSalesDataIsUsedWithoutSalesPatches() {
+        val json = configWithSalesPatches("[]", useSalesData = true)
+
+        assertThatThrownBy { JsonConfig.loadCliConfig(json.byteInputStream()) }
+            .isInstanceOf(IllegalArgumentException::class.java)
+            .hasMessageContaining("no salesPatches")
+    }
+
+    private fun configWithSalesPatches(
+        salesPatches: String,
+        useSalesData: Boolean = false,
+    ) = """
         {
           "sourceCodespace": "SE:050",
           "targetCodespace": "SAM",
           "timetableProviders": ["sj", "vt"],
-          "salesPatches": $salesPatches
+          "salesPatches": $salesPatches,
+          "timetableFilterFeatures": { "useSalesData": $useSalesData }
         }
         """.trimIndent()
 }

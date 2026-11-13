@@ -1,7 +1,6 @@
 package org.entur.ror.ubelluris.filter
 
 import net.logstash.logback.argument.StructuredArguments.kv
-import org.entur.netex.tools.lib.app.FilterNetexApp
 import org.entur.netex.tools.lib.report.FilterReport
 import org.entur.ror.ubelluris.config.CliConfig
 import org.entur.ror.ubelluris.model.SalesData
@@ -51,12 +50,7 @@ class TimetableFilterService(
                 logger.warn("Sales data has no service journeys for the carriers {} of {}", salesPatchCarriers, kv(PROVIDER, provider))
             }
             val filterConfig = TimetableFilterConfig(cliConfig, salesPatchData)
-            val filterResult =
-                FilterNetexApp(
-                    filterConfig = filterConfig.build(),
-                    input = rawData,
-                    target = resultsDir.toFile(),
-                ).run()
+            val filterResult = filterConfig.run(rawData, resultsDir.toFile())
 
             // Post-process: enrich Lines with OperatorRef from ServiceJourneys
             val lineOperatorInserter = LineOperatorInserter(filterConfig.lineOperatorEnricher)
@@ -87,14 +81,14 @@ class TimetableFilterService(
                     }
                 }
 
-            if (salesPatchCarriers.isNotEmpty()) {
-                val salesEnrichmentPlan = filterConfig.salesEnrichmentPlan
+            if (cliConfig.timetableFilterFeatures.useSalesData && salesPatchCarriers.isNotEmpty()) {
+                val salesEnrichment = filterConfig.salesMatchRepository.salesEnrichment
                 logger.info(
                     "Sales match summary for {}: {}. Converted {} service journeys to dated service journeys on {} operating days",
                     kv(PROVIDER, provider),
-                    salesEnrichmentPlan.matchSummary,
-                    salesEnrichmentPlan.convertedServiceJourneyIds.size,
-                    salesEnrichmentPlan.operatingDays.size,
+                    salesEnrichment.matchSummary,
+                    salesEnrichment.convertedServiceJourneyIds.size,
+                    salesEnrichment.operatingDays.size,
                 )
             }
 

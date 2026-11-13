@@ -12,6 +12,6 @@ class LocalFileFetcher(
         FileFetchResult(
             stopPlacePath = downloadDir.resolve(stopPlaceBlobPath),
             timetablePaths = timetableBlobPaths.mapValues { (_, blobPath) -> downloadDir.resolve(blobPath) },
-            salesPath = salesBlobPath?.let { downloadDir.resolve(it) },
+            salesPath = salesBlobPath?.let { downloadDir.resolve(it).parent },
         )
 }

@@ -45,6 +45,7 @@ fun writeLineFile(
     dayTypeRefs: List<String> = listOf("SE:030:DayType:A", "SE:030:DayType:B"),
     serviceJourneyKeyList: Boolean = true,
     serviceJourneyValidBetween: Boolean = false,
+    linePublicCode: String? = null,
 ) {
     val routeId = "$lineId:Route"
     val journeyPatternId = "$lineId:JourneyPattern"
@@ -57,6 +58,7 @@ fun writeLineFile(
             .withTransportMode(AllVehicleModesOfTransportEnumeration.fromValue(transportMode))
             .withRepresentedByGroupRef(GroupOfLinesRefStructure().withRef("SE:030:Network:813"))
     salesAuthorityNumber?.let { line.withKeyList(keyList("salesAuthorityNumber" to it)) }
+    linePublicCode?.let { line.withPublicCode(it) }
 
     val serviceJourney =
         ServiceJourney()

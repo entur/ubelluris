@@ -6,6 +6,8 @@ import org.rutebanken.netex.model.DayTypeAssignment
 import org.rutebanken.netex.model.DayTypeAssignmentsInFrame_RelStructure
 import org.rutebanken.netex.model.DayTypeRefStructure
 import org.rutebanken.netex.model.DayTypesInFrame_RelStructure
+import org.rutebanken.netex.model.OperatingDay
+import org.rutebanken.netex.model.OperatingDaysInFrame_RelStructure
 import org.rutebanken.netex.model.OperatingPeriod
 import org.rutebanken.netex.model.OperatingPeriodRefStructure
 import org.rutebanken.netex.model.OperatingPeriodsInFrame_RelStructure
@@ -19,13 +21,18 @@ import java.time.LocalDateTime
 private const val MONDAYS_DAY_TYPE_ID = "SE:100:DayType:mondays"
 private const val DATES_ONLY_DAY_TYPE_ID = "SE:100:DayType:datesOnly"
 private const val OPERATING_PERIOD_ID = "SE:100:OperatingPeriod:1"
+const val EXISTING_OPERATING_DAY_ID = "SE:100:OperatingDay:existing"
 
 /**
  * Writes a timetable _shared_data.xml with this calendar to [directory]:
  * - SE:100:DayType:mondays: Mondays in OperatingPeriod 2026-11-02 to 2026-11-16 (exclusive), except 2026-11-09
  * - SE:100:DayType:datesOnly: only 2026-11-10
+ * With [existingOperatingDay], the frame also has operatingDays with OperatingDay [EXISTING_OPERATING_DAY_ID].
  */
-fun writeTimetableSharedDataFile(directory: Path) {
+fun writeTimetableSharedDataFile(
+    directory: Path,
+    existingOperatingDay: Boolean = false,
+) {
     val serviceCalendarFrame =
         ServiceCalendarFrame()
             .withId("SE:100:ServiceCalendarFrame:1")
@@ -56,6 +63,16 @@ fun writeTimetableSharedDataFile(directory: Path) {
                         .withDate(LocalDateTime.parse("2026-11-10T00:00:00")),
                 ),
             )
+    if (existingOperatingDay) {
+        serviceCalendarFrame.withOperatingDays(
+            OperatingDaysInFrame_RelStructure().withOperatingDay(
+                OperatingDay()
+                    .withId(EXISTING_OPERATING_DAY_ID)
+                    .withVersion(TEST_NETEX_VERSION)
+                    .withCalendarDate(LocalDateTime.parse("2026-12-01T00:00:00")),
+            ),
+        )
+    }
 
     writePublicationDelivery(
         directory.resolve("_shared_data.xml"),

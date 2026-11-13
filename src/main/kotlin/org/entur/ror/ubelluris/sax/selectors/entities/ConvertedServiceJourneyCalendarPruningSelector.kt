@@ -5,7 +5,7 @@ import org.entur.netex.tools.lib.model.EntityModel
 import org.entur.netex.tools.lib.selections.EntitySelection
 import org.entur.netex.tools.lib.selectors.entities.EntitySelector
 import org.entur.netex.tools.lib.selectors.entities.EntitySelectorContext
-import org.entur.ror.ubelluris.sales.SalesEnrichmentPlan
+import org.entur.ror.ubelluris.sax.plugins.SalesMatchRepository
 import org.slf4j.LoggerFactory
 
 /**
@@ -13,9 +13,12 @@ import org.slf4j.LoggerFactory
  * - DayTypes that a converted ServiceJourney refers to, and that no other ServiceJourney or DatedServiceJourney refers to,
  * - the DayTypeAssignments of those DayTypes,
  * - OperatingPeriods that only those DayTypeAssignments refer to.
+ *
+ * It runs before the sales enrichment is reduced to the selection, so it also removes the calendar data of
+ * converted ServiceJourneys that other selectors remove, e.g. [CascadingLineRemovalSelector].
  */
 class ConvertedServiceJourneyCalendarPruningSelector(
-    private val salesEnrichmentPlan: SalesEnrichmentPlan,
+    private val salesMatchRepository: SalesMatchRepository,
 ) : EntitySelector {
     companion object {
         private const val DAY_TYPE_REF = "DayTypeRef"
@@ -30,7 +33,7 @@ class ConvertedServiceJourneyCalendarPruningSelector(
 
     override fun selectEntities(context: EntitySelectorContext): EntitySelection {
         val model = context.entityModel
-        val convertedServiceJourneyIds = salesEnrichmentPlan.convertedServiceJourneyIds
+        val convertedServiceJourneyIds = salesMatchRepository.salesEnrichment.convertedServiceJourneyIds
 
         val dayTypeIdsOfConvertedServiceJourneys = convertedServiceJourneyIds.flatMap { refsFrom(model, it, DAY_TYPE_REF) }.toSet()
         val dayTypeIdsStillUsed =

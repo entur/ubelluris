@@ -1,14 +1,16 @@
 package org.entur.ror.ubelluris.sax.handlers
 
 import org.assertj.core.api.Assertions.assertThat
-import org.entur.netex.tools.lib.NetexProcessor
 import org.entur.ror.ubelluris.config.CliConfig
+import org.entur.ror.ubelluris.config.TimetableFilterFeatures
 import org.entur.ror.ubelluris.filter.TimetableFilterConfig
 import org.entur.ror.ubelluris.model.DayTypeDateAssignment
 import org.entur.ror.ubelluris.model.SalesData
 import org.entur.ror.ubelluris.model.SalesServiceJourney
 import org.entur.ror.ubelluris.model.SharedCalendarData
 import org.entur.ror.ubelluris.model.TransportMode
+import org.entur.ror.ubelluris.sales.EXISTING_OPERATING_DAY_ID
+import org.entur.ror.ubelluris.sales.SalesEnrichment
 import org.entur.ror.ubelluris.sales.SalesTimetableMatcher
 import org.entur.ror.ubelluris.sales.writeLineFile
 import org.entur.ror.ubelluris.sales.writeTimetableSharedDataFile
@@ -61,11 +63,7 @@ class ServiceJourneySalesHandlerTest {
                 ),
         )
 
-    private val timetableFilterConfig =
-        TimetableFilterConfig(
-            CliConfig(sourceCodespace = "SE", targetCodespace = "SE", transportModes = listOf(TransportMode.BUS)),
-            salesData,
-        )
+    private val timetableFilterConfig = TimetableFilterConfig(salesCliConfig(), salesData)
 
     @BeforeEach
     fun createDirectories() {
@@ -83,7 +81,7 @@ class ServiceJourneySalesHandlerTest {
         val serviceJourney = readServiceJourney("line_matched.xml")
         assertThat(serviceJourney.children.first().name).isEqualTo("keyList")
         assertThat(keyValues(serviceJourney)).containsExactly("productCode" to "RE", "salesAuthorityNumber" to "74")
-        assertThat(timetableFilterConfig.salesEnrichmentPlan.matchSummary)
+        assertThat(salesEnrichment().matchSummary)
             .isEqualTo(SalesTimetableMatcher.MatchSummary(railServiceJourneys = 1, matched = 1))
     }
 
@@ -127,6 +125,40 @@ class ServiceJourneySalesHandlerTest {
     }
 
     @Test
+    fun shouldAddOperatingDaysToExistingOperatingDaysElement() {
+        writeTimetableSharedDataFile(inputDir, existingOperatingDay = true)
+        writeTimetableLineFile("line_matched.xml", "SE:100:Line:1", trainNr = "100", dayTypeRef = "SE:100:DayType:mondays")
+
+        filter()
+
+        val serviceCalendarFrame = readSharedServiceCalendarFrame()
+        assertThat(serviceCalendarFrame.getChildren("operatingDays", namespace)).hasSize(1)
+        assertThat(ids(serviceCalendarFrame, "OperatingDay"))
+            .containsExactly(EXISTING_OPERATING_DAY_ID, "SE:100:OperatingDay:2026-11-02")
+    }
+
+    @Test
+    fun shouldNotWriteOperatingDaysOfConvertedServiceJourneyOnRemovedLine() {
+        // Public code "NO 1" makes the line removal remove the Line and its ServiceJourney
+        writeTimetableLineFile(
+            "line_removed.xml",
+            "SE:100:Line:1",
+            trainNr = "100",
+            dayTypeRef = "SE:100:DayType:mondays",
+            linePublicCode = "NO 1",
+        )
+
+        filter()
+
+        // The ServiceJourney was matched, but the repository keeps only the exported ServiceJourneys
+        assertThat(salesEnrichment().matchSummary).isEqualTo(SalesTimetableMatcher.MatchSummary(railServiceJourneys = 1, matched = 1))
+        assertThat(salesEnrichment().convertedServiceJourneyIds).isEmpty()
+        assertThat(readSharedServiceCalendarFrame().getChild("operatingDays", namespace)).isNull()
+        // The calendar data of the converted ServiceJourney is removed too
+        assertThat(ids(readSharedServiceCalendarFrame(), "DayType")).containsExactly("SE:100:DayType:datesOnly")
+    }
+
+    @Test
     fun shouldNotChangeServiceJourneyWithoutMatchOrItsCalendarData() {
         writeTimetableLineFile("line_unmatched.xml", "SE:100:Line:1", trainNr = "100", dayTypeRef = "SE:100:DayType:datesOnly")
 
@@ -140,7 +172,7 @@ class ServiceJourneySalesHandlerTest {
         val serviceCalendarFrame = readSharedServiceCalendarFrame()
         assertThat(serviceCalendarFrame.getChild("operatingDays", namespace)).isNull()
         assertThat(ids(serviceCalendarFrame, "DayType")).containsExactlyInAnyOrder("SE:100:DayType:mondays", "SE:100:DayType:datesOnly")
-        assertThat(timetableFilterConfig.salesEnrichmentPlan.matchSummary)
+        assertThat(salesEnrichment().matchSummary)
             .isEqualTo(SalesTimetableMatcher.MatchSummary(railServiceJourneys = 1, noOperatingDateOverlap = 1))
     }
 
@@ -148,17 +180,14 @@ class ServiceJourneySalesHandlerTest {
     fun shouldNotMatchAnyServiceJourneyWithoutSalesData() {
         writeTimetableLineFile("line_matched.xml", "SE:100:Line:1", trainNr = "100", dayTypeRef = "SE:100:DayType:mondays")
         val unpatchedFilterConfig =
-            TimetableFilterConfig(
-                CliConfig(sourceCodespace = "SE", targetCodespace = "SE", transportModes = listOf(TransportMode.BUS)),
-                salesData.forCarriers(emptySet()),
-            )
+            TimetableFilterConfig(salesCliConfig(), salesData.forCarriers(emptySet()))
 
         filter(unpatchedFilterConfig)
 
         val serviceJourney = readServiceJourney("line_matched.xml")
         assertThat(serviceJourney.getChild("keyList", namespace)).isNull()
         assertThat(serviceJourney.getChild("dayTypes", namespace)).isNotNull()
-        assertThat(unpatchedFilterConfig.salesEnrichmentPlan.matchSummary).isEqualTo(SalesTimetableMatcher.MatchSummary())
+        assertThat(salesEnrichment(unpatchedFilterConfig).matchSummary).isEqualTo(SalesTimetableMatcher.MatchSummary())
     }
 
     @Test
@@ -232,12 +261,7 @@ class ServiceJourneySalesHandlerTest {
             )
         val prioritizingFilterConfig =
             TimetableFilterConfig(
-                CliConfig(
-                    sourceCodespace = "SE",
-                    targetCodespace = "SE",
-                    transportModes = listOf(TransportMode.BUS),
-                    salesAuthorityNumberPriority = listOf("275", "74"),
-                ),
+                salesCliConfig(salesAuthorityNumberPriority = listOf("275", "74")),
                 disagreeingSalesData,
             )
         writeTimetableLineFile("line_matched.xml", "SE:100:Line:1", trainNr = "100", dayTypeRef = "SE:100:DayType:mondays")
@@ -257,6 +281,7 @@ class ServiceJourneySalesHandlerTest {
         serviceJourneyValidBetween: Boolean = false,
         // timetable ServiceJourneys have no productCode of their own by default
         existingProductCode: String? = null,
+        linePublicCode: String? = null,
     ) = writeLineFile(
         inputDir,
         fileName,
@@ -268,11 +293,24 @@ class ServiceJourneySalesHandlerTest {
         serviceJourneyKeyList = serviceJourneyKeyList,
         serviceJourneyValidBetween = serviceJourneyValidBetween,
         productCode = existingProductCode,
+        linePublicCode = linePublicCode,
     )
 
+    private fun salesCliConfig(salesAuthorityNumberPriority: List<String> = emptyList()) =
+        CliConfig(
+            sourceCodespace = "SE",
+            targetCodespace = "SE",
+            transportModes = listOf(TransportMode.BUS),
+            salesAuthorityNumberPriority = salesAuthorityNumberPriority,
+            timetableFilterFeatures = TimetableFilterFeatures(useSalesData = true),
+        )
+
     private fun filter(filterConfig: TimetableFilterConfig = timetableFilterConfig) {
-        NetexProcessor(filterConfig = filterConfig.build()).run(inputDir.toFile(), outputDir.toFile())
+        filterConfig.run(inputDir.toFile(), outputDir.toFile())
     }
+
+    private fun salesEnrichment(filterConfig: TimetableFilterConfig = timetableFilterConfig): SalesEnrichment =
+        filterConfig.salesMatchRepository.salesEnrichment
 
     private fun readServiceJourney(fileName: String): Element = readElements(fileName, "ServiceJourney").single()
 

@@ -1,7 +1,12 @@
 package org.entur.ror.ubelluris.sax.plugins
 
+import org.entur.netex.tools.lib.selections.EntitySelection
+import org.entur.netex.tools.lib.selections.RefSelection
+import org.entur.ror.ubelluris.filter.SelectionDependent
 import org.entur.ror.ubelluris.model.DayTypeDateAssignment
+import org.entur.ror.ubelluris.model.NetexTypes
 import org.entur.ror.ubelluris.model.SharedCalendarData
+import org.entur.ror.ubelluris.sales.SalesEnrichment
 import org.entur.ror.ubelluris.sales.TimetableRailServiceJourney
 import java.time.DayOfWeek
 import java.time.LocalDate
@@ -21,13 +26,25 @@ data class CollectedServiceJourney(
 )
 
 /**
- * Stores the timetable data that [SalesMatchDataCollector] collects to match ServiceJourneys with the sales data.
- * Read it only after the collector has collected all files, i.e. from entity selectors or export handlers.
+ * The only connection between the sales steps of the timetable filter. It has two sections:
+ * - collected data: [SalesMatchDataCollector] writes it while it reads the files.
+ *   Read it only after the collector has collected all files.
+ * - [salesEnrichment]: TimetableFilterConfig.run writes it after the collection and before the entity selection.
+ *   [updateBasedOnSelection] reduces it to the ServiceJourneys that the export writes.
  */
-class SalesMatchRepository {
+class SalesMatchRepository : SelectionDependent {
     companion object {
         private const val RAIL_TRANSPORT_MODE = "rail"
     }
+
+    private var plannedSalesEnrichment: SalesEnrichment? = null
+
+    /** Entity selectors read all converted ServiceJourneys. Export handlers read only the exported ones. */
+    var salesEnrichment: SalesEnrichment
+        get() = checkNotNull(plannedSalesEnrichment) { "The sales enrichment is not planned before the collection is done" }
+        set(salesEnrichment) {
+            plannedSalesEnrichment = salesEnrichment
+        }
 
     private val daysOfWeekByDayTypeId = mutableMapOf<String, List<DayOfWeek>>()
     private val fromDateByOperatingPeriodId = mutableMapOf<String, LocalDateTime>()
@@ -149,6 +166,14 @@ class SalesMatchRepository {
 
     /** The last child of the ServiceJourney, in schema order, that must come before keyList, or null when it has none. */
     fun lastElementBeforeKeyList(serviceJourneyId: String): String? = serviceJourneysById[serviceJourneyId]?.lastElementBeforeKeyList
+
+    override fun updateBasedOnSelection(
+        entitySelection: EntitySelection,
+        refSelection: RefSelection,
+    ) {
+        val exportedServiceJourneyIds = entitySelection.selection[NetexTypes.SERVICE_JOURNEY]?.keys.orEmpty()
+        salesEnrichment = salesEnrichment.restrictedTo(exportedServiceJourneyIds)
+    }
 
     private fun resolveTransportMode(serviceJourney: CollectedServiceJourney): String? =
         serviceJourney.transportMode

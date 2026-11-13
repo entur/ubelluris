@@ -60,14 +60,8 @@ class SalesDataService(
 
         val trainNrServiceJourneysMap =
             lineFilePaths
-                .flatMap { lineFilePath ->
-                    try {
-                        lineFileParser.parse(lineFilePath)
-                    } catch (exception: Exception) {
-                        logger.warn("Failed to parse sales line file ${lineFilePath.name}", exception)
-                        emptyList()
-                    }
-                }.groupBy { it.trainNr }
+                .flatMap { lineFilePath -> lineFileParser.parse(lineFilePath) }
+                .groupBy { it.trainNr }
 
         logger.info("Collected sales ServiceJourneys for {} train numbers", trainNrServiceJourneysMap.size)
         return trainNrServiceJourneysMap
