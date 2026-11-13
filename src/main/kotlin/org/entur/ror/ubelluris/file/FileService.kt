@@ -20,6 +20,7 @@ class FileService(
     fun createFetcher(
         stopPlaceBlobPath: String,
         timetableBlobPaths: Map<String, String>,
+        salesBlobPath: String?,
     ): FileFetcher {
         if (config.downloadEnabled) {
             val storage = createStorage()
@@ -28,10 +29,11 @@ class FileService(
                 config = config,
                 stopPlaceBlobPath = stopPlaceBlobPath,
                 timetableBlobPaths = timetableBlobPaths,
+                salesBlobPath = salesBlobPath,
             )
         }
 
-        return LocalFileFetcher(stopPlaceBlobPath, timetableBlobPaths)
+        return LocalFileFetcher(stopPlaceBlobPath, timetableBlobPaths, salesBlobPath)
     }
 
     fun createPublisher(

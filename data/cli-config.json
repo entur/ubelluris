@@ -17,5 +17,30 @@
   "filterPublicCodes": [
     "*"
   ],
-  "dropParentStops": true
+  "dropParentStops": true,
+  "lineTransportModesToRemove": ["taxi"],
+  "salesAuthorityNumberPriority": ["74"],
+  "salesPatches": [
+    {
+      "provider": "sj",
+      "carrier": "74"
+    }
+  ],
+  "timetableFilterFeatures": {
+    "versionRefNormalizer" : true,
+    "transportModeToLocalScheduledStopPoint" : true,
+    "lineRemovalBasedOnPublicCodes" : true,
+    "lineRemovalBasedOnTransportMode" : true,
+    "skipTopographicPlaceCountryRef" : true,
+    "skipRequestStop" : true,
+    "publicationTimestamp" : true,
+    "bookWhenFilter" : true,
+    "timetabledPassingTimeId" : true,
+    "interchangeDeduplication" : true,
+    "firstAndLastStopBoardingAlighting" : true,
+    "emptyGroupOfStopPlacesMembersFilter" : true,
+    "lineOperatorEnricher" : true,
+    "pruneUnreferencedEntities" : true,
+    "useSalesData" : true
+  }
 }

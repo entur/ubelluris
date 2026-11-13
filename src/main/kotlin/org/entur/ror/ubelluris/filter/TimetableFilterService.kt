@@ -1,9 +1,9 @@
 package org.entur.ror.ubelluris.filter
 
 import net.logstash.logback.argument.StructuredArguments.kv
-import org.entur.netex.tools.lib.app.FilterNetexApp
 import org.entur.netex.tools.lib.report.FilterReport
 import org.entur.ror.ubelluris.config.CliConfig
+import org.entur.ror.ubelluris.model.SalesData
 import org.entur.ror.ubelluris.model.TimetableData
 import org.entur.ror.ubelluris.sax.enrichment.LineOperatorInserter
 import org.entur.ror.ubelluris.utils.LogKeys.PROVIDER
@@ -20,17 +20,21 @@ class TimetableFilterService(
 ) {
     private val logger = LoggerFactory.getLogger(javaClass)
 
-    fun process(rawTimetableData: Map<String, Path>): Map<String, TimetableData> {
+    fun process(
+        rawTimetableData: Map<String, Path>,
+        salesData: SalesData,
+    ): Map<String, TimetableData> {
         logger.info("Starting timetable filtering for providers: ${rawTimetableData.keys}")
 
         return rawTimetableData.mapValues { (provider, path) ->
-            filterProvider(provider, path.toFile())
+            filterProvider(provider, path.toFile(), salesData)
         }
     }
 
     private fun filterProvider(
         provider: String,
         rawData: File,
+        salesData: SalesData,
     ): TimetableData =
         MDC.putCloseable(PROVIDER, provider).use {
             logger.info("Filtering timetables for provider: {} from: {}", kv(PROVIDER, provider), rawData)
@@ -38,13 +42,15 @@ class TimetableFilterService(
             val resultsDir = Path(cliConfig.resultsDir).resolve(provider)
             Files.createDirectories(resultsDir)
 
-            val filterConfig = TimetableFilterConfig(cliConfig)
-            val filterResult =
-                FilterNetexApp(
-                    filterConfig = filterConfig.build(),
-                    input = rawData,
-                    target = resultsDir.toFile(),
-                ).run()
+            val salesPatchCarriers = cliConfig.salesPatchCarriers(provider)
+            val salesPatchData = salesData.forCarriers(salesPatchCarriers)
+            if (salesPatchCarriers.isEmpty()) {
+                logger.info("No sales patch configured for {}", kv(PROVIDER, provider))
+            } else if (salesPatchData.trainNrServiceJourneysMap.isEmpty()) {
+                logger.warn("Sales data has no service journeys for the carriers {} of {}", salesPatchCarriers, kv(PROVIDER, provider))
+            }
+            val filterConfig = TimetableFilterConfig(cliConfig, salesPatchData)
+            val filterResult = filterConfig.run(rawData, resultsDir.toFile())
 
             // Post-process: enrich Lines with OperatorRef from ServiceJourneys
             val lineOperatorInserter = LineOperatorInserter(filterConfig.lineOperatorEnricher)
@@ -74,6 +80,17 @@ class TimetableFilterService(
                         logger.warn("Failed to enrich operators for file: ${xmlFile.fileName}", e)
                     }
                 }
+
+            if (cliConfig.timetableFilterFeatures.useSalesData && salesPatchCarriers.isNotEmpty()) {
+                val salesEnrichment = filterConfig.salesMatchRepository.salesEnrichment
+                logger.info(
+                    "Sales match summary for {}: {}. Converted {} service journeys to dated service journeys on {} operating days",
+                    kv(PROVIDER, provider),
+                    salesEnrichment.matchSummary,
+                    salesEnrichment.convertedServiceJourneyIds.size,
+                    salesEnrichment.operatingDays.size,
+                )
+            }
 
             val quayModes = filterConfig.transportModeToLocalScheduledStopPointMapper.getCollectedData()
 

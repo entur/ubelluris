@@ -1,14 +1,20 @@
 package org.entur.ror.ubelluris.filter
 
+import org.entur.netex.tools.lib.NetexProcessor
 import org.entur.netex.tools.lib.config.FilterConfig
 import org.entur.netex.tools.lib.config.FilterConfigBuilder
 import org.entur.netex.tools.lib.output.XMLElementHandler
+import org.entur.netex.tools.lib.report.FilterReport
 import org.entur.ror.ubelluris.config.CliConfig
 import org.entur.ror.ubelluris.model.NetexTypes
+import org.entur.ror.ubelluris.model.SalesData
+import org.entur.ror.ubelluris.sales.SalesEnrichmentPlanner
 import org.entur.ror.ubelluris.sax.handlers.BookWhenFilterHandler
 import org.entur.ror.ubelluris.sax.handlers.EmptyMembersFilterHandler
 import org.entur.ror.ubelluris.sax.handlers.PublicationTimestampHandler
+import org.entur.ror.ubelluris.sax.handlers.SalesOperatingDaysHandler
 import org.entur.ror.ubelluris.sax.handlers.ServiceJourneyInterchangeDeduplicationHandler
+import org.entur.ror.ubelluris.sax.handlers.ServiceJourneySalesHandler
 import org.entur.ror.ubelluris.sax.handlers.StopPointInJourneyPatternBoardingAlightingHandler
 import org.entur.ror.ubelluris.sax.handlers.TimetabledPassingTimeIdHandler
 import org.entur.ror.ubelluris.sax.handlers.VersionRefNormalizerHandler
@@ -17,13 +23,18 @@ import org.entur.ror.ubelluris.sax.plugins.LineFilteringRepository
 import org.entur.ror.ubelluris.sax.plugins.LineOperatorEnricher
 import org.entur.ror.ubelluris.sax.plugins.LinePublicCodeFilterPlugin
 import org.entur.ror.ubelluris.sax.plugins.LineTransportModeFilterPlugin
+import org.entur.ror.ubelluris.sax.plugins.SalesMatchDataCollector
+import org.entur.ror.ubelluris.sax.plugins.SalesMatchRepository
 import org.entur.ror.ubelluris.sax.plugins.ServiceJourneyInterchangeCollectorPlugin
 import org.entur.ror.ubelluris.sax.plugins.TransportModeToLocalScheduledStopPointMapper
 import org.entur.ror.ubelluris.sax.plugins.VersionRefNormalizerPlugin
 import org.entur.ror.ubelluris.sax.selectors.entities.CascadingLineRemovalSelector
+import org.entur.ror.ubelluris.sax.selectors.entities.ConvertedServiceJourneyCalendarPruningSelector
+import java.io.File
 
 class TimetableFilterConfig(
     cliConfig: CliConfig,
+    salesData: SalesData,
 ) : FilterProfileConfiguration {
     private val features = cliConfig.timetableFilterFeatures
 
@@ -32,6 +43,16 @@ class TimetableFilterConfig(
     val journeyPatternStopPointCollectorPlugin = JourneyPatternStopPointCollectorPlugin()
     val lineOperatorEnricher = LineOperatorEnricher()
     val versionRefNormalizerPlugin = VersionRefNormalizerPlugin()
+    val salesMatchRepository = SalesMatchRepository()
+    private val salesMatchDataCollector = SalesMatchDataCollector(salesMatchRepository)
+    private val salesEnrichmentPlanner = SalesEnrichmentPlanner(salesData, cliConfig.salesAuthorityNumberPriority)
+    private val serviceJourneySalesHandler = ServiceJourneySalesHandler(salesMatchRepository)
+    private val salesOperatingDaysHandler = SalesOperatingDaysHandler(salesMatchRepository)
+
+    private val selectionDependents: List<SelectionDependent> =
+        buildList {
+            if (features.useSalesData) add(salesMatchRepository)
+        }
 
     private val linePublicCodeRegexPatterns =
         listOf(
@@ -49,6 +70,29 @@ class TimetableFilterConfig(
             transportModesToRemove = cliConfig.lineTransportModesToRemove.toSet(),
             repository = lineFilteringRepository,
         )
+
+    /**
+     * Filters the NeTEx files in [inputDir] into [targetDir]. Runs the steps one by one, and the repositories are
+     * the only connection between them:
+     * 1. Collect: plugins write the collected data into the repositories.
+     * 2. Enrich: the planner writes the sales enrichment into the repository.
+     * 3. Select: entity selectors read the repositories.
+     * 4. Apply the selection: the repositories keep only the data of the selected entities.
+     * 5. Write: handlers read the repositories.
+     */
+    fun run(
+        inputDir: File,
+        targetDir: File,
+    ): FilterReport {
+        val netexProcessor = NetexProcessor(filterConfig = build())
+        netexProcessor.buildEntityModel(inputDir)
+        if (features.useSalesData) {
+            salesMatchRepository.salesEnrichment = salesEnrichmentPlanner.plan(salesMatchRepository)
+        }
+        val (entitySelection, refSelection) = netexProcessor.selectEntities()
+        selectionDependents.forEach { it.updateBasedOnSelection(entitySelection, refSelection) }
+        return netexProcessor.exportToFiles(inputDir, targetDir, entitySelection, refSelection)
+    }
 
     override fun build(): FilterConfig {
         val handlerMap = mutableMapOf<String, XMLElementHandler>()
@@ -84,6 +128,15 @@ class TimetableFilterConfig(
             ] = TimetabledPassingTimeIdHandler()
         }
 
+        if (features.useSalesData) {
+            ServiceJourneySalesHandler.handledPaths.forEach { path ->
+                handlerMap[path] = serviceJourneySalesHandler
+            }
+            SalesOperatingDaysHandler.handledPaths.forEach { path ->
+                handlerMap[path] = salesOperatingDaysHandler
+            }
+        }
+
         if (features.interchangeDeduplication) {
             registerInterchangeDeduplication(handlerMap)
         }
@@ -98,6 +151,7 @@ class TimetableFilterConfig(
 
         val plugins =
             buildList {
+                if (features.useSalesData) add(salesMatchDataCollector)
                 if (features.versionRefNormalizer) add(versionRefNormalizerPlugin)
                 if (features.transportModeToLocalScheduledStopPoint) add(transportModeToLocalScheduledStopPointMapper)
                 if (features.interchangeDeduplication) add(interchangeCollectorPlugin)
@@ -111,7 +165,10 @@ class TimetableFilterConfig(
             features.lineRemovalBasedOnPublicCodes || features.lineRemovalBasedOnTransportMode
 
         val entitySelectors =
-            if (lineRemovalEnabled) listOf(CascadingLineRemovalSelector(lineFilteringRepository)) else emptyList()
+            buildList {
+                if (lineRemovalEnabled) add(CascadingLineRemovalSelector(lineFilteringRepository))
+                if (features.useSalesData) add(ConvertedServiceJourneyCalendarPruningSelector(salesMatchRepository))
+            }
 
         val skipElements =
             buildList {
@@ -200,7 +257,8 @@ class TimetableFilterConfig(
     }
 
     private fun registerBoardingAlighting(handlerMap: MutableMap<String, XMLElementHandler>) {
-        val boardingAlightingHandler = StopPointInJourneyPatternBoardingAlightingHandler(journeyPatternStopPointCollectorPlugin)
+        val boardingAlightingHandler =
+            StopPointInJourneyPatternBoardingAlightingHandler(journeyPatternStopPointCollectorPlugin)
         listOf(
             "/PublicationDelivery/dataObjects/CompositeFrame/frames/ServiceFrame/journeyPatterns/JourneyPattern",
             "/PublicationDelivery/dataObjects/ServiceFrame/journeyPatterns/JourneyPattern",
