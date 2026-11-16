@@ -31,6 +31,9 @@ data class CollectedServiceJourney(
  *   Read it only after the collector has collected all files.
  * - [salesEnrichment]: TimetableFilterConfig.run writes it after the collection and before the entity selection.
  *   [updateBasedOnSelection] reduces it to the ServiceJourneys that the export writes.
+ *
+ * The repository throws on invalid data: duplicate ServiceJourney ids, OperatingPeriods without both FromDate and ToDate,
+ * ServiceJourneys whose Line does not resolve, and TrainNumberRefs that do not resolve.
  */
 class SalesMatchRepository : SelectionDependent {
     companion object {
@@ -127,36 +130,57 @@ class SalesMatchRepository : SelectionDependent {
     }
 
     fun addServiceJourney(serviceJourney: CollectedServiceJourney) {
+        check(serviceJourney.id !in serviceJourneysById) { "Duplicate ServiceJourney id: ${serviceJourney.id}" }
         serviceJourneysById[serviceJourney.id] = serviceJourney
     }
 
-    /** The calendar of the provider. OperatingPeriods without both FromDate and ToDate are left out. */
-    fun calendar(): SharedCalendarData =
-        SharedCalendarData(
+    /** The calendar of the provider. Fails when an OperatingPeriod does not have both FromDate and ToDate. */
+    fun calendar(): SharedCalendarData {
+        val operatingPeriodIdsWithFromDate = fromDateByOperatingPeriodId.keys
+        val operatingPeriodIdsWithToDate = toDateByOperatingPeriodId.keys
+        val incompleteOperatingPeriodIds =
+            (operatingPeriodIdsWithFromDate union operatingPeriodIdsWithToDate) -
+                (operatingPeriodIdsWithFromDate intersect operatingPeriodIdsWithToDate)
+        check(incompleteOperatingPeriodIds.isEmpty()) {
+            "OperatingPeriods without both FromDate and ToDate: ${incompleteOperatingPeriodIds.sorted()}"
+        }
+        return SharedCalendarData(
             dayTypes = daysOfWeekByDayTypeId.toMap(),
             operatingPeriods =
-                fromDateByOperatingPeriodId
-                    .mapNotNull { (operatingPeriodId, fromDate) ->
-                        toDateByOperatingPeriodId[operatingPeriodId]?.let { toDate -> operatingPeriodId to Pair(fromDate, toDate) }
-                    }.toMap(),
+                fromDateByOperatingPeriodId.mapValues { (operatingPeriodId, fromDate) ->
+                    Pair(fromDate, toDateByOperatingPeriodId.getValue(operatingPeriodId))
+                },
             dayTypeAssignments = operatingPeriodIdByDayTypeId.toMap(),
             dayTypeDateAssignments = dateAssignmentsByDayTypeId.mapValues { (_, dates) -> dates.toList() },
         )
+    }
 
     /**
      * The ServiceJourneys that are trains. A ServiceJourney TransportMode overrides the Line TransportMode,
-     * e.g. replacement buses on rail lines. TrainNumberRefs that do not resolve to a TrainNumber are left out.
+     * e.g. replacement buses on rail lines. Fails when the Line or a TrainNumberRef of any ServiceJourney does not resolve.
      */
-    fun railServiceJourneys(): List<TimetableRailServiceJourney> =
-        serviceJourneysById.values
+    fun railServiceJourneys(): List<TimetableRailServiceJourney> {
+        serviceJourneysById.values.forEach(::requireResolvedReferences)
+        return serviceJourneysById.values
             .filter { resolveTransportMode(it) == RAIL_TRANSPORT_MODE }
             .map { serviceJourney ->
                 TimetableRailServiceJourney(
                     serviceJourneyId = serviceJourney.id,
-                    trainNrs = serviceJourney.trainNumberRefs.mapNotNull { trainNrByTrainNumberId[it] },
+                    trainNrs = serviceJourney.trainNumberRefs.map { trainNrByTrainNumberId.getValue(it) },
                     dayTypeRefs = serviceJourney.dayTypeRefs,
                 )
             }
+    }
+
+    private fun requireResolvedReferences(serviceJourney: CollectedServiceJourney) {
+        checkNotNull(lineId(serviceJourney.id)) {
+            "Unresolved Line for ServiceJourney ${serviceJourney.id}: JourneyPatternRef -> RouteRef -> LineRef does not resolve"
+        }
+        val unresolvedTrainNumberRefs = serviceJourney.trainNumberRefs.filterNot { it in trainNrByTrainNumberId }
+        check(unresolvedTrainNumberRefs.isEmpty()) {
+            "Unresolved TrainNumberRefs in ServiceJourney ${serviceJourney.id}: $unresolvedTrainNumberRefs"
+        }
+    }
 
     /** True when the ServiceJourney has its own keyList. A keyList of a nested entity, e.g. ServiceFacilitySet, does not count. */
     fun hasKeyList(serviceJourneyId: String): Boolean = serviceJourneysById[serviceJourneyId]?.keyListKeys != null
@@ -175,10 +199,13 @@ class SalesMatchRepository : SelectionDependent {
         salesEnrichment = salesEnrichment.restrictedTo(exportedServiceJourneyIds)
     }
 
+    /** Follows ServiceJourney -> JourneyPatternRef -> RouteRef -> LineRef. Null when a reference does not resolve. */
+    fun lineId(serviceJourneyId: String): String? =
+        serviceJourneysById[serviceJourneyId]
+            ?.journeyPatternRef
+            ?.let { routeIdByJourneyPatternId[it] }
+            ?.let { lineIdByRouteId[it] }
+
     private fun resolveTransportMode(serviceJourney: CollectedServiceJourney): String? =
-        serviceJourney.transportMode
-            ?: serviceJourney.journeyPatternRef
-                ?.let { routeIdByJourneyPatternId[it] }
-                ?.let { lineIdByRouteId[it] }
-                ?.let { transportModeByLineId[it] }
+        serviceJourney.transportMode ?: lineId(serviceJourney.id)?.let { transportModeByLineId[it] }
 }

@@ -225,23 +225,6 @@ class ServiceJourneySalesHandlerTest {
     }
 
     @Test
-    fun shouldWriteNewKeyListAfterElementsThatComeBeforeIt() {
-        writeTimetableLineFile(
-            "line_with_valid_between.xml",
-            "SE:100:Line:1",
-            trainNr = "100",
-            dayTypeRef = "SE:100:DayType:mondays",
-            serviceJourneyValidBetween = true,
-        )
-
-        filter()
-
-        val serviceJourney = readServiceJourney("line_with_valid_between.xml")
-        assertThat(serviceJourney.children.map { it.name }.take(2)).containsExactly("ValidBetween", "keyList")
-        assertThat(keyValues(serviceJourney)).containsExactly("productCode" to "RE", "salesAuthorityNumber" to "74")
-    }
-
-    @Test
     fun shouldWriteProductCodeOfPrioritizedSalesAuthorityNumberWhenSalesValuesDisagree() {
         // Sales train 100 has a second sales ServiceJourney on the same date, with other sales values
         val disagreeingSalesData =

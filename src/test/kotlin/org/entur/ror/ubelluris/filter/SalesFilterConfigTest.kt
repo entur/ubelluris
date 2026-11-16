@@ -1,4 +1,4 @@
-package org.entur.ror.ubelluris.sales
+package org.entur.ror.ubelluris.filter
 
 import org.assertj.core.api.Assertions.assertThat
 import org.entur.ror.ubelluris.model.DayTypeDateAssignment
@@ -10,15 +10,13 @@ import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.LocalDateTime
 
-class SalesSharedDataParserTest {
+class SalesFilterConfigTest {
     @TempDir
     lateinit var tempDir: Path
 
-    private val parser = SalesSharedDataParser()
-
     @Test
     fun shouldMapDayTypeToDaysOfWeek() {
-        val result = parser.parse(writeSharedDataFile())
+        val result = SalesFilterConfig().run(writeSharedDataFile().toFile()).calendarData
 
         assertThat(result.dayTypes).containsExactlyInAnyOrderEntriesOf(
             mapOf(
@@ -31,7 +29,7 @@ class SalesSharedDataParserTest {
 
     @Test
     fun shouldMapOperatingPeriodToFromAndToDate() {
-        val result = parser.parse(writeSharedDataFile())
+        val result = SalesFilterConfig().run(writeSharedDataFile().toFile()).calendarData
 
         assertThat(result.operatingPeriods).containsExactlyEntriesOf(
             mapOf(
@@ -43,7 +41,7 @@ class SalesSharedDataParserTest {
 
     @Test
     fun shouldMapDayTypeToOperatingPeriod() {
-        val result = parser.parse(writeSharedDataFile())
+        val result = SalesFilterConfig().run(writeSharedDataFile().toFile()).calendarData
 
         assertThat(result.dayTypeAssignments).containsExactlyInAnyOrderEntriesOf(
             mapOf(
@@ -55,7 +53,7 @@ class SalesSharedDataParserTest {
 
     @Test
     fun shouldMapDayTypeToIncludedAndExcludedDates() {
-        val result = parser.parse(writeSharedDataFile())
+        val result = SalesFilterConfig().run(writeSharedDataFile().toFile()).calendarData
 
         assertThat(result.dayTypeDateAssignments).containsExactlyInAnyOrderEntriesOf(
             mapOf(
@@ -128,6 +126,6 @@ class SalesSharedDataParserTest {
             </PublicationDelivery>
             """.trimIndent(),
         )
-        return sharedDataPath
+        return tempDir
     }
 }
