@@ -34,9 +34,13 @@ import java.io.File
 
 class TimetableFilterConfig(
     cliConfig: CliConfig,
+    provider: String,
     salesData: SalesData,
 ) : FilterProfileConfiguration {
     private val features = cliConfig.timetableFilterFeatures
+
+    /** The sales steps run only for a provider that has a sales patch, so other providers skip the sales collection. */
+    val useSalesData = features.useSalesData && cliConfig.salesPatchCarriers(provider).isNotEmpty()
 
     val transportModeToLocalScheduledStopPointMapper = TransportModeToLocalScheduledStopPointMapper(cliConfig.transportModes)
     val interchangeCollectorPlugin = ServiceJourneyInterchangeCollectorPlugin()
@@ -51,7 +55,7 @@ class TimetableFilterConfig(
 
     private val selectionDependents: List<SelectionDependent> =
         buildList {
-            if (features.useSalesData) add(salesMatchRepository)
+            if (useSalesData) add(salesMatchRepository)
         }
 
     private val linePublicCodeRegexPatterns =
@@ -86,7 +90,7 @@ class TimetableFilterConfig(
     ): FilterReport {
         val netexProcessor = NetexProcessor(filterConfig = build())
         netexProcessor.buildEntityModel(inputDir)
-        if (features.useSalesData) {
+        if (useSalesData) {
             salesMatchRepository.salesEnrichment = salesEnrichmentPlanner.plan(salesMatchRepository)
         }
         val (entitySelection, refSelection) = netexProcessor.selectEntities()
@@ -128,7 +132,7 @@ class TimetableFilterConfig(
             ] = TimetabledPassingTimeIdHandler()
         }
 
-        if (features.useSalesData) {
+        if (useSalesData) {
             ServiceJourneySalesHandler.handledPaths.forEach { path ->
                 handlerMap[path] = serviceJourneySalesHandler
             }
@@ -151,7 +155,7 @@ class TimetableFilterConfig(
 
         val plugins =
             buildList {
-                if (features.useSalesData) add(salesMatchDataCollector)
+                if (useSalesData) add(salesMatchDataCollector)
                 if (features.versionRefNormalizer) add(versionRefNormalizerPlugin)
                 if (features.transportModeToLocalScheduledStopPoint) add(transportModeToLocalScheduledStopPointMapper)
                 if (features.interchangeDeduplication) add(interchangeCollectorPlugin)
@@ -167,7 +171,7 @@ class TimetableFilterConfig(
         val entitySelectors =
             buildList {
                 if (lineRemovalEnabled) add(CascadingLineRemovalSelector(lineFilteringRepository))
-                if (features.useSalesData) add(ConvertedServiceJourneyCalendarPruningSelector(salesMatchRepository))
+                if (useSalesData) add(ConvertedServiceJourneyCalendarPruningSelector(salesMatchRepository))
             }
 
         val skipElements =

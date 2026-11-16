@@ -1,6 +1,7 @@
 package org.entur.ror.ubelluris.sax.handlers
 
 import org.assertj.core.api.Assertions.assertThat
+import org.entur.ror.ubelluris.PROVIDER_WITHOUT_SALES_PATCH
 import org.entur.ror.ubelluris.config.CliConfig
 import org.entur.ror.ubelluris.emptySalesData
 import org.entur.ror.ubelluris.filter.TimetableFilterConfig
@@ -32,7 +33,7 @@ class TimetabledPassingTimeIdHandlerTest {
             }.readBytes()
         File(inputDir, "duplicate-timetabled-passing-time-ids.xml").writeBytes(inputBytes)
 
-        TimetableFilterConfig(cliConfig, emptySalesData()).run(inputDir, outputDir)
+        TimetableFilterConfig(cliConfig, PROVIDER_WITHOUT_SALES_PATCH, emptySalesData()).run(inputDir, outputDir)
 
         val outputFile = outputDir.listFiles()?.firstOrNull()
         requireNotNull(outputFile) { "No output file was created" }
@@ -115,7 +116,7 @@ class TimetabledPassingTimeIdHandlerTest {
 
         File(inputDir, "unique-ids.xml").writeText(xmlContent)
 
-        TimetableFilterConfig(cliConfig, emptySalesData()).run(inputDir, outputDir)
+        TimetableFilterConfig(cliConfig, PROVIDER_WITHOUT_SALES_PATCH, emptySalesData()).run(inputDir, outputDir)
 
         val outputFile = outputDir.listFiles()?.firstOrNull()
         requireNotNull(outputFile) { "No output file was created" }

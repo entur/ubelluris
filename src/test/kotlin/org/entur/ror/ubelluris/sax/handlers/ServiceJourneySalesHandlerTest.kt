@@ -1,6 +1,7 @@
 package org.entur.ror.ubelluris.sax.handlers
 
 import org.assertj.core.api.Assertions.assertThat
+import org.entur.ror.ubelluris.PROVIDER_WITH_SALES_PATCH
 import org.entur.ror.ubelluris.config.CliConfig
 import org.entur.ror.ubelluris.config.TimetableFilterFeatures
 import org.entur.ror.ubelluris.filter.TimetableFilterConfig
@@ -63,7 +64,7 @@ class ServiceJourneySalesHandlerTest {
                 ),
         )
 
-    private val timetableFilterConfig = TimetableFilterConfig(salesCliConfig(), salesData)
+    private val timetableFilterConfig = TimetableFilterConfig(salesCliConfig(), PROVIDER_WITH_SALES_PATCH, salesData)
 
     @BeforeEach
     fun createDirectories() {
@@ -180,7 +181,7 @@ class ServiceJourneySalesHandlerTest {
     fun shouldNotMatchAnyServiceJourneyWithoutSalesData() {
         writeTimetableLineFile("line_matched.xml", "SE:100:Line:1", trainNr = "100", dayTypeRef = "SE:100:DayType:mondays")
         val unpatchedFilterConfig =
-            TimetableFilterConfig(salesCliConfig(), salesData.forCarriers(emptySet()))
+            TimetableFilterConfig(salesCliConfig(), PROVIDER_WITH_SALES_PATCH, salesData.forCarriers(emptySet()))
 
         filter(unpatchedFilterConfig)
 
@@ -245,6 +246,7 @@ class ServiceJourneySalesHandlerTest {
         val prioritizingFilterConfig =
             TimetableFilterConfig(
                 salesCliConfig(salesAuthorityNumberPriority = listOf("275", "74")),
+                PROVIDER_WITH_SALES_PATCH,
                 disagreeingSalesData,
             )
         writeTimetableLineFile("line_matched.xml", "SE:100:Line:1", trainNr = "100", dayTypeRef = "SE:100:DayType:mondays")

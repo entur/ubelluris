@@ -5,6 +5,7 @@ import org.entur.netex.tools.lib.config.FilterConfig
 import org.entur.netex.tools.lib.config.FilterConfigBuilder
 import org.entur.ror.ubelluris.model.NetexTypes
 import org.entur.ror.ubelluris.model.SalesData
+import org.entur.ror.ubelluris.model.SalesKeys
 import org.entur.ror.ubelluris.model.SalesServiceJourney
 import org.entur.ror.ubelluris.sales.TimetableRailServiceJourney
 import org.entur.ror.ubelluris.sax.plugins.KeyValueCollectorPlugin
@@ -19,9 +20,6 @@ import java.io.File
  */
 class SalesFilterConfig : FilterProfileConfiguration {
     companion object {
-        private const val PRODUCT_CODE_KEY = "productCode"
-        private const val SALES_AUTHORITY_NUMBER_KEY = "salesAuthorityNumber"
-
         /** Large subtrees that the sales data does not use. Skipping them keeps the entity model small. */
         private val SKIPPED_ELEMENTS =
             listOf(
@@ -49,8 +47,8 @@ class SalesFilterConfig : FilterProfileConfiguration {
     private val keyValueCollectorPlugin =
         KeyValueCollectorPlugin(
             mapOf(
-                NetexTypes.LINE to setOf(SALES_AUTHORITY_NUMBER_KEY),
-                NetexTypes.SERVICE_JOURNEY to setOf(PRODUCT_CODE_KEY),
+                NetexTypes.LINE to setOf(SalesKeys.SALES_AUTHORITY_NUMBER),
+                NetexTypes.SERVICE_JOURNEY to setOf(SalesKeys.PRODUCT_CODE),
             ),
         )
 
@@ -94,7 +92,7 @@ class SalesFilterConfig : FilterProfileConfiguration {
                 }
             }
 
-        val productCode = keyValueCollectorPlugin.keyValueOrNull(serviceJourneyId, PRODUCT_CODE_KEY)
+        val productCode = keyValueCollectorPlugin.keyValueOrNull(serviceJourneyId, SalesKeys.PRODUCT_CODE)
         if (productCode.isNullOrBlank()) {
             logger.warn("service journey {} has no productCode, skipping", serviceJourneyId)
             return null
@@ -102,7 +100,7 @@ class SalesFilterConfig : FilterProfileConfiguration {
 
         // The repository fails on unresolved Lines, so the Line always resolves here
         val lineId = checkNotNull(salesMatchRepository.lineId(serviceJourneyId))
-        val salesAuthorityNumber = keyValueCollectorPlugin.keyValueOrNull(lineId, SALES_AUTHORITY_NUMBER_KEY)
+        val salesAuthorityNumber = keyValueCollectorPlugin.keyValueOrNull(lineId, SalesKeys.SALES_AUTHORITY_NUMBER)
         if (salesAuthorityNumber.isNullOrBlank()) {
             logger.warn("service journey {} has no salesAuthorityNumber on line {}, skipping", serviceJourneyId, lineId)
             return null

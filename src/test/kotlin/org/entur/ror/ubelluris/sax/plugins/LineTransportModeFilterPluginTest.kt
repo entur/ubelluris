@@ -1,6 +1,7 @@
 package org.entur.ror.ubelluris.sax.plugins
 
 import org.assertj.core.api.Assertions.assertThat
+import org.entur.ror.ubelluris.PROVIDER_WITHOUT_SALES_PATCH
 import org.entur.ror.ubelluris.config.CliConfig
 import org.entur.ror.ubelluris.emptySalesData
 import org.entur.ror.ubelluris.filter.TimetableFilterConfig
@@ -79,6 +80,7 @@ class LineTransportModeFilterPluginTest {
                     targetCodespace = "TEST",
                     transportModes = listOf(TransportMode.TRAM),
                 ),
+                PROVIDER_WITHOUT_SALES_PATCH,
                 emptySalesData(),
             )
 

@@ -3,6 +3,7 @@ package org.entur.ror.ubelluris.sax.handlers
 import org.entur.netex.tools.lib.output.DelegatingXMLElementWriter
 import org.entur.netex.tools.lib.output.XMLElementHandler
 import org.entur.ror.ubelluris.model.NetexTypes
+import org.entur.ror.ubelluris.model.SalesKeys
 import org.entur.ror.ubelluris.sales.SalesTimetableMatcher
 import org.entur.ror.ubelluris.sax.plugins.SalesMatchDataCollector
 import org.entur.ror.ubelluris.sax.plugins.SalesMatchRepository
@@ -19,8 +20,6 @@ class ServiceJourneySalesHandler(
     private val salesMatchRepository: SalesMatchRepository,
 ) : XMLElementHandler {
     companion object {
-        const val PRODUCT_CODE_KEY = "productCode"
-        const val SALES_AUTHORITY_NUMBER_KEY = "salesAuthorityNumber"
         private const val KEY_LIST = "keyList"
         private const val DAY_TYPES = "dayTypes"
         private const val DAY_TYPE_REF = "DayTypeRef"
@@ -155,8 +154,10 @@ class ServiceJourneySalesHandler(
     ): List<Pair<String, String>> {
         val existingKeys = salesMatchRepository.keyListKeys(serviceJourneyId)
         val (alreadyInKeyList, notInKeyList) =
-            listOf(PRODUCT_CODE_KEY to salesValues.productCode, SALES_AUTHORITY_NUMBER_KEY to salesValues.salesAuthorityNumber)
-                .partition { (key, _) -> key in existingKeys }
+            listOf(
+                SalesKeys.PRODUCT_CODE to salesValues.productCode,
+                SalesKeys.SALES_AUTHORITY_NUMBER to salesValues.salesAuthorityNumber,
+            ).partition { (key, _) -> key in existingKeys }
         alreadyInKeyList.forEach { (key, value) ->
             logger.warn("Service journey {} already has KeyValue {}. Sales value {} is not added", serviceJourneyId, key, value)
         }

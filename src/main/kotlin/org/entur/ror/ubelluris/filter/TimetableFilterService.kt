@@ -49,7 +49,7 @@ class TimetableFilterService(
             } else if (salesPatchData.trainNrServiceJourneysMap.isEmpty()) {
                 logger.warn("Sales data has no service journeys for the carriers {} of {}", salesPatchCarriers, kv(PROVIDER, provider))
             }
-            val filterConfig = TimetableFilterConfig(cliConfig, salesPatchData)
+            val filterConfig = TimetableFilterConfig(cliConfig, provider, salesPatchData)
             val filterResult = filterConfig.run(rawData, resultsDir.toFile())
 
             // Post-process: enrich Lines with OperatorRef from ServiceJourneys
@@ -81,7 +81,7 @@ class TimetableFilterService(
                     }
                 }
 
-            if (cliConfig.timetableFilterFeatures.useSalesData && salesPatchCarriers.isNotEmpty()) {
+            if (filterConfig.useSalesData) {
                 val salesEnrichment = filterConfig.salesMatchRepository.salesEnrichment
                 logger.info(
                     "Sales match summary for {}: {}. Converted {} service journeys to dated service journeys on {} operating days",
