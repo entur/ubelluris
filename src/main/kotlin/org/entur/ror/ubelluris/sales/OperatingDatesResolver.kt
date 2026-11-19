@@ -7,7 +7,9 @@ import java.time.LocalDate
  * Resolves the dates a ServiceJourney operates on from the DayTypes it refers to.
  *
  * The dates of one DayType are:
- * - the dates in its OperatingPeriod (FromDate inclusive, ToDate exclusive) that fall on one of its DaysOfWeek,
+ * - the dates in its OperatingPeriods (FromDate inclusive, ToDate exclusive) that fall on one of its DaysOfWeek.
+ *   A DayType can have several OperatingPeriods, and its dates are the union of them,
+ *      https://samtrafiken.atlassian.net/wiki/spaces/SamtrafikenOpenData/pages/989233182/Samtrafiken+NeTEx+export
  * - plus its date assignments with isAvailable true,
  * - minus its date assignments with isAvailable false.
  * An unknown DayType has no dates.
@@ -23,14 +25,14 @@ class OperatingDatesResolver(
         datesByDayTypeId.getOrPut(dayTypeId) {
             val daysOfWeek = calendar.dayTypes[dayTypeId].orEmpty().toSet()
             val periodDates =
-                calendar.dayTypeAssignments[dayTypeId]
-                    ?.let { operatingPeriodId -> calendar.operatingPeriods[operatingPeriodId] }
-                    ?.let { (fromDateTime, toDateTime) ->
+                calendar.operatingPeriodIdsByDayTypeId[dayTypeId]
+                    .orEmpty()
+                    .mapNotNull { operatingPeriodId -> calendar.operatingPeriods[operatingPeriodId] }
+                    .flatMapTo(mutableSetOf()) { (fromDateTime, toDateTime) ->
                         generateSequence(fromDateTime.toLocalDate()) { it.plusDays(1) }
                             .takeWhile { it.atStartOfDay() < toDateTime }
                             .filter { it.dayOfWeek in daysOfWeek }
-                            .toSet()
-                    }.orEmpty()
+                    }
             val (includedDates, excludedDates) = calendar.dayTypeDateAssignments[dayTypeId].orEmpty().partition { it.isAvailable }
             periodDates + includedDates.map { it.date } - excludedDates.map { it.date }.toSet()
         }

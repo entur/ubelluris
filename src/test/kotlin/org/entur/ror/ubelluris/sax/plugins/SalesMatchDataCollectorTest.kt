@@ -44,7 +44,8 @@ class SalesMatchDataCollectorTest {
                     Pair(LocalDateTime.parse("2026-11-02T00:00:00"), LocalDateTime.parse("2026-11-16T00:00:00")),
             ),
         )
-        assertThat(calendar.dayTypeAssignments).containsExactlyEntriesOf(mapOf("SE:100:DayType:mondays" to "SE:100:OperatingPeriod:1"))
+        assertThat(calendar.operatingPeriodIdsByDayTypeId)
+            .containsExactlyEntriesOf(mapOf("SE:100:DayType:mondays" to listOf("SE:100:OperatingPeriod:1")))
         assertThat(calendar.dayTypeDateAssignments).containsExactlyInAnyOrderEntriesOf(
             mapOf(
                 "SE:100:DayType:mondays" to listOf(DayTypeDateAssignment(LocalDate.parse("2026-11-09"), isAvailable = false)),

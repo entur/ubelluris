@@ -52,7 +52,7 @@ class SalesMatchRepository : SelectionDependent {
     private val daysOfWeekByDayTypeId = mutableMapOf<String, List<DayOfWeek>>()
     private val fromDateByOperatingPeriodId = mutableMapOf<String, LocalDateTime>()
     private val toDateByOperatingPeriodId = mutableMapOf<String, LocalDateTime>()
-    private val operatingPeriodIdByDayTypeId = mutableMapOf<String, String>()
+    private val operatingPeriodIdsByDayTypeId = mutableMapOf<String, MutableList<String>>()
     private val dateAssignmentsByDayTypeId = mutableMapOf<String, MutableList<DayTypeDateAssignment>>()
 
     private val routeIdByJourneyPatternId = mutableMapOf<String, String>()
@@ -65,11 +65,15 @@ class SalesMatchRepository : SelectionDependent {
         daysOfWeekByDayTypeId.putIfAbsent(dayTypeId, emptyList())
     }
 
+    /**
+     * Adds the DaysOfWeek of one PropertyOfDay. A DayType can have several PropertyOfDay, and its days are the union of them.
+     * An empty PropertyOfDay means that the service does not run, so it adds no days.
+     */
     fun addDaysOfWeek(
         dayTypeId: String,
         daysOfWeek: List<DayOfWeek>,
     ) {
-        daysOfWeekByDayTypeId[dayTypeId] = daysOfWeek
+        daysOfWeekByDayTypeId[dayTypeId] = (daysOfWeekByDayTypeId[dayTypeId].orEmpty() + daysOfWeek).distinct().sorted()
     }
 
     fun addOperatingPeriodFromDate(
@@ -86,11 +90,12 @@ class SalesMatchRepository : SelectionDependent {
         toDateByOperatingPeriodId[operatingPeriodId] = toDate
     }
 
+    /** A DayType can have several DayTypeAssignments with an OperatingPeriod. All of them are kept. */
     fun addOperatingPeriodAssignment(
         dayTypeId: String,
         operatingPeriodId: String,
     ) {
-        operatingPeriodIdByDayTypeId[dayTypeId] = operatingPeriodId
+        operatingPeriodIdsByDayTypeId.getOrPut(dayTypeId) { mutableListOf() }.add(operatingPeriodId)
     }
 
     fun addDateAssignment(
@@ -150,7 +155,10 @@ class SalesMatchRepository : SelectionDependent {
                 fromDateByOperatingPeriodId.mapValues { (operatingPeriodId, fromDate) ->
                     Pair(fromDate, toDateByOperatingPeriodId.getValue(operatingPeriodId))
                 },
-            dayTypeAssignments = operatingPeriodIdByDayTypeId.toMap(),
+            operatingPeriodIdsByDayTypeId =
+                operatingPeriodIdsByDayTypeId.mapValues { (_, operatingPeriodIds) ->
+                    operatingPeriodIds.toList()
+                },
             dayTypeDateAssignments = dateAssignmentsByDayTypeId.mapValues { (_, dates) -> dates.toList() },
         )
     }

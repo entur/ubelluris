@@ -31,7 +31,13 @@ class NetexDaysOfWeekTest {
 
     @Test
     fun shouldParseNoneAsNoDays() {
-        assertThat(parseNetexDaysOfWeek("None")).isEmpty()
+        assertThat(parseNetexDaysOfWeek("none")).isEmpty()
+    }
+
+    @Test
+    fun shouldFailOnCapitalizedNoneBecauseXsdUsesLowercase() {
+        assertThatThrownBy { parseNetexDaysOfWeek("None") }
+            .hasMessageContaining("Unknown NeTEx DaysOfWeek value: None")
     }
 
     @Test

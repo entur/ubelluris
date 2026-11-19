@@ -5,14 +5,17 @@ import java.time.DayOfWeek
 private val WEEKDAYS = listOf(DayOfWeek.MONDAY, DayOfWeek.TUESDAY, DayOfWeek.WEDNESDAY, DayOfWeek.THURSDAY, DayOfWeek.FRIDAY)
 private val WEEKEND = listOf(DayOfWeek.SATURDAY, DayOfWeek.SUNDAY)
 
-/** The days of each NeTEx DayOfWeekEnumeration value: the single days, and the values Weekdays, Weekend, Everyday and None. */
+/**
+ * The days of each NeTEx DayOfWeekEnumeration value: the single days, and the values Weekdays, Weekend, Everyday and none.
+ * The XSD spells "none" in lowercase, see netex_dayType_propertiesOfDay.xsd.
+ */
 private val DAYS_BY_NETEX_DAY_OF_WEEK: Map<String, List<DayOfWeek>> =
     DayOfWeek.entries.associate { day -> day.name.lowercase().replaceFirstChar { it.uppercase() } to listOf(day) } +
         mapOf(
             "Weekdays" to WEEKDAYS,
             "Weekend" to WEEKEND,
             "Everyday" to WEEKDAYS + WEEKEND,
-            "None" to emptyList(),
+            "none" to emptyList(),
         )
 
 /**

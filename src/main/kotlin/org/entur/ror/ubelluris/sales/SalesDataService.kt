@@ -27,7 +27,7 @@ class SalesDataService(
             "Collected sales shared data: {} day types, {} operating periods, {} day type assignments, {} date assignments",
             calendarData.dayTypes.size,
             calendarData.operatingPeriods.size,
-            calendarData.dayTypeAssignments.size,
+            calendarData.operatingPeriodIdsByDayTypeId.values.sumOf { it.size },
             calendarData.dayTypeDateAssignments.values.sumOf { it.size },
         )
         logger.info("Collected sales ServiceJourneys for {} train numbers", salesData.trainNrServiceJourneysMap.size)

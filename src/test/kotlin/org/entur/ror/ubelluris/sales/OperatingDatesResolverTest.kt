@@ -17,14 +17,20 @@ class OperatingDatesResolverTest {
                     "DayType:mondays" to listOf(DayOfWeek.MONDAY),
                     "DayType:mondaysWithChanges" to listOf(DayOfWeek.MONDAY),
                     "DayType:datesOnly" to emptyList(),
+                    "DayType:mondaysInTwoPeriods" to listOf(DayOfWeek.MONDAY),
                 ),
             operatingPeriods =
-                mapOf("OperatingPeriod:1" to Pair(LocalDateTime.parse("2026-11-02T00:00:00"), LocalDateTime.parse("2026-11-16T00:00:00"))),
-            dayTypeAssignments =
                 mapOf(
-                    "DayType:mondays" to "OperatingPeriod:1",
-                    "DayType:mondaysWithChanges" to "OperatingPeriod:1",
-                    "DayType:datesOnly" to "OperatingPeriod:1",
+                    "OperatingPeriod:1" to Pair(LocalDateTime.parse("2026-11-02T00:00:00"), LocalDateTime.parse("2026-11-16T00:00:00")),
+                    // 2026-12-07 is a Monday. The period covers only that Monday.
+                    "OperatingPeriod:2" to Pair(LocalDateTime.parse("2026-12-07T00:00:00"), LocalDateTime.parse("2026-12-14T00:00:00")),
+                ),
+            operatingPeriodIdsByDayTypeId =
+                mapOf(
+                    "DayType:mondays" to listOf("OperatingPeriod:1"),
+                    "DayType:mondaysWithChanges" to listOf("OperatingPeriod:1"),
+                    "DayType:datesOnly" to listOf("OperatingPeriod:1"),
+                    "DayType:mondaysInTwoPeriods" to listOf("OperatingPeriod:1", "OperatingPeriod:2"),
                 ),
             dayTypeDateAssignments =
                 mapOf(
@@ -42,6 +48,12 @@ class OperatingDatesResolverTest {
     @Test
     fun shouldUseDaysOfWeekWithinOperatingPeriodWithExclusiveToDate() {
         assertThat(resolver.resolve(listOf("DayType:mondays"))).containsExactlyInAnyOrderElementsOf(dates("2026-11-02", "2026-11-09"))
+    }
+
+    @Test
+    fun shouldUseDatesOfAllOperatingPeriodsOfDayType() {
+        assertThat(resolver.resolve(listOf("DayType:mondaysInTwoPeriods")))
+            .containsExactlyInAnyOrderElementsOf(dates("2026-11-02", "2026-11-09", "2026-12-07"))
     }
 
     @Test

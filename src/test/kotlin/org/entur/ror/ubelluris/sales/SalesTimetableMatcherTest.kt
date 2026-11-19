@@ -160,7 +160,7 @@ class SalesTimetableMatcherTest {
         SharedCalendarData(
             dayTypes = emptyMap(),
             operatingPeriods = emptyMap(),
-            dayTypeAssignments = emptyMap(),
+            operatingPeriodIdsByDayTypeId = emptyMap(),
             dayTypeDateAssignments =
                 datesByDayTypeId.associate { (dayTypeId, dates) ->
                     dayTypeId to dates.map { DayTypeDateAssignment(LocalDate.parse(it), isAvailable = true) }

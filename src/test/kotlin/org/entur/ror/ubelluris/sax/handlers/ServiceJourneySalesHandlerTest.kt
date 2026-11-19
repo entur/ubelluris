@@ -58,7 +58,7 @@ class ServiceJourneySalesHandlerTest {
                 SharedCalendarData(
                     dayTypes = emptyMap(),
                     operatingPeriods = emptyMap(),
-                    dayTypeAssignments = emptyMap(),
+                    operatingPeriodIdsByDayTypeId = emptyMap(),
                     dayTypeDateAssignments =
                         mapOf("SE:030:DayType:2nov" to listOf(DayTypeDateAssignment(LocalDate.parse("2026-11-02"), isAvailable = true))),
                 ),

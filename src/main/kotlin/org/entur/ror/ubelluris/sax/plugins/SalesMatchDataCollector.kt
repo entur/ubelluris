@@ -10,7 +10,9 @@ import java.time.LocalDateTime
 
 /**
  * Collects the timetable data needed to match ServiceJourneys with the sales data into [repository]:
- * - from _shared_data: DayTypes, OperatingPeriods and DayTypeAssignments
+ * - from _shared_data: DayTypes, OperatingPeriods and DayTypeAssignments. A DayType can have several DayTypeAssignments
+ *   with an OperatingPeriod, and each of them is added to the repository. A DayType can also have several PropertyOfDay,
+ *   and the DaysOfWeek of each of them is added. An empty PropertyOfDay has no DaysOfWeek, so the service does not run on any day.
  * - from line files: the Line TransportMode via JourneyPattern -> Route -> Line, TrainNumbers, and the ServiceJourneys
  */
 class SalesMatchDataCollector(

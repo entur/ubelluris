@@ -16,7 +16,7 @@ data class SalesData(
                     SharedCalendarData(
                         dayTypes = emptyMap(),
                         operatingPeriods = emptyMap(),
-                        dayTypeAssignments = emptyMap(),
+                        operatingPeriodIdsByDayTypeId = emptyMap(),
                         dayTypeDateAssignments = emptyMap(),
                     ),
             )
@@ -36,7 +36,8 @@ data class SalesData(
 data class SharedCalendarData(
     val dayTypes: Map<String, List<DayOfWeek>>, // DayType id -> DaysOfWeek, empty when the DayType only uses dates
     val operatingPeriods: Map<String, Pair<LocalDateTime, LocalDateTime>>, // OperatingPeriod id -> FromDate, ToDate
-    val dayTypeAssignments: Map<String, String>, // DayType id -> OperatingPeriod id
+    // DayType id -> the OperatingPeriod ids of its DayTypeAssignments. A DayType can have several OperatingPeriods.
+    val operatingPeriodIdsByDayTypeId: Map<String, List<String>>,
     val dayTypeDateAssignments: Map<String, List<DayTypeDateAssignment>>, // DayType id -> dates included or excluded
 )
 
