@@ -30,7 +30,7 @@ class CliConfigTest {
                 targetCodespace = "SAM",
             )
         assertThat(config.timetableProviders)
-            .containsExactly("vt", "halland", "skane")
+            .containsExactly("vt", "halland", "skane", "sj")
         assertThat(config.transportModes)
             .containsExactly(TransportMode.TRAM, TransportMode.WATER)
         assertThat(config.illegalPublicCodes)

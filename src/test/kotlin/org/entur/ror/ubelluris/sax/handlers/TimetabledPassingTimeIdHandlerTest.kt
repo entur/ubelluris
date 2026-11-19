@@ -1,8 +1,9 @@
 package org.entur.ror.ubelluris.sax.handlers
 
 import org.assertj.core.api.Assertions.assertThat
-import org.entur.netex.tools.lib.NetexProcessor
+import org.entur.ror.ubelluris.PROVIDER_WITHOUT_SALES_PATCH
 import org.entur.ror.ubelluris.config.CliConfig
+import org.entur.ror.ubelluris.emptySalesData
 import org.entur.ror.ubelluris.filter.TimetableFilterConfig
 import org.entur.ror.ubelluris.model.TransportMode
 import org.junit.jupiter.api.Test
@@ -23,8 +24,6 @@ class TimetabledPassingTimeIdHandlerTest {
                 targetCodespace = "SE",
                 transportModes = listOf(TransportMode.BUS),
             )
-        val filterConfig = TimetableFilterConfig(cliConfig).build()
-
         val inputDir = Files.createDirectories(tempDir.resolve("input")).toFile()
         val outputDir = Files.createDirectories(tempDir.resolve("output")).toFile()
 
@@ -34,9 +33,7 @@ class TimetabledPassingTimeIdHandlerTest {
             }.readBytes()
         File(inputDir, "duplicate-timetabled-passing-time-ids.xml").writeBytes(inputBytes)
 
-        NetexProcessor(
-            filterConfig = filterConfig,
-        ).run(inputDir, outputDir)
+        TimetableFilterConfig(cliConfig, PROVIDER_WITHOUT_SALES_PATCH, emptySalesData()).run(inputDir, outputDir)
 
         val outputFile = outputDir.listFiles()?.firstOrNull()
         requireNotNull(outputFile) { "No output file was created" }
@@ -85,8 +82,6 @@ class TimetabledPassingTimeIdHandlerTest {
                 targetCodespace = "SE",
                 transportModes = listOf(TransportMode.BUS),
             )
-        val filterConfig = TimetableFilterConfig(cliConfig).build()
-
         val inputDir = Files.createDirectories(tempDir.resolve("input")).toFile()
         val outputDir = Files.createDirectories(tempDir.resolve("output")).toFile()
 
@@ -121,9 +116,7 @@ class TimetabledPassingTimeIdHandlerTest {
 
         File(inputDir, "unique-ids.xml").writeText(xmlContent)
 
-        NetexProcessor(
-            filterConfig = filterConfig,
-        ).run(inputDir, outputDir)
+        TimetableFilterConfig(cliConfig, PROVIDER_WITHOUT_SALES_PATCH, emptySalesData()).run(inputDir, outputDir)
 
         val outputFile = outputDir.listFiles()?.firstOrNull()
         requireNotNull(outputFile) { "No output file was created" }

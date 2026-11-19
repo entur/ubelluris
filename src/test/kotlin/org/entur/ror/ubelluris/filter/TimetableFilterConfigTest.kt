@@ -1,10 +1,15 @@
 package org.entur.ror.ubelluris.filter
 
 import org.assertj.core.api.Assertions.assertThat
-import org.entur.netex.tools.lib.NetexProcessor
+import org.entur.ror.ubelluris.PROVIDER_WITHOUT_SALES_PATCH
+import org.entur.ror.ubelluris.PROVIDER_WITH_SALES_PATCH
 import org.entur.ror.ubelluris.config.CliConfig
+import org.entur.ror.ubelluris.config.SalesPatch
 import org.entur.ror.ubelluris.config.TimetableFilterFeatures
+import org.entur.ror.ubelluris.emptySalesData
 import org.entur.ror.ubelluris.model.TransportMode
+import org.entur.ror.ubelluris.sax.plugins.SalesMatchDataCollector
+import org.entur.ror.ubelluris.sax.selectors.entities.ConvertedServiceJourneyCalendarPruningSelector
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.io.TempDir
 import java.io.File
@@ -26,8 +31,6 @@ class TimetableFilterConfigTest {
                 transportModes = listOf(TransportMode.TRAM),
                 timetableFilterFeatures = timetableFilterFeatures,
             )
-        val filterConfig = TimetableFilterConfig(cliConfig).build()
-
         val inputDir = Files.createDirectories(tempDir.resolve("input")).toFile()
         val outputDir = Files.createDirectories(tempDir.resolve("output")).toFile()
 
@@ -37,9 +40,7 @@ class TimetableFilterConfigTest {
             }.readBytes()
         File(inputDir, resourceFileName).writeBytes(inputBytes)
 
-        NetexProcessor(
-            filterConfig = filterConfig,
-        ).run(inputDir, outputDir)
+        TimetableFilterConfig(cliConfig, PROVIDER_WITHOUT_SALES_PATCH, emptySalesData()).run(inputDir, outputDir)
 
         val outputFile = outputDir.listFiles()?.firstOrNull()
         requireNotNull(outputFile) { "No output file was created" }
@@ -115,16 +116,38 @@ class TimetableFilterConfigTest {
                         emptyGroupOfStopPlacesMembersFilter = false,
                         lineOperatorEnricher = false,
                         pruneUnreferencedEntities = false,
+                        useSalesData = false,
                     ),
             )
 
-        val filterConfig = TimetableFilterConfig(cliConfig).build()
+        val filterConfig = TimetableFilterConfig(cliConfig, PROVIDER_WITHOUT_SALES_PATCH, emptySalesData()).build()
 
         assertThat(filterConfig.plugins).isEmpty()
         assertThat(filterConfig.entitySelectors).isEmpty()
         assertThat(filterConfig.skipElements).isEmpty()
         assertThat(filterConfig.customElementHandlers).isEmpty()
         assertThat(filterConfig.unreferencedEntitiesToPrune).isEmpty()
+    }
+
+    @Test
+    fun shouldUseSalesDataOnlyForProviderWithSalesPatch() {
+        val cliConfig =
+            CliConfig(
+                sourceCodespace = "SE",
+                targetCodespace = "SE",
+                salesPatches = listOf(SalesPatch(PROVIDER_WITH_SALES_PATCH, "74")),
+                timetableFilterFeatures = TimetableFilterFeatures(useSalesData = true),
+            )
+
+        val providerWithSalesPatchConfig = TimetableFilterConfig(cliConfig, PROVIDER_WITH_SALES_PATCH, emptySalesData())
+        val providerWithoutSalesPatchConfig = TimetableFilterConfig(cliConfig, PROVIDER_WITHOUT_SALES_PATCH, emptySalesData())
+
+        assertThat(providerWithSalesPatchConfig.useSalesData).isTrue()
+        assertThat(providerWithSalesPatchConfig.build().plugins).anyMatch { it is SalesMatchDataCollector }
+        assertThat(providerWithoutSalesPatchConfig.useSalesData).isFalse()
+        assertThat(providerWithoutSalesPatchConfig.build().plugins).noneMatch { it is SalesMatchDataCollector }
+        assertThat(providerWithoutSalesPatchConfig.build().entitySelectors)
+            .noneMatch { it is ConvertedServiceJourneyCalendarPruningSelector }
     }
 
     @Test
@@ -158,8 +181,7 @@ class TimetableFilterConfigTest {
                 targetCodespace = "SE",
                 transportModes = listOf(TransportMode.TRAM),
             )
-        val timetableFilterConfig = TimetableFilterConfig(cliConfig)
-        val filterConfig = timetableFilterConfig.build()
+        val timetableFilterConfig = TimetableFilterConfig(cliConfig, PROVIDER_WITHOUT_SALES_PATCH, emptySalesData())
 
         val inputDir = Files.createDirectories(tempDir.resolve("input")).toFile()
         val outputDir = Files.createDirectories(tempDir.resolve("output")).toFile()
@@ -170,9 +192,7 @@ class TimetableFilterConfigTest {
             }.readBytes()
         File(inputDir, "duplicate-service-journey-interchanges.xml").writeBytes(inputBytes)
 
-        NetexProcessor(
-            filterConfig = filterConfig,
-        ).run(inputDir, outputDir)
+        timetableFilterConfig.run(inputDir, outputDir)
 
         // Verify what the plugin collected during parsing
         val identicalDuplicates = timetableFilterConfig.interchangeCollectorPlugin.getIdenticalDuplicates()
@@ -246,7 +266,7 @@ class TimetableFilterConfigTest {
                 targetCodespace = "SE",
                 transportModes = listOf(TransportMode.TRAM),
             )
-        NetexProcessor(filterConfig = TimetableFilterConfig(cliConfig).build()).run(inputDir, outputDir)
+        TimetableFilterConfig(cliConfig, PROVIDER_WITHOUT_SALES_PATCH, emptySalesData()).run(inputDir, outputDir)
 
         listOf("a.xml", "b.xml").forEach { fileName ->
             val result = File(outputDir, fileName).readText()

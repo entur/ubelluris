@@ -11,5 +11,6 @@ interface FilePublisher {
     companion object {
         const val STOPS_DIR = "stops"
         const val TIMETABLE_DIR = "timetable"
+        const val SALES_DIR = "sales"
     }
 }

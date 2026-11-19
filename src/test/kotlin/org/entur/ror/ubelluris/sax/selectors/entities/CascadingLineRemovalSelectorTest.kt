@@ -1,8 +1,9 @@
 package org.entur.ror.ubelluris.sax.selectors.entities
 
 import org.assertj.core.api.Assertions.assertThat
-import org.entur.netex.tools.lib.NetexProcessor
+import org.entur.ror.ubelluris.PROVIDER_WITHOUT_SALES_PATCH
 import org.entur.ror.ubelluris.config.CliConfig
+import org.entur.ror.ubelluris.emptySalesData
 import org.entur.ror.ubelluris.filter.TimetableFilterConfig
 import org.entur.ror.ubelluris.model.TransportMode
 import org.junit.jupiter.api.Test
@@ -23,8 +24,7 @@ class CascadingLineRemovalSelectorTest {
                 targetCodespace = "SE",
                 transportModes = listOf(TransportMode.TRAM),
             )
-        val timetableFilterConfig = TimetableFilterConfig(cliConfig)
-        val filterConfig = timetableFilterConfig.build()
+        val timetableFilterConfig = TimetableFilterConfig(cliConfig, PROVIDER_WITHOUT_SALES_PATCH, emptySalesData())
 
         val inputDir = Files.createDirectories(tempDir.resolve("input")).toFile()
         val outputDir = Files.createDirectories(tempDir.resolve("output")).toFile()
@@ -35,9 +35,7 @@ class CascadingLineRemovalSelectorTest {
             }.readBytes()
         File(inputDir, "nartrafik.xml").writeBytes(inputBytes)
 
-        NetexProcessor(
-            filterConfig = filterConfig,
-        ).run(inputDir, outputDir)
+        timetableFilterConfig.run(inputDir, outputDir)
 
         val repository = timetableFilterConfig.lineFilteringRepository
         val removedLines =

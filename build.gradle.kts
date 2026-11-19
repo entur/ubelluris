@@ -29,6 +29,7 @@ dependencies {
     implementation(libs.jackson.databind)
     testImplementation(kotlin("test"))
     testImplementation(libs.junit.jupiter)
+    testImplementation(libs.netex.java.model)
     testImplementation(libs.assertj.core)
     testImplementation(libs.mockito.core)
     testImplementation(libs.mockito.inline)
