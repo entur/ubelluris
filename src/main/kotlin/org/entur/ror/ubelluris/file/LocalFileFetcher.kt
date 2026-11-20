@@ -33,13 +33,25 @@ class LocalFileFetcher(
     private fun extractTimetable(
         provider: String,
         path: Path,
-    ): Path =
-        if (path.isZip()) {
+    ): Path {
+        val resolvedPath = path.withDirectoryFallback()
+        return if (resolvedPath.isZip()) {
             val outputDir = Files.createDirectories(extractDir.resolve("timetable").resolve(provider))
-            extractZipToDirectory(path, outputDir)
+            extractZipToDirectory(resolvedPath, outputDir)
         } else {
-            path
+            resolvedPath
         }
+    }
 
-    private fun Path.isZip(): Boolean = fileName.toString().endsWith(".zip", ignoreCase = true)
+    private fun Path.withDirectoryFallback(): Path {
+        if (!isZip() || Files.exists(this)) return this
+        val directory = resolveSibling(fileName.toString().dropLast(ZIP_SUFFIX.length))
+        return if (Files.isDirectory(directory)) directory else this
+    }
+
+    private fun Path.isZip(): Boolean = fileName.toString().endsWith(ZIP_SUFFIX, ignoreCase = true)
+
+    companion object {
+        private const val ZIP_SUFFIX = ".zip"
+    }
 }

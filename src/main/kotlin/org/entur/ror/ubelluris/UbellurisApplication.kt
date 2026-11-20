@@ -55,8 +55,10 @@ fun printHelp() {
         """
          Ubelluris takes four mandatory arguments:
         - <cli-config-file-path>      : Path to the configuration file relative to the local directory (e.g. config/cli-config.json)
-        - <stop-place-zip-path>       : Path to the stop place zip file (e.g. 2026/01/01/stops/sweden.zip)
-        - <timetable-input-path>      : Path containing a <provider>.zip per timetable provider (e.g. 2026/01/01/timetable)
+        - <stop-place-zip-path>       : Path to the stop place zip or xml file (e.g. 2026/01/01/stops/sweden.zip)
+        - <timetable-input-path>      : Path containing a <provider>.zip per timetable provider (e.g. 2026/01/01/timetable).
+                                        Locally, a <provider> directory of XML files may be used instead of <provider>.zip
+        - <sales-input-path>          : Path to the sales data file(s) (a zip file or a directory with xml files) (e.g. 2026/01/01/sales)
         - <output-path>               : Output path where stops/ and timetable/ results are written (e.g. 2026/01/01)
         An optional argument:
         - <blacklist-quays-file-path> : Path to the blacklist quays file (e.g. processing/blacklist-quays.txt)
