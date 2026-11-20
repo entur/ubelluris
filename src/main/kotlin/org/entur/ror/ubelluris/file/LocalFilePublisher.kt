@@ -9,7 +9,6 @@ import java.nio.file.StandardCopyOption
 
 class LocalFilePublisher(
     private val outputPath: Path,
-    private val resultsDir: Path,
 ) : FilePublisher {
     private val logger = LoggerFactory.getLogger(javaClass)
 
@@ -18,19 +17,29 @@ class LocalFilePublisher(
         timetablePaths: Map<String, Path>,
     ): Path {
         logger.info("Publishing stop place file: ${stopPlacePath.fileName}")
-        val stopsDir = resultsDir.resolve(outputPath).resolve(FilePublisher.STOPS_DIR)
-        Files.createDirectories(stopsDir)
-        Files.move(stopPlacePath, stopsDir.resolve(stopPlacePath.fileName), StandardCopyOption.REPLACE_EXISTING)
+        val stopsDir = outputPath.resolve(FilePublisher.STOPS_DIR)
+        moveIfNeeded(stopPlacePath, stopsDir)
 
         timetablePaths.forEach { (provider, timetablePath) ->
             logger.info("Publishing timetable for provider: {}", kv(PROVIDER, provider))
-            val providerOutDir = resultsDir.resolve(outputPath).resolve(FilePublisher.TIMETABLE_DIR).resolve(provider)
-            Files.createDirectories(providerOutDir)
-            Files.walk(timetablePath).filter(Files::isRegularFile).forEach { file ->
-                Files.move(file, providerOutDir.resolve(file.fileName), StandardCopyOption.REPLACE_EXISTING)
+            val providerOutDir = outputPath.resolve(FilePublisher.TIMETABLE_DIR).resolve(provider)
+            Files.walk(timetablePath).filter(Files::isRegularFile).toList().forEach { file ->
+                moveIfNeeded(file, providerOutDir)
             }
         }
 
-        return resultsDir
+        return outputPath
+    }
+
+    private fun moveIfNeeded(
+        file: Path,
+        targetDir: Path,
+    ) {
+        val target = targetDir.resolve(file.fileName)
+        if (file.toAbsolutePath().normalize() == target.toAbsolutePath().normalize()) {
+            return
+        }
+        Files.createDirectories(targetDir)
+        Files.move(file, target, StandardCopyOption.REPLACE_EXISTING)
     }
 }

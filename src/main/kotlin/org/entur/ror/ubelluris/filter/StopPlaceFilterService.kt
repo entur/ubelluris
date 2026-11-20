@@ -2,6 +2,7 @@ package org.entur.ror.ubelluris.filter
 
 import org.entur.netex.tools.lib.app.FilterNetexApp
 import org.entur.ror.ubelluris.config.CliConfig
+import org.entur.ror.ubelluris.file.FilePublisher
 import org.entur.ror.ubelluris.model.TimetableData
 import org.entur.ror.ubelluris.processor.KeyValueMigrationProcessor
 import org.entur.ror.ubelluris.processor.StopPlaceTypeNormalizer
@@ -13,14 +14,14 @@ import org.slf4j.LoggerFactory
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.StandardCopyOption
-import kotlin.io.path.Path
 
 class StopPlaceFilterService(
     val cliConfig: CliConfig,
     val blacklistFilePath: String,
+    private val outputPath: Path,
 ) : XmlProcessor {
     private val filterConfig = StandardImportFilterConfig(cliConfig, blacklistFilePath)
-    private val resultsDir = Path(cliConfig.resultsDir)
+    private val stopsDir = outputPath.resolve(FilePublisher.STOPS_DIR)
     private val logger = LoggerFactory.getLogger(javaClass)
 
     private val quayModeMatcher = QuayModeMatcher()
@@ -32,7 +33,7 @@ class StopPlaceFilterService(
         timetableData: Map<String, TimetableData>,
     ): Path {
         val outputFile =
-            resultsDir.resolve(
+            stopsDir.resolve(
                 inputFile.fileName.toString().replace(".xml", "_filtered.xml"),
             )
         return filter(inputFile, outputFile, timetableData)
@@ -43,7 +44,7 @@ class StopPlaceFilterService(
         outputFile: Path,
         timetableData: Map<String, TimetableData> = emptyMap(),
     ): Path {
-        Files.createDirectories(resultsDir)
+        Files.createDirectories(outputFile.toAbsolutePath().parent)
 
         val tempDir = Files.createTempDirectory("ubelluris-filter-")
         logger.info("Temp processing dir: $tempDir")

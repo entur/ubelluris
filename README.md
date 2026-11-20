@@ -70,4 +70,4 @@ Ubelluris fetches input data from and can publish results to Google Cloud Storag
 - **Download enabled** (default): Input data is fetched from `GCS_INPUT_BUCKET`; already-cached files are skipped
 - **Download disabled**: Local cache in `downloads/` is used directly, requires unzipped files; no GCS connection needed for input
 - **Upload enabled**: Result files are uploaded to the specified `GCS_OUTPUT_BUCKET`
-- **Upload disabled** (default): Result files are saved locally to a `results/` directory
+- **Upload disabled** (default): Result files are saved locally under `<output-path>` (in `stops/` and `timetable/<provider>/`)

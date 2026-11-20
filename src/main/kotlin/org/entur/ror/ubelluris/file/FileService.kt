@@ -36,15 +36,12 @@ class FileService(
         return LocalFileFetcher(stopPlaceBlobPath, timetableBlobPaths, salesBlobPath)
     }
 
-    fun createPublisher(
-        outputPath: Path,
-        localCachePath: Path,
-    ): FilePublisher {
+    fun createPublisher(outputPath: Path): FilePublisher {
         if (config.uploadEnabled) {
             val storage = createStorage()
             return GcsFilePublisher(config, storage, outputPath)
         }
 
-        return LocalFilePublisher(outputPath, localCachePath)
+        return LocalFilePublisher(outputPath)
     }
 }

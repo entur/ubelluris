@@ -3,6 +3,7 @@ package org.entur.ror.ubelluris.filter
 import net.logstash.logback.argument.StructuredArguments.kv
 import org.entur.netex.tools.lib.report.FilterReport
 import org.entur.ror.ubelluris.config.CliConfig
+import org.entur.ror.ubelluris.file.FilePublisher
 import org.entur.ror.ubelluris.model.SalesData
 import org.entur.ror.ubelluris.model.TimetableData
 import org.entur.ror.ubelluris.sax.enrichment.LineOperatorInserter
@@ -12,11 +13,11 @@ import org.slf4j.MDC
 import java.io.File
 import java.nio.file.Files
 import java.nio.file.Path
-import kotlin.io.path.Path
 import kotlin.io.path.extension
 
 class TimetableFilterService(
     private val cliConfig: CliConfig,
+    private val outputPath: Path,
 ) {
     private val logger = LoggerFactory.getLogger(javaClass)
 
@@ -39,8 +40,8 @@ class TimetableFilterService(
         MDC.putCloseable(PROVIDER, provider).use {
             logger.info("Filtering timetables for provider: {} from: {}", kv(PROVIDER, provider), rawData)
 
-            val resultsDir = Path(cliConfig.resultsDir).resolve(provider)
-            Files.createDirectories(resultsDir)
+            val providerDir = outputPath.resolve(FilePublisher.TIMETABLE_DIR).resolve(provider)
+            Files.createDirectories(providerDir)
 
             val salesPatchCarriers = cliConfig.salesPatchCarriers(provider)
             val salesPatchData = salesData.forCarriers(salesPatchCarriers)
@@ -50,13 +51,13 @@ class TimetableFilterService(
                 logger.warn("Sales data has no service journeys for the carriers {} of {}", salesPatchCarriers, kv(PROVIDER, provider))
             }
             val filterConfig = TimetableFilterConfig(cliConfig, provider, salesPatchData)
-            val filterResult = filterConfig.run(rawData, resultsDir.toFile())
+            val filterResult = filterConfig.run(rawData, providerDir.toFile())
 
             // Post-process: enrich Lines with OperatorRef from ServiceJourneys
             val lineOperatorInserter = LineOperatorInserter(filterConfig.lineOperatorEnricher)
 
             // After removing lines, some PublicationDeliveries may become "empty"
-            // This will trigger errors in Antur, so we delete those files from the results directory
+            // This will trigger errors in Antur, so we delete those files from the output directory
             val emptyFiles = filesWithoutServiceJourneys(filterResult)
 
             emptyFiles
@@ -71,7 +72,7 @@ class TimetableFilterService(
                 }
 
             Files
-                .walk(resultsDir)
+                .walk(providerDir)
                 .filter { it.extension == "xml" }
                 .forEach { xmlFile ->
                     try {
@@ -96,7 +97,7 @@ class TimetableFilterService(
 
             logger.info("Done processing {}, {} quay mode mappings", kv(PROVIDER, provider), quayModes.size)
 
-            TimetableData(provider, resultsDir, quayModes)
+            TimetableData(provider, providerDir, quayModes)
         }
 
     private fun filesWithoutServiceJourneys(report: FilterReport): Set<File> =

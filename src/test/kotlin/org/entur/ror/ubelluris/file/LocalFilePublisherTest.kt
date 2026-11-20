@@ -7,17 +7,17 @@ import java.nio.file.Files
 import java.nio.file.Path
 
 class LocalFilePublisherTest {
-    private val outputPath = Path.of("2026", "01", "01")
-
     @TempDir
     lateinit var tempDir: Path
 
+    private val outputPath by lazy { tempDir.resolve(Path.of("artifacts", "output")) }
+
     private val publisher by lazy {
-        LocalFilePublisher(outputPath, resultsDir = tempDir.resolve("results"))
+        LocalFilePublisher(outputPath)
     }
 
     @Test
-    fun shouldMoveFilesToResultsDir() {
+    fun shouldMoveFilesToOutputPath() {
         val stopPlaceFile = tempDir.resolve(Path.of("stops", "stops.xml"))
         Files.createDirectories(stopPlaceFile.parent)
         Files.writeString(stopPlaceFile, "<StopPlaces/>")
@@ -25,18 +25,18 @@ class LocalFilePublisherTest {
         val providers = listOf("RUT", "ATB", "FLT")
         val timetablePaths =
             providers.associate { provider ->
-                val dir = tempDir.resolve(outputPath).resolve("timetable").resolve(provider)
+                val dir = tempDir.resolve("input").resolve("timetable").resolve(provider)
                 Files.createDirectories(dir)
                 Files.writeString(dir.resolve("${provider}_line_001.xml"), "<Line />")
                 provider to dir
             }
 
-        val result = publisher.publish(stopPlaceFile, timetablePaths)
+        publisher.publish(stopPlaceFile, timetablePaths)
 
-        val expectedFilePlacement = result.resolve(outputPath).resolve(FilePublisher.STOPS_DIR).resolve(stopPlaceFile.fileName)
+        val expectedFilePlacement = outputPath.resolve(FilePublisher.STOPS_DIR).resolve(stopPlaceFile.fileName)
         assertThat(expectedFilePlacement).hasContent("<StopPlaces/>")
 
-        val timetableDir = result.resolve(outputPath).resolve("timetable")
+        val timetableDir = outputPath.resolve("timetable")
         providers.forEach { provider ->
             val expectedProviderFilePlacement = timetableDir.resolve(provider).resolve("${provider}_line_001.xml")
             assertThat(expectedProviderFilePlacement).hasContent("<Line />")
@@ -44,12 +44,12 @@ class LocalFilePublisherTest {
     }
 
     @Test
-    fun shouldReturnResultsDir() {
+    fun shouldReturnOutputPath() {
         val stopPlaceFile = tempDir.resolve("stops.xml")
         Files.writeString(stopPlaceFile, "<StopPlaces/>")
 
         val result = publisher.publish(stopPlaceFile, emptyMap())
 
-        assertThat(result).isEqualTo(tempDir.resolve("results"))
+        assertThat(result).isEqualTo(outputPath)
     }
 }

@@ -39,14 +39,15 @@ fun main(args: Array<String>) {
 
     UbellurisService(
         fetcher = fileService.createFetcher(stopPlaceBlobPath, timetableBlobPaths, salesInputPath),
-        timetableProcessor = TimetableFilterService(cliConfig),
+        timetableProcessor = TimetableFilterService(cliConfig, outputPath),
         stopPlaceProcessor =
             StopPlaceFilterService(
                 cliConfig = cliConfig,
                 blacklistFilePath = blacklistFilePath,
+                outputPath = outputPath,
             ),
         salesDataProcessor = SalesDataService(cliConfig),
-        publisher = fileService.createPublisher(outputPath, Path(cliConfig.resultsDir)),
+        publisher = fileService.createPublisher(outputPath),
     ).run()
 }
 
