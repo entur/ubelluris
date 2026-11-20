@@ -12,7 +12,6 @@ data class CliConfig(
     val illegalPublicCodes: List<String> = listOf("-"),
     val filterPublicCodes: List<String> = listOf("*"),
     val lineTransportModesToRemove: List<TransportMode> = listOf(TransportMode.TAXI),
-    val resultsDir: String = "results",
     val dropParentStops: Boolean = false,
     val salesAuthorityNumberPriority: List<String> = emptyList(),
     val salesPatches: List<SalesPatch> = listOf(SalesPatch("sj", "74")),

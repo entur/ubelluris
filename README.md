@@ -8,10 +8,16 @@ Ubelluris fetches stop place and timetable data from a GCS (Google Cloud Storage
 ## Running Ubelluris locally
 A minimal local setup requires access to a GCS input bucket containing stop place and timetable data.
 
-The main function takes one argument:
+The main function takes five arguments:
 * Path to a .json configuration file
+* Path to the stop place zip file, e.g. `2026/01/01/stops/sweden.zip`
+* Path to the timetable input directory containing `<provider>.zip` files, e.g. `2026/01/01/timetable`
+* Path to the sales input directory containing `<sales>.zip` files, e.g. `2026/01/01/sales`
+* Output path, where `stops/` and `timetable/` results are written
 
-A second argument may be provided:
+Input paths are relative to the input bucket, or local file paths when download is disabled. The output path is relative to the output bucket, or the local results directory when upload is disabled.
+
+A fifth argument may be provided:
 * Path to a .txt file specifying any blacklisted quays
 
 Running the main method in UbellurisApplication.kt with the necessary GCS configuration will fetch stops data and produce a filtered result file.
@@ -64,4 +70,4 @@ Ubelluris fetches input data from and can publish results to Google Cloud Storag
 - **Download enabled** (default): Input data is fetched from `GCS_INPUT_BUCKET`; already-cached files are skipped
 - **Download disabled**: Local cache in `downloads/` is used directly, requires unzipped files; no GCS connection needed for input
 - **Upload enabled**: Result files are uploaded to the specified `GCS_OUTPUT_BUCKET`
-- **Upload disabled** (default): Result files are saved locally to a `results/` directory
+- **Upload disabled** (default): Result files are saved locally under `<output-path>` (in `stops/` and `timetable/<provider>/`)
