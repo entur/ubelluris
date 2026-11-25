@@ -7,6 +7,7 @@ import org.entur.ror.ubelluris.filter.StopPlaceFilterService
 import org.entur.ror.ubelluris.filter.TimetableFilterService
 import org.entur.ror.ubelluris.sales.SalesDataService
 import java.io.File
+import java.nio.file.Path
 import kotlin.io.path.Path
 import kotlin.system.exitProcess
 
@@ -32,10 +33,7 @@ fun main(args: Array<String>) {
     val gcsConfig = GcsConfig.fromEnvironment()
     val fileService = FileService(gcsConfig)
 
-    val timetableBlobPaths =
-        cliConfig.timetableProviders.associateWith { provider ->
-            timetableInputPath.resolve("$provider.zip").joinToString("/")
-        }
+    val timetableBlobPaths = timetableBlobPaths(cliConfig.timetableProviders, timetableInputPath)
 
     UbellurisService(
         fetcher = fileService.createFetcher(stopPlaceBlobPath, timetableBlobPaths, salesInputPath),
@@ -50,6 +48,11 @@ fun main(args: Array<String>) {
         publisher = fileService.createPublisher(outputPath),
     ).run()
 }
+
+internal fun timetableBlobPaths(
+    providers: List<String>,
+    timetableInputPath: Path,
+): Map<String, String> = providers.associateWith { provider -> timetableInputPath.resolve("$provider.zip").toString() }
 
 fun printHelp() {
     println(
