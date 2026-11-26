@@ -20,7 +20,7 @@ import kotlin.time.measureTime
 class GcsFilePublisher(
     private val config: GcsConfig,
     storage: Storage,
-    private val storagePath: Path,
+    private val outputPath: Path,
     private val transferManagerFactory: () -> TransferManager = {
         TransferManagerConfig
             .newBuilder()
@@ -35,7 +35,7 @@ class GcsFilePublisher(
         stopPlacePath: Path,
         timetablePaths: Map<String, Path>,
     ): Path {
-        val stopBlobName = storagePath.resolve(FilePublisher.STOPS_DIR).resolve(stopPlacePath.fileName)
+        val stopBlobName = outputPath.resolve(FilePublisher.STOPS_DIR).resolve(stopPlacePath.fileName)
         val zipDir = Files.createTempDirectory(ZIP_DIR_PREFIX)
 
         try {
@@ -43,7 +43,7 @@ class GcsFilePublisher(
 
             val timetableBlobNames =
                 zipFiles.values.associateWith { zipFile ->
-                    storagePath.resolve(FilePublisher.TIMETABLE_DIR).resolve(zipFile.fileName)
+                    outputPath.resolve(FilePublisher.TIMETABLE_DIR).resolve(zipFile.fileName)
                 }
             upload(mapOf(stopPlacePath to stopBlobName) + timetableBlobNames)
         } finally {
